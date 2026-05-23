@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05050f;
+  --card-bg: #0d0d1a;
+  --card-border: #1e1e3a;
+  --text: #d0d0ff;
+  --dim: #666;
+  --cyan: #00f5ff;
+  --magenta: #ff00c8;
+  --yellow: #ffe600;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* subtle scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 60px 20px 40px;
+}
+
+.site-title {
+  font-size: clamp(1.4rem, 4vw, 2.8rem);
+  color: var(--cyan);
+  text-shadow:
+    0 0 10px var(--cyan),
+    0 0 30px var(--cyan),
+    0 0 60px rgba(0,245,255,0.4);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.site-subtitle {
+  font-size: 0.6rem;
+  color: var(--dim);
+  letter-spacing: 6px;
+  animation: blink 1.2s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width: 80%;
+  max-width: 800px;
+  height: 2px;
+  margin: 0 auto 60px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+}
+
+/* ── GAME GRID ── */
+.game-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  padding: 0 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── GAME CARD ── */
+.game-card {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  border: 2px solid var(--card-border);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--card-bg);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* per-game accent colors */
+.game-card.city-driver:hover  { border-color: #f1c40f; box-shadow: 0 0 24px rgba(241,196,15,0.4); }
+.game-card.dumpling:hover      { border-color: #ff6b35; box-shadow: 0 0 24px rgba(255,107,53,0.4); }
+.game-card.sea-of-phantoms:hover { border-color: #00b4d8; box-shadow: 0 0 24px rgba(0,180,216,0.4); }
+
+/* ── CARD ICON ── */
+.card-icon {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.city-driver   .card-icon { background: linear-gradient(135deg, #1a1200, #3d2e00); }
+.dumpling      .card-icon { background: linear-gradient(135deg, #1a0800, #3d1500); }
+.sea-of-phantoms .card-icon { background: linear-gradient(135deg, #000d1a, #001e38); }
+
+.card-icon svg {
+  width: 110px;
+  height: 110px;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+/* ── CARD INFO ── */
+.card-info {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 2px solid var(--card-border);
+}
+
+.card-title {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.city-driver   .card-title { color: #f1c40f; }
+.dumpling      .card-title { color: #ff6b35; }
+.sea-of-phantoms .card-title { color: #00b4d8; }
+
+.card-desc {
+  font-size: 0.45rem;
+  color: var(--dim);
+  line-height: 1.8;
+  letter-spacing: 1px;
+}
+
+.play-btn {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 8px 14px;
+  font-size: 0.5rem;
+  letter-spacing: 2px;
+  color: var(--bg);
+  border-radius: 3px;
+  align-self: flex-start;
+}
+
+.city-driver   .play-btn { background: #f1c40f; }
+.dumpling      .play-btn { background: #ff6b35; }
+.sea-of-phantoms .play-btn { background: #00b4d8; }
+
+.game-card:hover .play-btn {
+  filter: brightness(1.15);
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.4rem;
+  color: var(--dim);
+  letter-spacing: 2px;
+}

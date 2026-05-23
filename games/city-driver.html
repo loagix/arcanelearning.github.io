@@ -1,0 +1,969 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Driver: Police Escape</title>
+<style>
+*{box-sizing:border-box;}
+body{margin:0;overflow:hidden;background:#111;font-family:'Segoe UI',sans-serif;}
+canvas{display:block;}
+#ui-layer{position:absolute;top:20px;left:20px;color:white;background:rgba(0,0,0,0.80);
+  padding:14px 18px;border-radius:12px;pointer-events:none;border:1px solid #555;min-width:190px;}
+#ui-layer h2{margin:0 0 6px;font-size:1rem;letter-spacing:2px;color:#f1c40f;}
+#ui-layer p{margin:3px 0;font-size:0.88rem;}
+#stars-row{font-size:1.3rem;letter-spacing:2px;margin:4px 0;}
+.score-text{color:#f1c40f;font-weight:bold;}
+#minimap{position:absolute;bottom:20px;right:20px;border:2px solid #555;border-radius:6px;background:#111;}
+/* gear button */
+#settings-btn{position:absolute;top:20px;right:20px;width:44px;height:44px;
+  background:rgba(0,0,0,0.75);border:1px solid #555;border-radius:50%;
+  color:white;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;z-index:50;transition:background .2s,transform .3s;line-height:1;}
+#settings-btn:hover{background:rgba(60,60,60,0.9);transform:rotate(45deg);}
+/* modals shared */
+.modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;text-align:center;border-radius:20px;z-index:200;}
+/* settings */
+#settings{background:rgba(10,10,20,0.97);padding:32px 40px;border:3px solid #3498db;
+  box-shadow:0 0 50px rgba(52,152,219,0.35);min-width:380px;max-height:90vh;overflow-y:auto;}
+#settings h2{margin:0 0 4px;font-size:1.5rem;color:#3498db;letter-spacing:3px;}
+#settings .sub{color:#888;font-size:.82rem;margin-bottom:18px;}
+.ctrl-option{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;
+  cursor:pointer;border:2px solid transparent;background:rgba(255,255,255,0.04);
+  margin-bottom:8px;transition:border-color .15s,background .15s;text-align:left;}
+.ctrl-option:hover{background:rgba(255,255,255,0.09);}
+.ctrl-option.active{border-color:#3498db;background:rgba(52,152,219,0.12);}
+.ctrl-option .ci{font-size:1.5rem;width:34px;text-align:center;flex-shrink:0;}
+.ctrl-option .ct{font-weight:bold;font-size:.92rem;color:#eee;}
+.ctrl-option .cd{font-size:.73rem;color:#888;margin-top:2px;}
+#signin-section{margin-top:16px;border-top:1px solid #333;padding-top:16px;}
+#signin-section .si-title{font-size:.88rem;color:#aaa;margin-bottom:10px;letter-spacing:1px;}
+.si-row{display:flex;gap:8px;margin-bottom:8px;}
+.si-row input{flex:1;padding:9px 12px;background:rgba(255,255,255,0.07);border:1px solid #444;
+  border-radius:8px;color:white;font-size:.88rem;outline:none;transition:border-color .15s;}
+.si-row input:focus{border-color:#3498db;}
+.si-row input::placeholder{color:#555;}
+#signin-btn{width:100%;padding:9px;background:#3498db;color:#000;border:none;
+  border-radius:8px;cursor:pointer;font-weight:bold;font-size:.88rem;letter-spacing:1px;}
+#signin-btn:hover{background:#2980b9;}
+#signin-status{font-size:.76rem;margin-top:6px;min-height:16px;}
+#signout-row{display:none;margin-top:6px;}
+#settings-close{margin-top:14px;padding:10px 32px;font-size:1rem;background:#3498db;color:#000;
+  border:none;border-radius:8px;cursor:pointer;font-weight:bold;letter-spacing:1px;}
+#settings-close:hover{background:#2980b9;}
+/* garage */
+#garage{background:rgba(10,10,20,0.97);padding:32px 40px;border:3px solid #27ae60;
+  box-shadow:0 0 50px rgba(39,174,96,0.4);min-width:520px;}
+#garage h2{margin:0 0 4px;font-size:1.7rem;color:#27ae60;letter-spacing:3px;}
+#garage .sub{color:#888;font-size:.84rem;margin-bottom:18px;}
+#skin-grid{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:20px;}
+.skin-card{width:88px;border-radius:10px;padding:10px 6px 8px;cursor:pointer;
+  background:rgba(255,255,255,0.05);border:2px solid transparent;transition:border-color .15s,background .15s;}
+.skin-card:hover{background:rgba(255,255,255,0.10);}
+.skin-card.selected{border-color:#27ae60;background:rgba(39,174,96,0.15);}
+.skin-card.locked{cursor:not-allowed;opacity:0.42;}
+.skin-card canvas{display:block;margin:0 auto 5px;}
+.skin-card .sn{font-size:.70rem;color:#ccc;}
+.skin-card .sl{font-size:.63rem;color:#e67e22;margin-top:2px;}
+.skin-card .sp{font-size:.63rem;color:#f1c40f;margin-top:1px;}
+.skin-card .sk{font-size:.63rem;color:#e67e22;margin-top:1px;}
+#garage-close{padding:10px 32px;font-size:1rem;background:#27ae60;color:#000;
+  border:none;border-radius:8px;cursor:pointer;font-weight:bold;letter-spacing:1px;}
+#garage-close:hover{background:#1e8449;}
+/* game over */
+#game-over{background:rgba(0,0,0,0.96);padding:44px 54px;border:4px solid #ff3e3e;
+  box-shadow:0 0 60px rgba(255,0,0,0.4);}
+#game-over h1{font-size:3.4rem;margin:0 0 8px;text-transform:uppercase;letter-spacing:6px;
+  color:#ff3e3e;text-shadow:0 0 20px #ff3e3e;}
+#game-over p{color:#ccc;font-size:1rem;margin:5px 0;}
+#game-over .fs{font-size:1.5rem;margin:8px 0;}
+#game-over button{margin-top:18px;padding:12px 36px;font-size:1.1rem;background:#ff3e3e;
+  color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;letter-spacing:2px;}
+#game-over button:hover{background:#c0392b;}
+/* start screen - display controlled by JS */
+#start-screen{background:rgba(0,0,0,0.93);padding:44px 60px;border:3px solid #f1c40f;
+  box-shadow:0 0 40px rgba(241,196,15,0.3);}
+#start-screen h1{font-size:2.5rem;margin:0;color:#f1c40f;letter-spacing:3px;text-transform:uppercase;}
+#start-screen p{color:#aaa;margin:8px 0;font-size:.9rem;}
+#start-screen .controls{background:rgba(255,255,255,0.05);border-radius:8px;
+  padding:12px 16px;margin:12px 0;text-align:left;}
+#start-screen button{margin-top:12px;padding:12px 36px;font-size:1.1rem;background:#f1c40f;
+  color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;letter-spacing:2px;}
+#start-screen button:hover{background:#d4ac0d;}
+/* loading */
+#loading-screen{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.95);color:white;padding:40px 60px;text-align:center;
+  border-radius:20px;border:2px solid #f1c40f;z-index:300;min-width:300px;}
+</style>
+</head>
+<body>
+<style>
+#back-home {
+  position: fixed; top: 12px; left: 12px; z-index: 9999;
+  background: rgba(0,0,0,0.85); color: #00f5ff;
+  border: 1px solid #00f5ff; padding: 8px 14px;
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
+  text-decoration: none; border-radius: 3px; letter-spacing: 1px;
+}
+#back-home:hover { background: #00f5ff; color: #000; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<a id="back-home" href="../index.html">&#8592; HOME</a>
+
+<div id="loading-screen">
+  <div style="font-size:2rem;margin-bottom:10px;">🏙️</div>
+  <div style="font-size:1.1rem;color:#f1c40f;font-weight:bold;letter-spacing:2px;margin-bottom:14px;">BUILDING CITY...</div>
+  <div style="background:#222;border-radius:8px;height:10px;overflow:hidden;width:220px;margin:0 auto;">
+    <div id="load-bar" style="height:100%;width:0%;background:#f1c40f;border-radius:8px;transition:width .08s;"></div>
+  </div>
+</div>
+
+<button id="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
+
+<div id="settings" class="modal" style="display:none">
+  <h2>⚙️ SETTINGS</h2>
+  <p class="sub">Control scheme</p>
+  <div class="ctrl-option active" id="ctrl-wasd" onclick="setControl('wasd')">
+    <div class="ci">⌨️</div><div><div class="ct">WASD Keys</div><div class="cd">W/A/S/D — accelerate, steer, brake</div></div>
+  </div>
+  <div class="ctrl-option" id="ctrl-arrows" onclick="setControl('arrows')">
+    <div class="ci">🔲</div><div><div class="ct">Arrow Keys</div><div class="cd">↑↓←→ — accelerate, steer, brake</div></div>
+  </div>
+  <div class="ctrl-option" id="ctrl-mouse" onclick="setControl('mouse')">
+    <div class="ci">🖱️</div><div><div class="ct">Mouse / Cursor</div><div class="cd">Car follows your cursor automatically</div></div>
+  </div>
+  <div id="signin-section">
+    <div class="si-title">💾 SAVE &amp; LOAD PROGRESS</div>
+    <p style="color:#888;font-size:.74rem;margin:0 0 10px;">Click GET CODE to save your progress as a code. Paste it back anytime to restore.</p>
+    <button onclick="exportSave()" style="width:100%;padding:9px;background:#27ae60;color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:.88rem;margin-bottom:8px;">GET SAVE CODE</button>
+    <div id="save-code-row" style="display:none;margin-bottom:8px;">
+      <textarea id="save-code-box" rows="3" readonly onclick="this.focus();this.select();"
+        style="width:100%;background:#111;color:#f1c40f;border:1px solid #444;border-radius:6px;
+               font-size:.7rem;padding:6px;resize:none;font-family:monospace;cursor:pointer;" title="Click to select, then Ctrl+C to copy"></textarea>
+      <button onclick="copySaveCode()" style="width:100%;margin-top:4px;padding:6px;background:#444;color:#fff;
+        border:none;border-radius:6px;cursor:pointer;font-size:.78rem;">📋 COPY CODE</button>
+    </div>
+    <p style="color:#888;font-size:.72rem;margin:6px 0 4px;">👇 Click the box below, then press Ctrl+V to paste your code:</p>
+    <textarea id="load-code-box" rows="3"
+      onclick="this.focus();"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();importSave();}"
+      placeholder="Click here then Ctrl+V to paste your save code..."
+      style="width:100%;background:#111;color:#ccc;border:2px solid #3498db;border-radius:6px;
+             font-size:.7rem;padding:6px;resize:none;font-family:monospace;margin-bottom:4px;
+             cursor:text;"></textarea>
+    <button onclick="importSave()" style="width:100%;padding:6px;background:#3498db;color:#000;
+      border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.78rem;">📂 LOAD FROM CODE</button>
+    <div id="signin-status" style="margin-top:6px;"></div>
+  </div>
+  <button id="settings-close" onclick="closeSettings()">DONE</button>
+</div>
+
+<div id="start-screen" class="modal" style="display:none">
+  <h1>🚗 City Driver!</h1>
+  <p>Outrun the cop. Find the <span style="color:#27ae60">🏠 Garage</span> to change your skin!</p>
+  <div class="controls">
+    <p style="margin:0;color:#f1c40f;font-weight:bold;">Controls</p>
+    <p style="margin:3px 0;color:#ccc;">W/↑ Accelerate &nbsp;|&nbsp; S/↓ Brake &nbsp;|&nbsp; A/↓ Left &nbsp;|&nbsp; D/→ Right</p>
+    <p style="margin:3px 0;color:#999;font-size:.8rem;">Stars increase every 100s. Change controls in ⚙️ Settings.</p>
+  </div>
+  <button onclick="startGame()">START GAME</button>
+</div>
+
+<div id="ui-layer">
+  <h2>WANTED</h2>
+  <div id="stars-row">☆☆☆☆☆</div>
+  <p>Survived: <span id="currentScore" class="score-text">0</span>s</p>
+  <p>Best: <span id="bestScore" class="score-text">0</span>s</p>
+  <p id="speedDisplay">Speed: 0</p>
+  <p id="offroad-tag" style="color:#8bc34a;display:none;">🌿 OFF-ROAD</p>
+  <p id="garage-hint" style="color:#27ae60;display:none;">🏠 GARAGE NEARBY</p>
+</div>
+
+<div id="garage" class="modal" style="display:none">
+  <h2>🏠 GARAGE</h2>
+  <p class="sub">Choose your ride. <span style="color:#f1c40f">(Timer paused)</span></p>
+  <div id="skin-grid"></div>
+  <button id="garage-close" onclick="closeGarage()">BACK TO CHASE</button>
+</div>
+
+<div id="game-over" class="modal" style="display:none">
+  <h1>BUSTED!</h1>
+  <p>The police caught up to you.</p>
+  <div class="fs" id="final-stars"></div>
+  <p>Survived: <span id="finalScore" class="score-text">0</span>s</p>
+  <p>Best Run: <span id="bestFinal" class="score-text">0</span>s</p>
+  <button onclick="resetGame()">TRY AGAIN</button>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+<canvas id="minimap" width="180" height="135"></canvas>
+
+<script>
+// ─── Canvas ─────────────────────────────────────────
+const canvas=document.getElementById('gameCanvas');
+const ctx=canvas.getContext('2d');
+const mmC=document.getElementById('minimap');
+const mmX=mmC.getContext('2d');
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+window.addEventListener('resize',resize);resize();
+
+// ─── State ──────────────────────────────────────────
+let gameActive=false,gameStarted=false,sirenState=0;
+let score=0,bestScore=0,startTime=0,totalPausedMs=0,garagePauseStart=0,settingsPauseStart=0;
+let wantedStars=1,garageOpen=false,inGarage=false,animFrame=null;
+let controlMode='wasd',currentUser=null;
+const cam={x:0,y:0},mouse={x:0,y:0};
+window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+// ─── Skins ──────────────────────────────────────────
+const SKINS=[
+  {name:'Red Racer',  color:'#e74c3c',unlockAt:0,  spd:6.7},
+  {name:'Ocean Blue', color:'#2980b9',unlockAt:0,  spd:6.7},
+  {name:'Lime Rush',  color:'#27ae60',unlockAt:30, spd:6.7},
+  {name:'Solar Gold', color:'#f1c40f',unlockAt:60, spd:6.8},
+  {name:'Midnight',   color:'#2c3e50',unlockAt:100,spd:6.8},
+  {name:'Purple Haze',color:'#8e44ad',unlockAt:150,spd:7.0},
+  {name:'Ghost White',color:'#ecf0f1',unlockAt:200,spd:7.0},
+  {name:'Inferno',    color:'#e67e22',unlockAt:300,spd:7.2,perk:'🔥 All-terrain'},
+];
+let selectedSkin=0;
+
+// ─── RNG ────────────────────────────────────────────
+let _seed=54321;
+function rng(){_seed=(_seed*1664525+1013904223)>>>0;return _seed/4294967296;}
+function rngR(a,b){return a+rng()*(b-a);}
+function rngI(a,b){return Math.floor(rngR(a,b));}
+function rngC(a){return a[rngI(0,a.length)];}
+
+// ─── World ──────────────────────────────────────────
+const WW=3200,WH=2600,RW=78,HL=RW/2;
+const COLS=8,ROWS=6;
+const CW=Math.floor(WW/COLS),CH=Math.floor(WH/ROWS);
+
+const nodes=[];
+for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+  const bx=c*CW+CW/2,by=r*CH+CH/2;
+  const jx=(c===0||c===COLS-1)?0:rngR(-90,90);
+  const jy=(r===0||r===ROWS-1)?0:rngR(-70,70);
+  nodes.push({x:Math.round(Math.max(HL+20,Math.min(WW-HL-20,bx+jx))),
+              y:Math.round(Math.max(HL+20,Math.min(WH-HL-20,by+jy)))});
+}
+function nd(c,r){return nodes[r*COLS+c];}
+
+const roadSegs=[];
+for(let r=0;r<ROWS;r++) for(let c=0;c<COLS-1;c++){
+  if(rng()<0.18&&r!==0&&r!==ROWS-1)continue;
+  const a=nd(c,r),b=nd(c+1,r);
+  roadSegs.push({ax:a.x,ay:a.y,bx:b.x,by:b.y});
+}
+for(let r=0;r<ROWS-1;r++) for(let c=0;c<COLS;c++){
+  if(rng()<0.18&&c!==0&&c!==COLS-1)continue;
+  const a=nd(c,r),b=nd(c,r+1);
+  roadSegs.push({ax:a.x,ay:a.y,bx:b.x,by:b.y});
+}
+
+const roadRects=roadSegs.map(s=>({
+  x:Math.min(s.ax,s.bx)-HL, y:Math.min(s.ay,s.by)-HL,
+  w:Math.abs(s.bx-s.ax)+RW,  h:Math.abs(s.by-s.ay)+RW
+}));
+
+function isOnRoad(px,py,m=0){
+  for(const r of roadRects)
+    if(px>r.x-m&&px<r.x+r.w+m&&py>r.y-m&&py<r.y+r.h+m)return true;
+  return false;
+}
+
+// ─── Buildings (BSP) ────────────────────────────────
+const BCOLORS=['#e74c3c','#c0392b','#e67e22','#d35400','#f1c40f','#f39c12',
+  '#2ecc71','#27ae60','#1abc9c','#16a085','#3498db','#2980b9',
+  '#9b59b6','#8e44ad','#e91e63','#ad1457','#00bcd4','#0097a7',
+  '#ff7043','#8bc34a','#26c6da','#7c4dff','#ff4081','#69f0ae',
+  '#40c4ff','#ffd740','#ff6d00','#b2ff59'];
+const buildings=[];
+let bci=0;
+const SP=14,BG=7,MB=40;
+
+function roadClear(x0,y0,x1,y1){
+  const C=10;
+  for(const r of roadRects)
+    if(x1+C>r.x&&x0-C<r.x+r.w&&y1+C>r.y&&y0-C<r.y+r.h)return false;
+  return true;
+}
+function bsp(x0,y0,x1,y1,d){
+  const bw=x1-x0,bh=y1-y0;
+  if(bw<MB||bh<MB)return;
+  if(d>=4||(bw<120&&bh<120&&rng()<0.55)){
+    if(roadClear(x0,y0,x1,y1))
+      buildings.push({x:Math.round(x0),y:Math.round(y0),w:Math.round(bw),h:Math.round(bh),color:BCOLORS[bci++%BCOLORS.length]});
+    return;
+  }
+  if(bw>=bh){
+    const mn=Math.max(MB,bw*.3),mx=Math.min(bw-MB,bw*.7);
+    if(mx<=mn){bsp(x0,y0,x1,y1,d+1);return;}
+    const cut=rngR(mn,mx);
+    bsp(x0,y0,x0+cut-BG/2,y1,d+1);
+    bsp(x0+cut+BG/2,y0,x1,y1,d+1);
+  }else{
+    const mn=Math.max(MB,bh*.3),mx=Math.min(bh-MB,bh*.7);
+    if(mx<=mn){bsp(x0,y0,x1,y1,d+1);return;}
+    const cut=rngR(mn,mx);
+    bsp(x0,y0,x1,y0+cut-BG/2,d+1);
+    bsp(x0,y0+cut+BG/2,x1,y1,d+1);
+  }
+}
+// Inner chunks
+for(let ri=0;ri<ROWS-1;ri++) for(let ci=0;ci<COLS-1;ci++){
+  const tl=nd(ci,ri),tr=nd(ci+1,ri),bl=nd(ci,ri+1);
+  bsp(tl.x+HL+SP,tl.y+HL+SP,tr.x-HL-SP,bl.y-HL-SP,0);
+}
+// Borders
+for(let ci=0;ci<COLS-1;ci++){
+  const a=nd(ci,0),b=nd(ci+1,0); bsp(a.x+HL+SP,SP,b.x-HL-SP,a.y-HL-SP,0);
+  const c=nd(ci,ROWS-1),d=nd(ci+1,ROWS-1); bsp(c.x+HL+SP,c.y+HL+SP,d.x-HL-SP,WH-SP,0);
+}
+for(let ri=0;ri<ROWS-1;ri++){
+  const t=nd(0,ri),b=nd(0,ri+1); bsp(SP,t.y+HL+SP,t.x-HL-SP,b.y-HL-SP,0);
+  const t2=nd(COLS-1,ri),b2=nd(COLS-1,ri+1); bsp(t2.x+HL+SP,t2.y+HL+SP,WW-SP,b2.y-HL-SP,0);
+}
+{const tl=nd(0,0),tr=nd(COLS-1,0),bl=nd(0,ROWS-1),br=nd(COLS-1,ROWS-1);
+  bsp(SP,SP,tl.x-HL-SP,tl.y-HL-SP,0);
+  bsp(tr.x+HL+SP,SP,WW-SP,tr.y-HL-SP,0);
+  bsp(SP,bl.y+HL+SP,bl.x-HL-SP,WH-SP,0);
+  bsp(br.x+HL+SP,br.y+HL+SP,WW-SP,WH-SP,0);}
+
+// ─── Spatial hash (built before checkCollision used at runtime) ──
+const HC=150; // hash cell size
+const bHash=new Map();
+function hk(c,r){return (c&0xFFFF)|(r<<16);}
+function buildHash(){
+  bHash.clear();
+  for(const b of buildings){
+    const c0=Math.floor(b.x/HC),c1=Math.floor((b.x+b.w)/HC);
+    const r0=Math.floor(b.y/HC),r1=Math.floor((b.y+b.h)/HC);
+    for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++){
+      const k=hk(c,r);
+      if(!bHash.has(k))bHash.set(k,[]);
+      bHash.get(k).push(b);
+    }
+  }
+}
+
+// ─── Collision (uses hash, no allocations) ──────────
+const _seen=new Set();  // reused, cleared each call
+let hashReady=false;
+function checkCollision(x,y,w,h){
+  const hw=w/2,hh=h/2;
+  if(x-hw<0||x+hw>WW||y-hh<0||y+hh>WH)return true;
+  if(!hashReady){
+    for(const b of buildings)
+      if(x+hw>b.x&&x-hw<b.x+b.w&&y+hh>b.y&&y-hh<b.y+b.h)return true;
+    return false;
+  }
+  const c0=Math.floor((x-hw)/HC),c1=Math.floor((x+hw)/HC);
+  const r0=Math.floor((y-hh)/HC),r1=Math.floor((y+hh)/HC);
+  _seen.clear();
+  for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++){
+    const bucket=bHash.get(hk(c,r));
+    if(!bucket)continue;
+    for(const b of bucket){
+      if(_seen.has(b))continue;
+      _seen.add(b);
+      if(x+hw>b.x&&x-hw<b.x+b.w&&y+hh>b.y&&y-hh<b.y+b.h)return true;
+    }
+  }
+  return false;
+}
+
+// ─── Garage ─────────────────────────────────────────
+const gn=nd(Math.floor(COLS/2),Math.floor(ROWS/2));
+const GARAGE={x:gn.x+HL+12,y:gn.y+HL+12,w:86,h:64,
+  cx:gn.x+HL+12+43,cy:gn.y+HL+12+32,r:85};
+
+// ─── A* grid ────────────────────────────────────────
+const GS=60;
+const GC=Math.ceil(WW/GS),GR=Math.ceil(WH/GS);
+const walkable=new Uint8Array(GC*GR);
+let gridReady=false;
+
+function bakeAsync(){
+  buildHash();hashReady=true;
+  const hp=GS*0.40;
+  let row=0;
+  const bar=document.getElementById('load-bar');
+  function chunk(){
+    const end=Math.min(row+10,GR);
+    for(let r=row;r<end;r++) for(let c=0;c<GC;c++){
+      const cx=c*GS+GS/2,cy=r*GS+GS/2;
+      walkable[r*GC+c]=checkCollision(cx,cy,hp*2,hp*2)?0:1;
+    }
+    row=end;
+    if(bar)bar.style.width=Math.round(row/GR*100)+'%';
+    if(row<GR){requestAnimationFrame(chunk);}
+    else{
+      gridReady=true;
+      document.getElementById('loading-screen').style.display='none';
+      document.getElementById('start-screen').style.display='block';
+    }
+  }
+  requestAnimationFrame(chunk);
+}
+
+function findPath(sx,sy,ex,ey){
+  const sc=Math.floor(sx/GS),sr=Math.floor(sy/GS);
+  const ec=Math.floor(ex/GS),er=Math.floor(ey/GS);
+  if(sc===ec&&sr===er)return[{x:ex,y:ey}];
+  const key=(c,r)=>r*GC+c;
+  const h=(c,r)=>Math.abs(c-ec)+Math.abs(r-er);
+  const open=[{c:sc,r:sr,g:0,f:h(sc,sr),par:null}];
+  const vis=new Map();vis.set(key(sc,sr),null);
+  let it=0;
+  while(open.length&&it++<1400){
+    let bi=0;for(let i=1;i<open.length;i++)if(open[i].f<open[bi].f)bi=i;
+    const cur=open.splice(bi,1)[0];
+    if(cur.c===ec&&cur.r===er){
+      const p=[];let n=cur;
+      while(n.par){p.unshift({x:n.c*GS+GS/2,y:n.r*GS+GS/2});n=n.par;}
+      p.push({x:ex,y:ey});return p;
+    }
+    for(const[dc,dr]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
+      const nc=cur.c+dc,nr=cur.r+dr;
+      if(nc<0||nc>=GC||nr<0||nr>=GR)continue;
+      if(vis.has(key(nc,nr)))continue;
+      if(!walkable[nr*GC+nc])continue;
+      if(dc&&dr&&(!walkable[cur.r*GC+nc]||!walkable[nr*GC+cur.c]))continue;
+      const g=cur.g+(dc&&dr?1.4:1);
+      vis.set(key(nc,nr),null);
+      open.push({c:nc,r:nr,g,f:g+h(nc,nr),par:cur});
+    }
+  }
+  return[{x:ex,y:ey}];
+}
+
+// ─── Vehicles ───────────────────────────────────────
+const sn=nd(1,1),cn=nd(COLS-2,ROWS-2);
+const car={x:sn.x,y:sn.y,w:18,h:34,angle:0,speed:0,
+  maxSpeed:SKINS[0].spd,accel:0.38,friction:0.95,turn:0.057};
+const cop={x:cn.x,y:cn.y,w:20,h:36,angle:Math.PI,speed:0,
+  maxSpeed:6.5,accel:0.22,friction:0.95,turn:0.055,
+  wp:null,pt:0,st:0,dt:0,lx:cn.x,ly:cn.y};
+
+const NPC_COLS=['#c0392b','#3498db','#27ae60','#e67e22','#9b59b6',
+  '#1abc9c','#f39c12','#dfe6e9','#e91e63','#ff7043','#00bcd4','#ffd700'];
+const npcs=[];
+function makeNPC(){
+  const seg=rngC(roadRects);
+  const horiz=seg.w>seg.h,side=rng()<0.5?-1:1;
+  let x,y,angle;
+  if(horiz){x=rngR(seg.x+20,seg.x+seg.w-20);y=seg.y+seg.h/2+side*RW/4;angle=side>0?0:Math.PI;}
+  else{x=seg.x+seg.w/2+side*RW/4;y=rngR(seg.y+20,seg.y+seg.h-20);angle=side>0?Math.PI/2:-Math.PI/2;}
+  return{x,y,w:14,h:26,angle,speed:rngR(1.6,3.4),color:rngC(NPC_COLS),st:0};
+}
+for(let i=0;i<20;i++)npcs.push(makeNPC());
+
+// ─── Input ──────────────────────────────────────────
+const keys={};
+window.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  keys[e.code]=true;e.preventDefault();
+});
+window.addEventListener('keyup',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  keys[e.code]=false;
+});
+
+// ─── Settings ───────────────────────────────────────
+function setControl(m){
+  controlMode=m;
+  ['wasd','arrows','mouse'].forEach(id=>
+    document.getElementById('ctrl-'+id).classList.toggle('active',id===m));
+}
+function openSettings(){
+  if(gameActive){gameActive=false;settingsPauseStart=Date.now();}
+  document.getElementById('settings').style.display='block';
+}
+function closeSettings(){
+  document.getElementById('settings').style.display='none';
+  if(!garageOpen&&gameStarted){
+    totalPausedMs+=Date.now()-settingsPauseStart;
+    gameActive=true;
+  }
+  if(currentUser)saveProgress().catch(()=>{});
+}
+
+// ─── Save/Load (Save Code with checksum — tamper-resistant) ───
+// The secret salt is mixed into the checksum so hand-crafted base64 codes
+// will fail validation even if the JSON structure looks correct.
+const SAVE_SALT='cd_x9k2mQr7';  // secret mixed into hash — not visible to player
+
+function simpleHash(str){
+  // Fast non-crypto hash — good enough to catch manual injection
+  let h=0x811c9dc5;
+  for(let i=0;i<str.length;i++){
+    h^=str.charCodeAt(i);
+    h=(h*0x01000193)>>>0;
+  }
+  return h.toString(36);
+}
+
+function makeSaveCode(){
+  try{
+    const payload={bestScore,selectedSkin,controlMode,v:2};
+    const raw=JSON.stringify(payload);
+    const check=simpleHash(raw+SAVE_SALT);
+    return btoa(raw+'|'+check);
+  }catch(e){return '';}
+}
+
+function parseSaveCode(code){
+  try{
+    const decoded=atob(code.trim());
+    const lastPipe=decoded.lastIndexOf('|');
+    if(lastPipe===-1)return null;
+    const raw=decoded.substring(0,lastPipe);
+    const check=decoded.substring(lastPipe+1);
+    // Validate checksum — rejects any hand-crafted or modified code
+    if(simpleHash(raw+SAVE_SALT)!==check)return null;
+    return JSON.parse(raw);
+  }catch(e){return null;}
+}
+
+function exportSave(){
+  const code=makeSaveCode();
+  document.getElementById('save-code-box').value=code;
+  document.getElementById('save-code-row').style.display='block';
+  setSS('✅ Copy the code above and keep it safe!','#27ae60');
+}
+
+function importSave(){
+  const raw=document.getElementById('load-code-box').value.trim();
+  if(!raw){setSS('⚠️ Paste your save code first.','#e67e22');return;}
+  const data=parseSaveCode(raw);
+  if(!data){setSS('❌ Invalid or tampered code.','#e74c3c');return;}
+  bestScore=data.bestScore||0;
+  selectedSkin=Math.max(0,Math.min(SKINS.length-1,data.selectedSkin||0));
+  controlMode=data.controlMode||'wasd';
+  car.maxSpeed=SKINS[selectedSkin].spd;
+  setControl(controlMode);
+  document.getElementById('bestScore').innerText=bestScore;
+  document.getElementById('load-code-box').value='';
+  setSS('✅ Loaded! Best: '+bestScore+'s — '+SKINS[selectedSkin].name,'#27ae60');
+}
+
+function copySaveCode(){
+  const box=document.getElementById('save-code-box');
+  if(!box.value){exportSave();return;}
+  // Try clipboard API first, fall back to select+copy
+  const tryFallback=()=>{
+    box.focus();
+    box.select();
+    box.setSelectionRange(0,99999);
+    try{
+      const ok=document.execCommand('copy');
+      setSS(ok?'📋 Copied! (Ctrl+C also works)':'📋 Press Ctrl+C to copy','#27ae60');
+    }catch(e){
+      setSS('📋 Click the box then press Ctrl+C to copy','#f1c40f');
+    }
+  };
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(box.value)
+      .then(()=>setSS('📋 Copied to clipboard!','#27ae60'))
+      .catch(()=>tryFallback());
+  }else{
+    tryFallback();
+  }
+}
+
+async function saveProgress(){
+  // Keep the code box up to date so player can copy latest save anytime
+  const box=document.getElementById('save-code-box');
+  if(box&&box.value)box.value=makeSaveCode();
+}
+
+function signOut(){}  // no longer needed, kept so nothing breaks
+function setSS(msg,col){
+  const el=document.getElementById('signin-status');
+  el.textContent=msg;el.style.color=col;
+}
+
+// ─── Timer pause on tab hide (fixes Chromebook close glitch) ──
+let tabHiddenAt=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    // Tab hidden — record when
+    tabHiddenAt=Date.now();
+    if(gameActive){gameActive=false;}
+  }else{
+    // Tab visible again — add hidden time to paused total
+    if(tabHiddenAt&&gameStarted&&startTime){
+      totalPausedMs+=Date.now()-tabHiddenAt;
+    }
+    tabHiddenAt=0;
+    if(gameStarted&&!garageOpen&&document.getElementById('game-over').style.display==='none'){
+      gameActive=true;
+    }
+  }
+});
+
+// ─── Garage UI ──────────────────────────────────────
+function buildSkinGrid(){
+  const g=document.getElementById('skin-grid');g.innerHTML='';
+  SKINS.forEach((sk,i)=>{
+    const locked=bestScore<sk.unlockAt;
+    const d=document.createElement('div');
+    d.className='skin-card'+(i===selectedSkin?' selected':'')+(locked?' locked':'');
+    const c=document.createElement('canvas');c.width=48;c.height=66;
+    carPreview(c.getContext('2d'),24,33,locked?'#444':sk.color);
+    d.appendChild(c);
+    const nm=document.createElement('div');nm.className='sn';nm.textContent=sk.name;d.appendChild(nm);
+    const sp=document.createElement('div');sp.className='sp';sp.textContent='⚡'+sk.spd;d.appendChild(sp);
+    if(locked){const lk=document.createElement('div');lk.className='sl';lk.textContent='🔒 '+sk.unlockAt+'s';d.appendChild(lk);}
+    if(sk.perk){const pk=document.createElement('div');pk.className='sk';pk.textContent=sk.perk;d.appendChild(pk);}
+    if(!locked)d.onclick=()=>{selectedSkin=i;car.maxSpeed=SKINS[i].spd;buildSkinGrid();};
+    g.appendChild(d);
+  });
+}
+function carPreview(cx,x,y,col){
+  const W=13,H=26;cx.save();cx.translate(x,y);
+  cx.fillStyle='rgba(0,0,0,0.2)';cx.fillRect(-W/2+2,-H/2+2,W,H);
+  cx.fillStyle='#111';cx.fillRect(-W/2-3,-H/2+2,3,6);cx.fillRect(W/2,-H/2+2,3,6);
+  cx.fillRect(-W/2-3,H/2-8,3,6);cx.fillRect(W/2,H/2-8,3,6);
+  cx.fillStyle=col;cx.beginPath();cx.roundRect(-W/2,-H/2,W,H,3);cx.fill();
+  cx.fillStyle='rgba(180,220,255,.5)';cx.fillRect(-W/2+2,-H/2+4,W-4,6);
+  cx.restore();
+}
+function openGarage(){
+  if(garageOpen)return;
+  garageOpen=true;gameActive=false;garagePauseStart=Date.now();
+  buildSkinGrid();document.getElementById('garage').style.display='block';
+}
+function closeGarage(){
+  totalPausedMs+=Date.now()-garagePauseStart;
+  document.getElementById('garage').style.display='none';
+  garageOpen=false;gameActive=true;car.speed=2;
+  // Punish garage camping: snap cop to the nearest road node to the player
+  // so leaving the garage is always dangerous
+  let best=Infinity,bx=cop.x,by=cop.y;
+  for(const n of nodes){
+    const d=Math.hypot(n.x-car.x,n.y-car.y);
+    // Pick a node that's close to player but not right on top of them
+    if(d>200&&d<best&&!checkCollision(n.x,n.y,cop.w+8,cop.h+8)){best=d;bx=n.x;by=n.y;}
+  }
+  cop.x=bx;cop.y=by;cop.speed=0;cop.wp=null;cop.pt=0;
+  if(currentUser)saveProgress().catch(()=>{});
+}
+
+// ─── Game flow ──────────────────────────────────────
+function startGame(){
+  document.getElementById('start-screen').style.display='none';
+  gameStarted=true;resetGame();
+}
+function resetGame(){
+  car.x=sn.x;car.y=sn.y;car.speed=0;car.angle=0;car.maxSpeed=SKINS[selectedSkin].spd;
+  cop.x=cn.x;cop.y=cn.y;cop.speed=0;cop.angle=Math.PI;
+  cop.wp=null;cop.pt=0;cop.st=0;cop.dt=0;cop.lx=cop.x;cop.ly=cop.y;
+  npcs.length=0;for(let i=0;i<20;i++)npcs.push(makeNPC());
+  gameActive=true;garageOpen=false;inGarage=false;
+  score=0;wantedStars=1;startTime=Date.now();totalPausedMs=0;garagePauseStart=0;
+  document.getElementById('game-over').style.display='none';
+  document.getElementById('garage').style.display='none';
+  updateStars();
+  if(!gameStarted)return;
+  if(!animFrame)loop();
+}
+
+function starsStr(n){
+  const s=Math.max(0,Math.min(5,n|0));
+  return'★'.repeat(s)+'☆'.repeat(5-s);
+}
+function updateStars(){document.getElementById('stars-row').textContent=starsStr(wantedStars);}
+function effScore(){return startTime?Math.max(0,Math.floor((Date.now()-startTime-totalPausedMs)/1000)):0;}
+
+// ─── Player update ──────────────────────────────────
+function updatePlayer(){
+  const onRoad=isOnRoad(car.x,car.y,4);
+  const inferno=SKINS[selectedSkin].name==='Inferno';
+  const eMax=(onRoad||inferno)?car.maxSpeed:car.maxSpeed*0.55;
+  const eFric=(onRoad||inferno)?car.friction:0.86;
+
+  if(controlMode==='mouse'){
+    const wx=mouse.x+cam.x,wy=mouse.y+cam.y;
+    const dist=Math.hypot(wx-car.x,wy-car.y);
+    if(dist>20){
+      let da=Math.atan2(wy-car.y,wx-car.x)-car.angle;
+      while(da<-Math.PI)da+=Math.PI*2;while(da>Math.PI)da-=Math.PI*2;
+      car.angle+=Math.max(-car.turn,Math.min(car.turn,da*.18));
+      car.speed+=car.accel*Math.min(1,dist/120);
+    }else{car.speed*=0.85;}
+  }else{
+    const W=controlMode==='wasd';
+    const up=W?keys['KeyW']:keys['ArrowUp'];
+    const dn=W?keys['KeyS']:keys['ArrowDown'];
+    const lt=W?keys['KeyA']:keys['ArrowLeft'];
+    const rt=W?keys['KeyD']:keys['ArrowRight'];
+    if(up)car.speed+=car.accel;
+    if(dn)car.speed-=car.accel;
+    if(Math.abs(car.speed)>0.2){
+      const rev=car.speed<0?-1:1,grip=Math.abs(car.speed)/car.maxSpeed;
+      const st=(onRoad||inferno)?car.turn:car.turn*0.6;
+      if(lt)car.angle-=st*rev*grip;
+      if(rt)car.angle+=st*rev*grip;
+    }
+  }
+  car.speed*=eFric;
+  car.speed=Math.max(-eMax*.5,Math.min(eMax,car.speed));
+  const nx=car.x+Math.cos(car.angle)*car.speed;
+  const ny=car.y+Math.sin(car.angle)*car.speed;
+  if(!checkCollision(nx,car.y,car.w,car.h))car.x=nx;else car.speed*=-.3;
+  if(!checkCollision(car.x,ny,car.w,car.h))car.y=ny;else car.speed*=-.3;
+
+  document.getElementById('speedDisplay').innerText='Speed: '+Math.abs(car.speed).toFixed(1);
+  document.getElementById('offroad-tag').style.display=(onRoad||inferno)?'none':'block';
+}
+
+// ─── Cop update ─────────────────────────────────────
+function updateCop(){
+  const sc=1+(wantedStars-1)*0.12;
+  cop.maxSpeed=7.2*sc;cop.accel=0.26*sc;
+
+  const dist=Math.hypot(car.x-cop.x,car.y-cop.y);
+  const la=Math.min(180,Math.abs(car.speed)*18);
+  const tx=dist<300?car.x:car.x+Math.cos(car.angle)*la;
+  const ty=dist<300?car.y:car.y+Math.sin(car.angle)*la;
+  const rr=dist>600?45:dist>200?30:20;
+
+  cop.pt--;
+  if(!cop.wp||cop.wp.length===0||cop.pt<=0){cop.wp=findPath(cop.x,cop.y,tx,ty);cop.pt=rr;}
+  while(cop.wp&&cop.wp.length>1&&Math.hypot(cop.wp[0].x-cop.x,cop.wp[0].y-cop.y)<40)cop.wp.shift();
+
+  const wp=cop.wp&&cop.wp.length?cop.wp[0]:{x:car.x,y:car.y};
+  let da=Math.atan2(wp.y-cop.y,wp.x-cop.x)-cop.angle;
+  while(da<-Math.PI)da+=Math.PI*2;while(da>Math.PI)da-=Math.PI*2;
+  cop.angle+=Math.max(-cop.turn*2,Math.min(cop.turn*2,da*.22));
+
+  const sharp=Math.abs(da)/Math.PI;
+  cop.speed=Math.min(cop.speed+cop.accel,cop.maxSpeed*(1-sharp*.45));
+  cop.speed*=cop.friction;
+
+  const nx=cop.x+Math.cos(cop.angle)*cop.speed;
+  const ny=cop.y+Math.sin(cop.angle)*cop.speed;
+  let hx=false,hy=false;
+  if(!checkCollision(nx,cop.y,cop.w,cop.h))cop.x=nx;else hx=true;
+  if(!checkCollision(cop.x,ny,cop.w,cop.h))cop.y=ny;else hy=true;
+
+  if(hx||hy){
+    cop.speed*=.15;
+    cop.st++;
+    cop.pt=0;
+    // Immediately nudge away from the wall on the blocked axis
+    if(hx){const push=cop.x>nx?1:-1; if(!checkCollision(cop.x+push*3,cop.y,cop.w,cop.h))cop.x+=push*3;}
+    if(hy){const push=cop.y>ny?1:-1; if(!checkCollision(cop.x,cop.y+push*3,cop.w,cop.h))cop.y+=push*3;}
+  }else if(cop.st>0){cop.st--;}
+
+  // Short-term stuck: find a clear road angle and turn toward it
+  if(cop.st>6){
+    cop.speed=-2.0;
+    let escaped=false;
+    // Try 16 evenly spaced angles around the full circle
+    for(let i=0;i<16&&!escaped;i++){
+      const na=cop.angle+(i%2===0?1:-1)*Math.PI*(Math.floor(i/2)+1)/8;
+      for(const probeD of[50,80,110,150]){
+        const px=cop.x+Math.cos(na)*probeD;
+        const py=cop.y+Math.sin(na)*probeD;
+        if(!checkCollision(px,py,cop.w+8,cop.h+8)&&isOnRoad(px,py,12)){
+          cop.angle=na;
+          escaped=true;
+          break;
+        }
+      }
+    }
+    cop.st=0;cop.pt=0;
+  }
+
+  cop.dt++;
+  if(cop.dt>=90){
+    if(Math.hypot(cop.x-cop.lx,cop.y-cop.ly)<14){
+      // Snap to nearest road NODE (intersection) — always clear, never inside a building
+      let best=Infinity,bx=cop.x,by=cop.y;
+      for(const n of nodes){
+        const d=Math.hypot(n.x-cop.x,n.y-cop.y);
+        if(d<best&&!checkCollision(n.x,n.y,cop.w+8,cop.h+8)){best=d;bx=n.x;by=n.y;}
+      }
+      cop.x=bx;cop.y=by;cop.speed=0;cop.wp=null;cop.pt=0;
+    }
+    cop.lx=cop.x;cop.ly=cop.y;cop.dt=0;
+  }
+}
+
+// ─── NPC update ─────────────────────────────────────
+function updateNPCs(){
+  for(const n of npcs){
+    const px=n.x,py=n.y;
+    n.x+=Math.cos(n.angle)*n.speed;n.y+=Math.sin(n.angle)*n.speed;
+    if(!isOnRoad(n.x,n.y,6)||checkCollision(n.x,n.y,n.w,n.h)){
+      n.x=px;n.y=py;n.st++;
+      if(n.st>6){
+        let ok=false;
+        for(const d of[Math.PI/2,-Math.PI/2,Math.PI,0]){
+          const na=n.angle+d,tx=n.x+Math.cos(na)*n.speed*5,ty=n.y+Math.sin(na)*n.speed*5;
+          if(isOnRoad(tx,ty,6)&&!checkCollision(tx,ty,n.w,n.h)){n.angle=na;ok=true;break;}
+        }
+        if(!ok)Object.assign(n,makeNPC());n.st=0;
+      }
+    }else{n.st=0;}
+    if(rng()<0.003){
+      const na=n.angle+(rng()<0.5?Math.PI/2:-Math.PI/2);
+      const tx=n.x+Math.cos(na)*45,ty=n.y+Math.sin(na)*45;
+      if(isOnRoad(tx,ty,6)&&!checkCollision(tx,ty,n.w,n.h))n.angle=na;
+    }
+    if(n.x<5||n.x>WW-5||n.y<5||n.y>WH-5)Object.assign(n,makeNPC());
+  }
+}
+
+// ─── Main update ────────────────────────────────────
+function update(){
+  if(!gameActive)return;
+  score=effScore();
+  document.getElementById('currentScore').innerText=score;
+  if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;if(currentUser)saveProgress().catch(()=>{});}
+
+  const ns=Math.min(5,Math.max(1,1+Math.floor(score/100)));
+  if(ns!==wantedStars){wantedStars=ns;updateStars();}
+
+  updatePlayer();updateCop();updateNPCs();
+
+  const gd=Math.hypot(car.x-GARAGE.cx,car.y-GARAGE.cy);
+  document.getElementById('garage-hint').style.display=gd<GARAGE.r&&!garageOpen?'block':'none';
+  if(gd<GARAGE.r&&!garageOpen&&!inGarage){inGarage=true;openGarage();}
+  if(gd>=GARAGE.r)inGarage=false;
+
+  cam.x+=(car.x-canvas.width/2-cam.x)*.1;
+  cam.y+=(car.y-canvas.height/2-cam.y)*.1;
+  cam.x=Math.max(0,Math.min(WW-canvas.width,cam.x));
+  cam.y=Math.max(0,Math.min(WH-canvas.height,cam.y));
+  sirenState+=.15;
+
+  if(Math.hypot(car.x-cop.x,car.y-cop.y)<36){
+    gameActive=false;
+    if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;}
+    document.getElementById('finalScore').innerText=score;
+    document.getElementById('bestFinal').innerText=bestScore;
+    document.getElementById('final-stars').textContent=starsStr(wantedStars);
+    document.getElementById('game-over').style.display='block';
+    if(currentUser)saveProgress().catch(()=>{});
+  }
+}
+
+// ─── Draw ────────────────────────────────────────────
+function draw(){
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.save();ctx.translate(-cam.x,-cam.y);
+
+  // Ground
+  ctx.fillStyle='#292929';ctx.fillRect(0,0,WW,WH);
+
+  // Helper: stroke all segments
+  function segs(lw,col,dash=[]){
+    ctx.lineWidth=lw;ctx.strokeStyle=col;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.setLineDash(dash);
+    for(const s of roadSegs){ctx.beginPath();ctx.moveTo(s.ax,s.ay);ctx.lineTo(s.bx,s.by);ctx.stroke();}
+    ctx.setLineDash([]);
+  }
+  segs(RW+22,'#6a6a6a');      // sidewalk
+  segs(RW+4,'rgba(200,200,200,.45)'); // kerb highlight
+  segs(RW,'#3b3b3b');          // tarmac
+
+  // Lane dividers
+  ctx.save();ctx.lineWidth=1.5;ctx.strokeStyle='rgba(255,255,255,.20)';ctx.lineCap='butt';ctx.setLineDash([10,28]);
+  for(const s of roadSegs){
+    const dx=s.bx-s.ax,dy=s.by-s.ay,len=Math.hypot(dx,dy);if(len<2)continue;
+    const px=-dy/len*(RW/4),py=dx/len*(RW/4);
+    ctx.beginPath();ctx.moveTo(s.ax+px,s.ay+py);ctx.lineTo(s.bx+px,s.by+py);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(s.ax-px,s.ay-py);ctx.lineTo(s.bx-px,s.by-py);ctx.stroke();
+  }ctx.setLineDash([]);ctx.restore();
+
+  // Centre dashes
+  segs(2,'#c8a200',[18,18]);
+
+  // Buildings
+  for(const b of buildings){
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(b.x+5,b.y+6,b.w,b.h);
+    ctx.fillStyle=b.color;ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.fillStyle='rgba(255,255,200,.10)';
+    for(let wx=b.x+10;wx<b.x+b.w-7;wx+=16)
+      for(let wy=b.y+10;wy<b.y+b.h-7;wy+=16)ctx.fillRect(wx,wy,6,6);
+    ctx.strokeStyle='rgba(0,0,0,.45)';ctx.lineWidth=1.5;ctx.strokeRect(b.x,b.y,b.w,b.h);
+  }
+
+  // Garage
+  const {x:gx,y:gy,w:gw,h:gh,cx:gcx,cy:gcy}=GARAGE;
+  const pulse=.5+.35*Math.sin(Date.now()*.003);
+  ctx.save();ctx.globalAlpha=pulse*.3;ctx.fillStyle='#27ae60';
+  ctx.beginPath();ctx.arc(gcx,gcy,65,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(gx+4,gy+4,gw,gh);
+  ctx.fillStyle='#1a4d2e';ctx.fillRect(gx,gy,gw,gh);
+  ctx.strokeStyle='#27ae60';ctx.lineWidth=3;ctx.strokeRect(gx,gy,gw,gh);
+  ctx.font='bold 20px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🏠',gcx,gcy-7);
+  ctx.font='bold 10px Segoe UI';ctx.fillStyle='#aaffcc';ctx.fillText('GARAGE',gcx,gcy+9);
+  ctx.textAlign='left';
+
+  // NPCs, player, cop
+  for(const n of npcs)drawCar(n.x,n.y,n.angle,n.color,false,false);
+  drawCar(car.x,car.y,car.angle,SKINS[selectedSkin].color,false,true);
+  drawCar(cop.x,cop.y,cop.angle,'#2464a8',true,false);
+  ctx.restore();
+}
+
+function drawCar(x,y,angle,color,isCop,isPlayer){
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle+Math.PI/2);
+  const W=isPlayer?16:isCop?17:13,H=isPlayer?32:isCop?34:26;
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(-W/2+3,-H/2+3,W,H);
+  ctx.fillStyle='#111';
+  ctx.fillRect(-W/2-4,-H/2+2,4,8);ctx.fillRect(W/2,-H/2+2,4,8);
+  ctx.fillRect(-W/2-4,H/2-10,4,8);ctx.fillRect(W/2,H/2-10,4,8);
+  ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-W/2,-H/2,W,H,4);ctx.fill();
+  ctx.fillStyle='rgba(180,220,255,.55)';ctx.fillRect(-W/2+3,-H/2+5,W-6,8);
+  ctx.fillStyle='rgba(180,220,255,.35)';ctx.fillRect(-W/2+3,H/2-13,W-6,6);
+  if(isCop){
+    const fl=Math.sin(sirenState*3)>0;
+    ctx.fillStyle=fl?'#ff1111':'#1111ff';ctx.fillRect(-W/2+2,-H/2-4,(W-4)/2,5);
+    ctx.fillStyle=fl?'#1111ff':'#ff1111';ctx.fillRect(1,-H/2-4,(W-4)/2,5);
+    ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=fl?'red':'blue';
+    ctx.beginPath();ctx.arc(0,-H/2,20,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(-W/2+2,-3,W-4,6);
+  }else{
+    ctx.fillStyle='#ffffaa';ctx.fillRect(-W/2+2,-H/2+1,4,3);ctx.fillRect(W/2-6,-H/2+1,4,3);
+    ctx.fillStyle='#ff4444';ctx.fillRect(-W/2+2,H/2-4,4,3);ctx.fillRect(W/2-6,H/2-4,4,3);
+  }
+  ctx.restore();
+}
+
+// ─── Minimap ─────────────────────────────────────────
+function drawMM(){
+  const mw=mmC.width,mh=mmC.height,sx=mw/WW,sy=mh/WH;
+  mmX.fillStyle='rgba(16,16,16,.94)';mmX.fillRect(0,0,mw,mh);
+  mmX.strokeStyle='#484848';mmX.lineWidth=RW*sx*1.2;mmX.lineCap='round';
+  for(const s of roadSegs){mmX.beginPath();mmX.moveTo(s.ax*sx,s.ay*sy);mmX.lineTo(s.bx*sx,s.by*sy);mmX.stroke();}
+  mmX.fillStyle='#585858';
+  for(const b of buildings)mmX.fillRect(b.x*sx,b.y*sy,b.w*sx,b.h*sy);
+  mmX.fillStyle='#27ae60';mmX.beginPath();mmX.arc(GARAGE.cx*sx,GARAGE.cy*sy,4,0,Math.PI*2);mmX.fill();
+  mmX.fillStyle='rgba(170,170,170,.4)';
+  for(const n of npcs){mmX.beginPath();mmX.arc(n.x*sx,n.y*sy,1.5,0,Math.PI*2);mmX.fill();}
+  mmX.strokeStyle='rgba(255,255,255,.14)';mmX.lineWidth=1;mmX.lineCap='butt';
+  mmX.strokeRect(cam.x*sx,cam.y*sy,canvas.width*sx,canvas.height*sy);
+  const fl=Math.sin(sirenState*3)>0;
+  mmX.fillStyle=fl?'#ff4444':'#4488ff';mmX.beginPath();mmX.arc(cop.x*sx,cop.y*sy,4,0,Math.PI*2);mmX.fill();
+  mmX.fillStyle='#f1c40f';mmX.beginPath();mmX.arc(car.x*sx,car.y*sy,4,0,Math.PI*2);mmX.fill();
+}
+
+// ─── Loop ────────────────────────────────────────────
+function loop(){animFrame=requestAnimationFrame(loop);update();draw();drawMM();}
+
+// Start render loop immediately so canvas isn't black during bake
+loop();
+// Then bake grid async — shows start screen when done
+bakeAsync();
+</script>
+</body>
+</html>
