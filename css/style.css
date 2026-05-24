@@ -104,9 +104,10 @@ header {
 }
 
 /* per-game accent colors */
-.game-card.city-driver:hover  { border-color: #f1c40f; box-shadow: 0 0 24px rgba(241,196,15,0.4); }
-.game-card.dumpling:hover      { border-color: #ff6b35; box-shadow: 0 0 24px rgba(255,107,53,0.4); }
+.game-card.city-driver:hover     { border-color: #f1c40f; box-shadow: 0 0 24px rgba(241,196,15,0.4); }
+.game-card.dumpling:hover        { border-color: #ff6b35; box-shadow: 0 0 24px rgba(255,107,53,0.4); }
 .game-card.sea-of-phantoms:hover { border-color: #00b4d8; box-shadow: 0 0 24px rgba(0,180,216,0.4); }
+.game-card.poly-island:hover     { border-color: #52b788; box-shadow: 0 0 24px rgba(82,183,136,0.4); }
 
 /* ── CARD ICON ── */
 .card-icon {
@@ -117,14 +118,14 @@ header {
   justify-content: center;
 }
 
-.city-driver   .card-icon { background: linear-gradient(135deg, #1a1200, #3d2e00); }
-.dumpling      .card-icon { background: linear-gradient(135deg, #1a0800, #3d1500); }
+.city-driver     .card-icon { background: linear-gradient(135deg, #1a1200, #3d2e00); }
+.dumpling        .card-icon { background: linear-gradient(135deg, #1a0800, #3d1500); }
 .sea-of-phantoms .card-icon { background: linear-gradient(135deg, #000d1a, #001e38); }
+.poly-island     .card-icon { background: linear-gradient(135deg, #001a0d, #003320); }
 
 .card-icon svg {
   width: 110px;
   height: 110px;
-  filter: drop-shadow(0 0 12px currentColor);
 }
 
 /* ── CARD INFO ── */
@@ -142,9 +143,10 @@ header {
   color: #fff;
 }
 
-.city-driver   .card-title { color: #f1c40f; }
-.dumpling      .card-title { color: #ff6b35; }
+.city-driver     .card-title { color: #f1c40f; }
+.dumpling        .card-title { color: #ff6b35; }
 .sea-of-phantoms .card-title { color: #00b4d8; }
+.poly-island     .card-title { color: #52b788; }
 
 .card-desc {
   font-size: 0.45rem;
@@ -164,9 +166,10 @@ header {
   align-self: flex-start;
 }
 
-.city-driver   .play-btn { background: #f1c40f; }
-.dumpling      .play-btn { background: #ff6b35; }
+.city-driver     .play-btn { background: #f1c40f; }
+.dumpling        .play-btn { background: #ff6b35; }
 .sea-of-phantoms .play-btn { background: #00b4d8; }
+.poly-island     .play-btn { background: #52b788; }
 
 .game-card:hover .play-btn {
   filter: brightness(1.15);

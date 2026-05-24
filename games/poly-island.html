@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolyIsland</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; cursor: crosshair; }
+
+#hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+
+#crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 14px; height: 14px; }
+#crosshair::before { content:''; position:absolute; width:1px; height:100%; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.7); }
+#crosshair::after  { content:''; position:absolute; height:1px; width:100%; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.7); }
+
+#info-panel {
+  position: absolute; top: 20px; left: 20px;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+  padding: 12px 16px; color: rgba(255,255,255,0.9);
+  font-size: 12px; line-height: 2.1;
+}
+#info-panel .title { font-size: 14px; font-weight: bold; color: #ffd700; letter-spacing: 4px; margin-bottom: 2px; }
+
+#compass {
+  position: absolute; top: 20px; right: 20px;
+  width: 54px; height: 54px;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 50%;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+}
+#compass-needle {
+  position: absolute; width: 2px; height: 19px;
+  background: linear-gradient(to bottom, #ff4444 50%, #ffffff 50%);
+  top: 50%; left: 50%; transform-origin: bottom center;
+  transform: translateX(-50%) translateY(-100%);
+}
+
+#sprint-indicator {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  color: #ffcc00; font-size: 10px; letter-spacing: 3px;
+  opacity: 0; transition: opacity 0.15s;
+}
+#sprint-indicator.active { opacity: 1; }
+
+#controls-hint {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 2px; white-space: nowrap;
+}
+#time-bar {
+  position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
+  width: 180px; height: 4px; background: rgba(0,0,0,0.35);
+  border-radius: 2px; border: 1px solid rgba(255,255,255,0.12); overflow: hidden;
+}
+#time-fill { height: 100%; width: 30%; background: linear-gradient(to right, #223366, #ff9944, #ffd700, #ff9944, #223366); transition: width 0.5s; }
+
+#overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.92); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 100; color: white; text-align: center;
+}
+#overlay h1 { font-size: 52px; letter-spacing: 10px; color: #ffd700; margin-bottom: 6px; text-shadow: 0 0 40px rgba(255,215,0,0.35); }
+#overlay .sub { font-size: 11px; color: rgba(255,255,255,0.28); letter-spacing: 5px; margin-bottom: 26px; }
+#overlay .controls { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 2.8; }
+#start-btn {
+  margin-top: 28px; padding: 13px 46px;
+  border: 1px solid rgba(255,215,0,0.55); background: transparent;
+  color: #ffd700; font-size: 13px; letter-spacing: 6px; cursor: pointer;
+  border-radius: 3px; font-family: 'Courier New', monospace; transition: all 0.2s;
+}
+#start-btn:hover { background: rgba(255,215,0,0.1); border-color: #ffd700; }
+
+#back-home {
+  position: fixed; top: 12px; left: 12px; z-index: 9999;
+  background: rgba(0,0,0,0.85); color: #00f5ff;
+  border: 1px solid #00f5ff; padding: 8px 14px;
+  font-family: 'Courier New', monospace; font-size: 11px; font-weight: bold;
+  text-decoration: none; border-radius: 3px; letter-spacing: 1px; pointer-events: all;
+}
+#back-home:hover { background: #00f5ff; color: #000; }
+</style>
+</head>
+<body>
+
+<a id="back-home" href="../index.html">← HOME</a>
+
+<div id="hud">
+  <div id="crosshair"></div>
+  <div id="sprint-indicator">⚡ SPRINTING</div>
+  <div id="info-panel">
+    <div class="title">POLYISLAND</div>
+    <div id="pos-display">POS: 0, 0</div>
+    <div id="biome-display">ZONE: Beach</div>
+    <div id="fps-display">FPS: --</div>
+  </div>
+  <div id="compass"><div id="compass-needle"></div></div>
+  <div id="time-bar"><div id="time-fill"></div></div>
+  <div id="controls-hint">CLICK TO CAPTURE MOUSE &nbsp;·&nbsp; WASD — WALK &nbsp;·&nbsp; SHIFT — SPRINT</div>
+</div>
+
+<div id="overlay">
+  <h1>POLYISLAND</h1>
+  <div class="sub">FIRST PERSON EXPLORATION</div>
+  <div class="controls">
+    <div>WASD / Arrow Keys &mdash; Walk</div>
+    <div>Shift &mdash; Sprint</div>
+    <div>Click &mdash; Capture Mouse &nbsp;&bull;&nbsp; ESC &mdash; Release</div>
+    <div>Click + Drag &mdash; Look Around</div>
+    <div style="margin-top:6px;color:rgba(255,255,255,0.3)">🌴 Palm Trees &nbsp;·&nbsp; 🌋 Volcano &nbsp;·&nbsp; 🌊 Ocean &nbsp;·&nbsp; 🐦 Birds</div>
+  </div>
+  <button id="start-btn">EXPLORE</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+
+// ── State ────────────────────────────────────────────────────────────────────
+var renderer, scene, camera, clock;
+var waterMesh, birdObjects = [];
+var colliders = []; // {x, z, r} collision circles
+var moveF=false, moveB=false, moveL=false, moveR=false, sprinting=false;
+var yaw=0, pitch=0;
+var dragging=false, lastMX=0, lastMY=0, pointerLocked=false;
+var dayTime=0.28, waveTime=0;
+var fpsFrames=0, fpsLast=Date.now(), fpsVal=60;
+var _leafGeo=null;
+
+// ── Start ────────────────────────────────────────────────────────────────────
+document.getElementById('start-btn').addEventListener('click', function() {
+  document.getElementById('overlay').style.display = 'none';
+  initGame();
+});
+
+// ── Pointer lock ─────────────────────────────────────────────────────────────
+document.addEventListener('pointerlockchange', function() {
+  pointerLocked = document.pointerLockElement === renderer.domElement;
+  document.getElementById('controls-hint').textContent = pointerLocked
+    ? 'WASD — WALK  ·  SHIFT — SPRINT  ·  ESC — RELEASE MOUSE'
+    : 'CLICK TO CAPTURE MOUSE  ·  WASD — WALK  ·  SHIFT — SPRINT';
+});
+
+document.addEventListener('click', function() {
+  if (document.getElementById('overlay').style.display !== 'none') return;
+  if (renderer) renderer.domElement.requestPointerLock();
+});
+
+// ── Mouse / touch look ───────────────────────────────────────────────────────
+document.addEventListener('mousedown', function(e) {
+  if (document.getElementById('overlay').style.display !== 'none') return;
+  dragging=true; lastMX=e.clientX; lastMY=e.clientY;
+});
+document.addEventListener('mouseup', function() { dragging=false; });
+
+document.addEventListener('mousemove', function(e) {
+  if (document.getElementById('overlay').style.display !== 'none') return;
+  if (pointerLocked) {
+    yaw   -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch));
+  } else if (dragging) {
+    yaw   -= (e.clientX - lastMX) * 0.004;
+    pitch -= (e.clientY - lastMY) * 0.004;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch));
+    lastMX=e.clientX; lastMY=e.clientY;
+  }
+});
+
+document.addEventListener('touchstart', function(e) {
+  if (document.getElementById('overlay').style.display !== 'none') return;
+  dragging=true; lastMX=e.touches[0].clientX; lastMY=e.touches[0].clientY;
+}, {passive:true});
+document.addEventListener('touchend', function() { dragging=false; });
+document.addEventListener('touchmove', function(e) {
+  if (!dragging) return;
+  yaw   -= (e.touches[0].clientX - lastMX) * 0.004;
+  pitch -= (e.touches[0].clientY - lastMY) * 0.004;
+  pitch = Math.max(-1.2, Math.min(1.2, pitch));
+  lastMX=e.touches[0].clientX; lastMY=e.touches[0].clientY;
+}, {passive:true});
+
+// ── Keyboard ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.code==='KeyW'||e.code==='ArrowUp')    { moveF=true;  e.preventDefault(); }
+  if (e.code==='KeyS'||e.code==='ArrowDown')  { moveB=true;  e.preventDefault(); }
+  if (e.code==='KeyA'||e.code==='ArrowLeft')  { moveL=true;  e.preventDefault(); }
+  if (e.code==='KeyD'||e.code==='ArrowRight') { moveR=true;  e.preventDefault(); }
+  if (e.code==='ShiftLeft'||e.code==='ShiftRight') {
+    sprinting=true;
+    document.getElementById('sprint-indicator').classList.add('active');
+  }
+});
+document.addEventListener('keyup', function(e) {
+  if (e.code==='KeyW'||e.code==='ArrowUp')    moveF=false;
+  if (e.code==='KeyS'||e.code==='ArrowDown')  moveB=false;
+  if (e.code==='KeyA'||e.code==='ArrowLeft')  moveL=false;
+  if (e.code==='KeyD'||e.code==='ArrowRight') moveR=false;
+  if (e.code==='ShiftLeft'||e.code==='ShiftRight') {
+    sprinting=false;
+    document.getElementById('sprint-indicator').classList.remove('active');
+  }
+});
+
+window.addEventListener('resize', function() {
+  if (!renderer) return;
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ── Terrain height ────────────────────────────────────────────────────────────
+function getH(x, z) {
+  var d = Math.sqrt(x*x + z*z);
+  var f = Math.max(0, 1 - d/48);
+  return Math.max(0,
+    f*f*8
+    + Math.sin(x*0.15)*1.5*f
+    + Math.cos(z*0.12)*1.2*f
+    + Math.sin(x*0.3+z*0.2)*0.5*f
+  );
+}
+
+function terrainColor(h) {
+  if (h < 0.15) return new THREE.Color(0xf2d98e);
+  if (h < 0.5)  return new THREE.Color(0xf2d98e).lerp(new THREE.Color(0x52c45a), (h-0.15)/0.35);
+  if (h < 2.0)  return new THREE.Color(0x52c45a);
+  if (h < 4.5)  return new THREE.Color(0x52c45a).lerp(new THREE.Color(0x2d7a25), (h-2)/2.5);
+  return         new THREE.Color(0x2d7a25).lerp(new THREE.Color(0x9e8860), (h-4.5)/2);
+}
+
+// ── Collision ─────────────────────────────────────────────────────────────────
+function checkCollision(nx, nz) {
+  for (var i=0; i<colliders.length; i++) {
+    var c=colliders[i], dx=nx-c.x, dz=nz-c.z;
+    if (dx*dx + dz*dz < c.r*c.r) return true;
+  }
+  return false;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function initGame() {
+  clock = new THREE.Clock();
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  document.body.appendChild(renderer.domElement);
+  renderer.domElement.style.cssText = 'position:fixed;top:0;left:0;z-index:1;';
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+  scene.fog = new THREE.FogExp2(0x87ceeb, 0.015);
+
+  camera = new THREE.PerspectiveCamera(72, window.innerWidth/window.innerHeight, 0.1, 800);
+  camera.position.set(0, 2, 5);
+
+  buildLighting();
+  buildIsland();
+  buildOcean();
+  buildSky();
+  buildTrees();
+  buildRocks();
+  buildVolcano();
+  buildFlowers();
+  buildClouds();
+  buildBirds();
+
+  animate();
+}
+
+// ── Lighting ──────────────────────────────────────────────────────────────────
+function buildLighting() {
+  scene.add(new THREE.AmbientLight(0x88aacc, 0.6));
+  var sun = new THREE.DirectionalLight(0xfff4e0, 1.4);
+  sun.name='sunLight'; sun.position.set(80,120,-60); sun.castShadow=true;
+  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.camera.near=0.5; sun.shadow.camera.far=350;
+  sun.shadow.camera.left=sun.shadow.camera.bottom=-80;
+  sun.shadow.camera.right=sun.shadow.camera.top=80;
+  sun.shadow.bias=-0.001;
+  scene.add(sun);
+  scene.add(new THREE.HemisphereLight(0x87ceeb, 0x558833, 0.5));
+}
+
+// ── Island ────────────────────────────────────────────────────────────────────
+function buildIsland() {
+  var geo = new THREE.PlaneGeometry(120,120,90,90);
+  geo.rotateX(-Math.PI/2);
+  var pos=geo.attributes.position, cols=[];
+  for (var i=0; i<pos.count; i++) {
+    var x=pos.getX(i), z=pos.getZ(i), h=getH(x,z);
+    pos.setY(i, h);
+    var c = terrainColor(h);
+    cols.push(c.r, c.g, c.b);
+  }
+  geo.computeVertexNormals();
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols,3));
+  var m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({vertexColors:true}));
+  m.receiveShadow=true; scene.add(m);
+
+  var bg = new THREE.RingGeometry(42,62,72); bg.rotateX(-Math.PI/2);
+  var beach = new THREE.Mesh(bg, new THREE.MeshLambertMaterial({color:0xf2d98e, side:THREE.DoubleSide}));
+  beach.position.y=0.01; scene.add(beach);
+}
+
+// ── Ocean ─────────────────────────────────────────────────────────────────────
+function buildOcean() {
+  var geo = new THREE.PlaneGeometry(600,600,60,60); geo.rotateX(-Math.PI/2);
+  waterMesh = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({
+    color:0x006080, transparent:true, opacity:0.88,
+    shininess:130, specular:new THREE.Color(0xaaddff)
+  }));
+  waterMesh.position.y=-0.15; scene.add(waterMesh);
+
+  var fg = new THREE.RingGeometry(44,56,72); fg.rotateX(-Math.PI/2);
+  var foam = new THREE.Mesh(fg, new THREE.MeshLambertMaterial({
+    color:0xddeeff, transparent:true, opacity:0.28, side:THREE.DoubleSide
+  }));
+  foam.position.y=0.02; scene.add(foam);
+}
+
+// ── Sky ───────────────────────────────────────────────────────────────────────
+function buildSky() {
+  var sky = new THREE.Mesh(
+    new THREE.SphereGeometry(400,32,16),
+    new THREE.MeshBasicMaterial({color:0x87ceeb, side:THREE.BackSide})
+  );
+  sky.name='sky'; scene.add(sky);
+
+  var sunDisc = new THREE.Mesh(
+    new THREE.SphereGeometry(6,16,16),
+    new THREE.MeshBasicMaterial({color:0xfffacd})
+  );
+  sunDisc.name='sunDisc'; scene.add(sunDisc);
+}
+
+// ── Palm leaf shape (shared, created once) ────────────────────────────────────
+function getLeafGeo() {
+  if (_leafGeo) return _leafGeo;
+  var s = new THREE.Shape();
+  // Elongated pointed leaf silhouette using bezier curves
+  s.moveTo(0, 0);
+  s.bezierCurveTo( 0.28, 0.8,  0.32, 2.4,  0.05, 4.1);
+  s.lineTo(0, 4.4);   // pointed tip
+  s.lineTo(-0.05, 4.1);
+  s.bezierCurveTo(-0.32, 2.4, -0.28, 0.8, 0, 0);
+  _leafGeo = new THREE.ShapeGeometry(s, 12);
+  return _leafGeo;
+}
+
+// ── Palm trees ────────────────────────────────────────────────────────────────
+var palmPositions = [
+  [5,10],[8,6],[12,-5],[6,-12],[15,8],[-8,6],[-12,-5],[-6,-12],[-15,5],
+  [8,18],[-10,15],[20,-3],[-18,-8],[3,-20],[-3,20],[22,12],[-20,10],
+  [10,-18],[-12,-18],[18,-15],[-5,25],[6,-25],[25,0],[-25,3],
+  [0,28],[-28,0],[28,5],[2,30],[-30,8],[12,28],[-14,26],[26,-18]
+];
+
+function buildTrees() {
+  for (var i=0; i<palmPositions.length; i++) {
+    var x=palmPositions[i][0], z=palmPositions[i][1];
+    if (Math.sqrt(x*x+z*z) > 42) continue;
+    var h=getH(x,z);
+    if (h<0.2 || h>6) continue;
+    makePalm(x, h, z);
+  }
+}
+
+function makePalm(x, y, z) {
+  var height  = 5.5 + Math.random()*3.5;
+  var lean    = (Math.random()-0.5)*0.22;
+  var leanDir = Math.random()*Math.PI*2;
+  var trunkColor = new THREE.Color().setHSL(0.08, 0.35, 0.27 + Math.random()*0.07);
+
+  // Trunk — tapered cylinder with a slight lean
+  var trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.07, 0.21, height, 8),
+    new THREE.MeshLambertMaterial({color: trunkColor})
+  );
+  trunk.position.set(x, y + height/2, z);
+  trunk.rotation.z = Math.sin(leanDir) * lean;
+  trunk.rotation.x = Math.cos(leanDir) * lean;
+  trunk.castShadow = true;
+  scene.add(trunk);
+
+  // Compute actual top position accounting for lean
+  var topX = x + Math.sin(leanDir) * Math.sin(Math.abs(lean)) * height * 0.45;
+  var topZ = z + Math.cos(leanDir) * Math.sin(Math.abs(lean)) * height * 0.45;
+  var topY = y + height;
+
+  // Palm fronds — ShapeGeometry leaf oriented via quaternion
+  var leafGeo = getLeafGeo();
+  var numLeaves = 9 + Math.floor(Math.random()*3);
+  var baseHue   = 0.28 + Math.random()*0.06;
+
+  for (var i=0; i<numLeaves; i++) {
+    var angle = (i/numLeaves)*Math.PI*2 + (Math.random()-0.5)*0.5;
+    var droop = 0.42 + Math.random()*0.32;   // downward component
+    var scale = 0.8  + Math.random()*0.5;    // length variation
+
+    var leaf = new THREE.Mesh(leafGeo, new THREE.MeshLambertMaterial({
+      color: new THREE.Color().setHSL(baseHue, 0.72, 0.20 + Math.random()*0.09),
+      side: THREE.DoubleSide
+    }));
+    leaf.scale.set(scale, scale, 1);
+    leaf.position.set(topX, topY - 0.1, topZ);
+
+    // Rotate leaf so its tip (local +Y) points outward and downward from the trunk top
+    var dir = new THREE.Vector3(Math.cos(angle), -droop, Math.sin(angle)).normalize();
+    leaf.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
+    leaf.castShadow = true;
+    scene.add(leaf);
+  }
+
+  // Coconut cluster beneath the fronds
+  var cocoMat = new THREE.MeshLambertMaterial({color: 0x4a3010});
+  for (var j=0; j<4; j++) {
+    var ca = (j/4)*Math.PI*2;
+    var coco = new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6), cocoMat);
+    coco.position.set(topX + Math.cos(ca)*0.22, topY - 0.28, topZ + Math.sin(ca)*0.22);
+    scene.add(coco);
+  }
+
+  colliders.push({x:x, z:z, r:0.55});
+}
+
+// ── Rocks ─────────────────────────────────────────────────────────────────────
+function buildRocks() {
+  var rockMats = [
+    new THREE.MeshLambertMaterial({color:0x888888}),
+    new THREE.MeshLambertMaterial({color:0x777768}),
+    new THREE.MeshLambertMaterial({color:0x676655}),
+    new THREE.MeshLambertMaterial({color:0x9a9080})
+  ];
+
+  for (var i=0; i<26; i++) {
+    var a  = Math.random()*Math.PI*2;
+    var r  = 5 + Math.random()*34;
+    var rx = Math.cos(a)*r, rz = Math.sin(a)*r;
+    var h  = getH(rx, rz);
+    if (h < 0.15) continue;
+
+    var s   = 0.25 + Math.random()*0.9;
+    var mat = rockMats[Math.floor(Math.random()*rockMats.length)];
+
+    var rock = new THREE.Mesh(new THREE.DodecahedronGeometry(s,0), mat);
+    rock.position.set(rx, h+s*0.35, rz);
+    rock.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
+    rock.castShadow=true; rock.receiveShadow=true;
+    scene.add(rock);
+
+    // Satellite rocks around larger ones — adds visual cluster feel
+    if (s > 0.5) {
+      var count = 2 + Math.floor(Math.random()*3);
+      for (var j=0; j<count; j++) {
+        var ss = s*(0.18 + Math.random()*0.4);
+        var sa = Math.random()*Math.PI*2;
+        var sr = s*0.7 + Math.random()*s*0.6;
+        var sx = rx + Math.cos(sa)*sr, sz = rz + Math.sin(sa)*sr;
+        var sh = getH(sx, sz);
+        var sm = new THREE.Mesh(new THREE.DodecahedronGeometry(ss,0), mat);
+        sm.position.set(sx, sh+ss*0.3, sz);
+        sm.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
+        sm.castShadow=true; scene.add(sm);
+      }
+      colliders.push({x:rx, z:rz, r:s*0.9});
+    }
+  }
+}
+
+// ── Volcano ───────────────────────────────────────────────────────────────────
+function buildVolcano() {
+  // Main cone — vertex noise for organic silhouette
+  var vGeo = new THREE.ConeGeometry(12, 22, 20);
+  var vPos = vGeo.attributes.position;
+  for (var i=0; i<vPos.count; i++) {
+    if (vPos.getY(i) > -10) {
+      vPos.setX(i, vPos.getX(i) * (1 + (Math.random()-0.5)*0.1));
+      vPos.setZ(i, vPos.getZ(i) * (1 + (Math.random()-0.5)*0.1));
+    }
+  }
+  vGeo.computeVertexNormals();
+  var v = new THREE.Mesh(vGeo, new THREE.MeshLambertMaterial({color:0x5a5050}));
+  v.position.set(-22,4,-18); v.castShadow=true; scene.add(v);
+
+  // Dark cap on upper section
+  var cap = new THREE.Mesh(
+    new THREE.ConeGeometry(5.5,9,18),
+    new THREE.MeshLambertMaterial({color:0x383030})
+  );
+  cap.position.set(-22,12.5,-18); scene.add(cap);
+
+  // Crater rim (torus ring)
+  var rimGeo = new THREE.TorusGeometry(2.8, 0.55, 8, 22);
+  rimGeo.rotateX(Math.PI/2);
+  var rim = new THREE.Mesh(rimGeo, new THREE.MeshLambertMaterial({color:0x4a3838}));
+  rim.position.set(-22,15.0,-18); scene.add(rim);
+
+  // Lava pool
+  var lavaGeo = new THREE.CircleGeometry(2.3, 18); lavaGeo.rotateX(-Math.PI/2);
+  var lavaPool = new THREE.Mesh(lavaGeo, new THREE.MeshBasicMaterial({color:0xff4400}));
+  lavaPool.position.set(-22,15.15,-18); lavaPool.name='lavaPool'; scene.add(lavaPool);
+
+  // Point light for lava glow
+  var lavaLight = new THREE.PointLight(0xff3300, 3, 40);
+  lavaLight.position.set(-22,16,-18); lavaLight.name='lavaLight'; scene.add(lavaLight);
+
+  // Static smoke puffs above crater
+  var smokeMat = new THREE.MeshBasicMaterial({color:0x555555, transparent:true, opacity:0.32});
+  for (var s=0; s<6; s++) {
+    var sr = 0.6 + Math.random()*0.8;
+    var smoke = new THREE.Mesh(new THREE.SphereGeometry(sr,7,5), smokeMat);
+    smoke.position.set(-22+(Math.random()-0.5)*2, 17+s*1.5+Math.random(), -18+(Math.random()-0.5)*2);
+    smoke.name='smoke'; scene.add(smoke);
+  }
+
+  // Dark lava-rock debris at base
+  var debrisMat = new THREE.MeshLambertMaterial({color:0x3a3030});
+  for (var d=0; d<14; d++) {
+    var da=Math.random()*Math.PI*2, dr=10+Math.random()*9;
+    var dx=-22+Math.cos(da)*dr, dz=-18+Math.sin(da)*dr;
+    var dh=getH(dx,dz); if(dh<0.1) continue;
+    var ds=0.25+Math.random()*0.6;
+    var debris = new THREE.Mesh(new THREE.DodecahedronGeometry(ds,0), debrisMat);
+    debris.position.set(dx, dh+ds*0.3, dz);
+    debris.rotation.set(Math.random()*6, Math.random()*6, Math.random()*6);
+    debris.castShadow=true; scene.add(debris);
+  }
+
+  colliders.push({x:-22, z:-18, r:11});
+}
+
+// ── Flowers ───────────────────────────────────────────────────────────────────
+function buildFlowers() {
+  var cols=[0xff6b9d,0xffec6b,0x6baaff,0xff8c6b,0xc06bff,0xff4444,0x44ffaa];
+  var stemMat = new THREE.MeshLambertMaterial({color:0x2a8a2a});
+  for (var i=0; i<90; i++) {
+    var a=Math.random()*Math.PI*2, r=2+Math.random()*30;
+    var x=Math.cos(a)*r, z=Math.sin(a)*r, h=getH(x,z);
+    if (h<0.3||h>5) continue;
+    var stem = new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,0.3,4), stemMat);
+    stem.position.set(x, h+0.15, z); scene.add(stem);
+    var petal = new THREE.Mesh(
+      new THREE.SphereGeometry(0.07,6,4),
+      new THREE.MeshLambertMaterial({color:cols[Math.floor(Math.random()*cols.length)]})
+    );
+    petal.position.set(x, h+0.32, z); scene.add(petal);
+  }
+}
+
+// ── Clouds ────────────────────────────────────────────────────────────────────
+function buildClouds() {
+  var cm = new THREE.MeshLambertMaterial({color:0xffffff, transparent:true, opacity:0.9});
+  for (var i=0; i<16; i++) {
+    var g = new THREE.Group();
+    g.position.set((Math.random()-0.5)*240, 58+Math.random()*36, (Math.random()-0.5)*240);
+    for (var j=0; j<4+Math.floor(Math.random()*4); j++) {
+      var p = new THREE.Mesh(new THREE.SphereGeometry(4+Math.random()*5,7,5), cm);
+      p.position.set((Math.random()-0.5)*10, (Math.random()-0.5)*3, (Math.random()-0.5)*9);
+      g.add(p);
+    }
+    g.name='cloud'; scene.add(g);
+  }
+}
+
+// ── Birds ─────────────────────────────────────────────────────────────────────
+function buildBirds() {
+  var bm = new THREE.MeshLambertMaterial({color:0x1a1a1a, side:THREE.DoubleSide});
+  for (var i=0; i<8; i++) {
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.ConeGeometry(0.06,0.55,5), bm);
+    body.rotation.x=Math.PI/2; g.add(body);
+    for (var s=0; s<2; s++) {
+      var side=s===0?-1:1;
+      var wing = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.18), bm);
+      wing.position.x=side*0.35; wing.rotation.z=side*0.45; g.add(wing);
+    }
+    var ba=Math.random()*Math.PI*2, br=15+Math.random()*28;
+    g.position.set(Math.cos(ba)*br, 24+Math.random()*18, Math.sin(ba)*br);
+    g.userData={angle:ba, radius:br, speed:0.25+Math.random()*0.35, baseY:g.position.y};
+    birdObjects.push(g); scene.add(g);
+  }
+}
+
+// ── Day / Night cycle ─────────────────────────────────────────────────────────
+function updateDayNight(dt) {
+  dayTime = (dayTime + dt*0.016) % 1;
+  var t = 0.1 + dayTime*0.8;
+  var sunAngle = t*Math.PI;
+  var sunX = Math.cos(sunAngle - Math.PI/2)*160;
+  var sunY = Math.sin(sunAngle)*100 + 10;
+
+  var sd = scene.getObjectByName('sunDisc');
+  if (sd) sd.position.set(sunX, sunY, -140);
+  var sl = scene.getObjectByName('sunLight');
+  if (sl) sl.position.set(sunX*0.5, sunY*0.5+20, -60);
+
+  var normY = Math.max(0, sunY/110);
+  var skyC, fogC;
+  if (sunY > 40) {
+    skyC = new THREE.Color().setHSL(0.58, 0.72, 0.52+normY*0.1);
+    fogC = new THREE.Color().setHSL(0.58, 0.5, 0.68);
+    if (sl) { sl.color.setHex(0xfff4e0); sl.intensity=0.8+normY*0.8; }
+  } else {
+    var blend = Math.max(0, sunY/40);
+    skyC = new THREE.Color(0xff7030).lerp(new THREE.Color(0x87ceeb), blend);
+    fogC = new THREE.Color(0xff9050).lerp(new THREE.Color(0x87ceeb), blend);
+    if (sl) { sl.color.setHex(0xff9944); sl.intensity=0.4+blend*0.9; }
+  }
+  scene.background=skyC; scene.fog.color.copy(fogC);
+
+  // Animate lava glow + color pulse
+  var ll = scene.getObjectByName('lavaLight');
+  if (ll) ll.intensity = 2.5 + Math.sin(Date.now()*0.004)*0.8 + Math.random()*0.3;
+  var lp = scene.getObjectByName('lavaPool');
+  if (lp) lp.material.color.setHSL(0.05, 1.0, 0.44 + Math.sin(Date.now()*0.003)*0.07);
+
+  document.getElementById('time-fill').style.width = (dayTime*100)+'%';
+  document.getElementById('compass-needle').style.transform =
+    'translateX(-50%) translateY(-100%) rotate('+(yaw*180/Math.PI)+'deg)';
+}
+
+// ── Player movement with collision + wall sliding ─────────────────────────────
+function updatePlayer(dt) {
+  var speed = sprinting ? 10 : 5.5;
+  var fw=0, st=0;
+  if (moveF) fw+=1; if (moveB) fw-=1;
+  if (moveL) st-=1; if (moveR) st+=1;
+  var len = Math.sqrt(fw*fw + st*st);
+  if (len>0) { fw/=len; st/=len; }
+
+  var fx=-Math.sin(yaw), fz=-Math.cos(yaw);
+  var rx= Math.cos(yaw), rz=-Math.sin(yaw);
+  var nx = camera.position.x + (fx*fw + rx*st)*speed*dt;
+  var nz = camera.position.z + (fz*fw + rz*st)*speed*dt;
+
+  if (Math.sqrt(nx*nx + nz*nz) < 52) {
+    if (!checkCollision(nx, nz)) {
+      camera.position.x=nx; camera.position.z=nz;
+    } else if (!checkCollision(nx, camera.position.z)) {
+      // Slide along X
+      camera.position.x=nx;
+    } else if (!checkCollision(camera.position.x, nz)) {
+      // Slide along Z
+      camera.position.z=nz;
+    }
+  }
+
+  var h = getH(camera.position.x, camera.position.z);
+  var moving = moveF||moveB||moveL||moveR;
+  var bobSpeed = sprinting ? 0.016 : 0.009;
+  var bobAmt   = sprinting ? 0.07  : 0.035;
+  camera.position.y = Math.max(h+1.7, 1.7) + (moving ? Math.sin(Date.now()*bobSpeed)*bobAmt : 0);
+
+  camera.rotation.order='YXZ';
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+}
+
+// ── Clouds / Birds / Water ────────────────────────────────────────────────────
+function updateClouds(dt) {
+  scene.children.forEach(function(o) {
+    if (o.name==='cloud') { o.position.x+=dt*1.2; if(o.position.x>160) o.position.x=-160; }
+  });
+}
+
+function updateBirds(dt) {
+  var now=Date.now();
+  for (var i=0; i<birdObjects.length; i++) {
+    var b=birdObjects[i];
+    b.userData.angle += b.userData.speed*dt;
+    var a=b.userData.angle, r=b.userData.radius;
+    b.position.x=Math.cos(a)*r; b.position.z=Math.sin(a)*r;
+    b.position.y=b.userData.baseY + Math.sin(a*3)*2;
+    b.rotation.y=-a+Math.PI/2;
+    var flap=Math.sin(now*0.009)*0.55;
+    if (b.children[1]) b.children[1].rotation.z= 0.4+flap;
+    if (b.children[2]) b.children[2].rotation.z=-0.4-flap;
+  }
+}
+
+function updateWater(dt) {
+  waveTime+=dt;
+  if (!waterMesh) return;
+  var pos=waterMesh.geometry.attributes.position;
+  for (var i=0; i<pos.count; i++) {
+    var x=pos.getX(i), z=pos.getZ(i);
+    pos.setY(i, Math.sin(x*0.1+waveTime)*0.14 + Math.cos(z*0.08+waveTime*0.7)*0.09);
+  }
+  pos.needsUpdate=true;
+}
+
+// ── HUD ───────────────────────────────────────────────────────────────────────
+function updateHUD() {
+  fpsFrames++;
+  var now=Date.now();
+  if (now-fpsLast>600) {
+    fpsVal=Math.round(fpsFrames/((now-fpsLast)/1000));
+    fpsFrames=0; fpsLast=now;
+  }
+  document.getElementById('fps-display').textContent='FPS: '+fpsVal;
+  document.getElementById('pos-display').textContent=
+    'POS: '+Math.round(camera.position.x)+', '+Math.round(camera.position.z);
+
+  var px=camera.position.x, pz=camera.position.z;
+  var h=getH(px,pz);
+  var biome='Beach';
+  if (h>4) biome='Highlands';
+  else if (h>1.5) biome='Jungle';
+  else if (h>0.3) biome='Grassland';
+  if (Math.sqrt(px*px+pz*pz)>44) biome='Shore';
+  if (Math.sqrt(Math.pow(px+22,2)+Math.pow(pz+18,2))<14) biome='Near Volcano';
+  document.getElementById('biome-display').textContent='ZONE: '+biome;
+}
+
+// ── Main loop ─────────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  if (!clock) return;
+  var dt=Math.min(clock.getDelta(), 0.05);
+  updatePlayer(dt);
+  updateDayNight(dt);
+  updateClouds(dt);
+  updateBirds(dt);
+  updateWater(dt);
+  updateHUD();
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
