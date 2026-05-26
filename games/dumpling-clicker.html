@@ -232,13 +232,14 @@
 
     <div class="section-title" style="margin-top:6px;">save / load</div>
     <div class="save-card">
-      <button class="save-btn get" onclick="getSaveCode()">💾 Get Save Code</button>
+      <p style="font-size:9px;color:#8b5e3c;margin:0;line-height:1.6;">💾 Auto-saves when you leave this page. Use save codes to move to another device or as a backup.</p>
+      <button class="save-btn get" onclick="getSaveCode()">💾 Export Save Code</button>
       <textarea id="saveCodeBox" rows="3" readonly onclick="this.select()" title="Click to select, Ctrl+C to copy"></textarea>
       <button class="save-btn copy" id="copyBtn" onclick="copySaveCode()" style="display:none;">📋 Copy Code</button>
-      <p style="font-size:9px;color:#8b5e3c;font-weight:700;margin:0;">Paste your code below to restore:</p>
+      <p style="font-size:9px;color:#8b5e3c;font-weight:700;margin:0;">Paste a save code below to import:</p>
       <textarea id="loadCodeBox" rows="3" onclick="this.focus()" placeholder="Paste code here then click Load…"
         onkeydown="if(event.key==='Enter'){event.preventDefault();loadSaveCode();}"></textarea>
-      <button class="save-btn load" onclick="loadSaveCode()">📂 Load Save</button>
+      <button class="save-btn load" onclick="loadSaveCode()">📂 Import Save Code</button>
       <div id="saveStatus"></div>
     </div>
   </div>
@@ -2177,6 +2178,7 @@ function loadSaveCode() {
     recalcPowers();
     renderUpgrades();
     document.getElementById('loadCodeBox').value = '';
+    autoSave();
     setSaveStatus('✅ Loaded! Welcome back 🥟', '#27ae60');
 
     const d = p.ts ? new Date(p.ts) : null;
@@ -2192,8 +2194,49 @@ function setSaveStatus(msg, col) {
   setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 4000);
 }
 
+// ─── LOCAL STORAGE AUTO-SAVE ───
+function autoSave() {
+  try {
+    const payload = JSON.stringify(buildSavePayload());
+    const check   = simpleHash(payload + SAVE_SALT);
+    localStorage.setItem('dumpling-save', btoa(payload + '|' + check));
+  } catch(e) {}
+}
+
+function autoLoad() {
+  try {
+    const raw = localStorage.getItem('dumpling-save');
+    if (!raw) return;
+    const decoded  = atob(raw);
+    const lastPipe = decoded.lastIndexOf('|');
+    if (lastPipe === -1) return;
+    const payloadStr = decoded.substring(0, lastPipe);
+    const check      = decoded.substring(lastPipe + 1);
+    if (simpleHash(payloadStr + SAVE_SALT) !== check) return;
+    const p = JSON.parse(payloadStr);
+    if (p.v !== SAVE_VERSION) return;
+    dumplings   = p.d  || 0;
+    totalEarned = p.te || 0;
+    rebirthTier = p.rb || 0;
+    rebirthMult = p.rm || 1.0;
+    costMult    = p.cm || 1.0;
+    mgWinsTotal = p.mw || 0;
+    if (Array.isArray(p.ow)) {
+      for (let i = 0; i < UPGRADES.length; i++) owned[i] = p.ow[i] || 0;
+    }
+    document.body.className = rebirthTier > 0 ? 'rebirth-' + rebirthTier : '';
+    recalcPowers();
+    renderUpgrades();
+  } catch(e) {}
+}
+
+window.addEventListener('beforeunload', autoSave);
+setInterval(autoSave, 30000);
+
 // ─── INIT ───
-recalcPowers(); renderUpgrades();
+recalcPowers();
+autoLoad();
+renderUpgrades();
 requestAnimationFrame(gameLoop);
 setInterval(renderUpgrades, 500);
 </script>

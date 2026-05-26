@@ -9,6 +9,18 @@
 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 #renderCanvas { width: 100%; height: 100%; touch-action: none; display: block; }
 
+#loading-screen {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #000; display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.4s ease;
+}
+#loading-text {
+  font-family: 'Press Start 2P', monospace; font-size: 18px;
+  color: #52b788; letter-spacing: 4px;
+  animation: blink-load 0.8s step-end infinite;
+}
+@keyframes blink-load { 50% { opacity: 0.2; } }
+
 #back-home {
   position: fixed; top: 12px; left: 12px; z-index: 9999;
   background: rgba(0,0,0,0.85); color: #00f5ff;
@@ -89,12 +101,41 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 }
 .seed-buy:hover { background: #74c69d; }
 .seed-buy:disabled { background: #2d5a3d; color: #666; cursor: not-allowed; }
+.seed-rarity { font-size: 9px; font-weight: bold; text-align: center; letter-spacing: 1px; }
+.seed-stock { font-size: 10px; color: #74c69d; text-align: center; }
+.seed-card.out-of-stock { opacity: 0.4; pointer-events: none; }
+#restock-timer {
+  text-align: center; font-size: 11px;
+  color: #ffe600; padding: 4px 0 10px; letter-spacing: 1px;
+}
 #shop-close {
   width: 100%; padding: 10px; background: transparent; border: 1px solid #52b788;
   color: #52b788; font-family: monospace; font-size: 13px; border-radius: 6px;
   cursor: pointer; letter-spacing: 2px;
 }
 #shop-close:hover { background: #52b788; color: #000; }
+#shop-reset {
+  width: 100%; padding: 8px; margin-top: 6px; background: transparent;
+  border: 1px solid #663333; color: #cc4444; font-family: monospace;
+  font-size: 11px; border-radius: 6px; cursor: pointer; letter-spacing: 2px;
+}
+#shop-reset:hover { background: #cc4444; color: #fff; }
+#save-section { margin: 12px 0 6px; display: flex; flex-direction: column; gap: 6px; }
+#save-info { font-size: 9px; color: #778; line-height: 1.6; text-align: center; padding: 0 4px; }
+#save-export-btn, #save-import-btn {
+  width: 100%; padding: 8px; background: transparent; border: 1px solid #2d5a3d;
+  color: #74c69d; font-family: monospace; font-size: 11px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 1px;
+}
+#save-export-btn:hover { background: #1a3328; }
+#save-import-btn:hover { background: #1a3328; }
+#save-code-box, #load-code-box {
+  width: 100%; font-size: 9px; font-family: monospace; background: #0a1a0f;
+  border: 1px solid #2d5a3d; border-radius: 6px; padding: 6px;
+  color: #74c69d; resize: none;
+}
+#load-code-box { border-color: #3a6b4a; }
+#save-status { font-size: 10px; text-align: center; min-height: 14px; color: #74c69d; }
 
 /* ── shop tabs ── */
 #shop-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -244,8 +285,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
 <canvas id="renderCanvas"></canvas>
 
+<div id="loading-screen">
+  <div id="loading-text">LOADING...</div>
+</div>
+
 <div id="hud">
-  <div id="hud-coins">💰 30</div>
+  <div id="hud-coins">💰 10</div>
   <div id="hud-harvest"></div>
   <div id="hud-smoothies"></div>
   <div id="hud-biome">BIOME: BEACH</div>
@@ -314,6 +359,17 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div id="shop-grid"></div>
     <div id="smoothie-list" style="display:none"></div>
     <button id="shop-close" onclick="closeShop()">BACK TO ISLAND [TAB]</button>
+
+    <div id="save-section">
+      <div id="save-info">💾 Auto-saves when you leave. Use save codes to move your progress to another device or as a backup.</div>
+      <button id="save-export-btn" onclick="exportSave()">📋 EXPORT SAVE CODE</button>
+      <textarea id="save-code-box" rows="2" readonly onclick="this.select()" placeholder="Your save code will appear here..."></textarea>
+      <textarea id="load-code-box" rows="2" placeholder="Paste a save code here to import..."></textarea>
+      <button id="save-import-btn" onclick="importSave()">📂 IMPORT SAVE CODE</button>
+      <div id="save-status"></div>
+    </div>
+
+    <button id="shop-reset" onclick="resetGame()">⚠ RESET SAVE</button>
   </div>
 </div>
 
@@ -324,18 +380,26 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
 // ── game data ──
 const SEEDS = [
-  { id:'strawberry',   name:'Strawberry',   biome:'GRASSLAND', seedCost:20,  baseValue:5,  icon:'🍓', color:'#ff4466', flavor:{sweet:7,sour:3,tropical:2,creamy:1,refreshing:5} },
-  { id:'coconut',      name:'Coconut',      biome:'BEACH',     seedCost:20,  baseValue:6,  icon:'🥥', color:'#c8a96e', flavor:{sweet:4,sour:0,tropical:9,creamy:8,refreshing:3} },
-  { id:'seaweed',      name:'Seaweed',      biome:'OCEAN',     seedCost:15,  baseValue:3,  icon:'🌿', color:'#2d8a4e', flavor:{sweet:0,sour:2,tropical:5,creamy:2,refreshing:6} },
-  { id:'watermelon',   name:'Watermelon',   biome:'GRASSLAND', seedCost:35,  baseValue:6,  icon:'🍉', color:'#ff6b6b', flavor:{sweet:8,sour:1,tropical:3,creamy:1,refreshing:9} },
-  { id:'pineapple',    name:'Pineapple',    biome:'BEACH',     seedCost:35,  baseValue:8,  icon:'🍍', color:'#ffd700', flavor:{sweet:6,sour:7,tropical:9,creamy:1,refreshing:7} },
-  { id:'raspberry',    name:'Raspberry',    biome:'JUNGLE',    seedCost:55,  baseValue:8,  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
-  { id:'mango',        name:'Mango',        biome:'JUNGLE',    seedCost:75,  baseValue:12, icon:'🥭', color:'#ff9500', flavor:{sweet:9,sour:3,tropical:9,creamy:3,refreshing:6} },
-  { id:'seagrape',     name:'Sea Grape',    biome:'OCEAN',     seedCost:90,  baseValue:13, icon:'🍇', color:'#4a9e6b', flavor:{sweet:3,sour:2,tropical:8,creamy:4,refreshing:7} },
-  { id:'passionfruit', name:'Passion Fruit',biome:'JUNGLE',    seedCost:120, baseValue:14, icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
-  { id:'lemon',        name:'Lemon',        biome:'HIGHLANDS', seedCost:160, baseValue:10, icon:'🍋', color:'#f7dc6f', flavor:{sweet:2,sour:10,tropical:4,creamy:0,refreshing:9} },
-  { id:'blueberry',    name:'Blueberry',    biome:'HIGHLANDS', seedCost:220, baseValue:12, icon:'🫐', color:'#4169e1', flavor:{sweet:6,sour:4,tropical:2,creamy:1,refreshing:4} },
+  { id:'strawberry',   name:'Strawberry',   biome:'GRASSLAND', seedCost:10,  baseValue:2,  rarity:'common',    icon:'🍓', color:'#ff4466', flavor:{sweet:7,sour:3,tropical:2,creamy:1,refreshing:5} },
+  { id:'coconut',      name:'Coconut',      biome:'BEACH',     seedCost:35,  baseValue:6,  rarity:'common',    icon:'🥥', color:'#c8a96e', flavor:{sweet:4,sour:0,tropical:9,creamy:8,refreshing:3} },
+  { id:'seaweed',      name:'Seaweed',      biome:'OCEAN',     seedCost:30,  baseValue:3,  rarity:'common',    icon:'🌿', color:'#2d8a4e', flavor:{sweet:0,sour:2,tropical:5,creamy:2,refreshing:6} },
+  { id:'watermelon',   name:'Watermelon',   biome:'GRASSLAND', seedCost:40,  baseValue:8,  rarity:'uncommon',  icon:'🍉', color:'#ff6b6b', flavor:{sweet:8,sour:1,tropical:3,creamy:1,refreshing:9} },
+  { id:'pineapple',    name:'Pineapple',    biome:'BEACH',     seedCost:35,  baseValue:8,  rarity:'uncommon',  icon:'🍍', color:'#ffd700', flavor:{sweet:6,sour:7,tropical:9,creamy:1,refreshing:7} },
+  { id:'raspberry',    name:'Raspberry',    biome:'JUNGLE',    seedCost:55,  baseValue:8,  rarity:'uncommon',  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
+  { id:'mango',        name:'Mango',        biome:'JUNGLE',    seedCost:75,  baseValue:12, rarity:'rare',      icon:'🥭', color:'#ff9500', flavor:{sweet:9,sour:3,tropical:9,creamy:3,refreshing:6} },
+  { id:'seagrape',     name:'Sea Grape',    biome:'OCEAN',     seedCost:90,  baseValue:13, rarity:'rare',      icon:'🍇', color:'#4a9e6b', flavor:{sweet:3,sour:2,tropical:8,creamy:4,refreshing:7} },
+  { id:'passionfruit', name:'Passion Fruit',biome:'JUNGLE',    seedCost:120, baseValue:14, rarity:'epic',      icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
+  { id:'lemon',        name:'Lemon',        biome:'HIGHLANDS', seedCost:160, baseValue:10, rarity:'epic',      icon:'🍋', color:'#f7dc6f', flavor:{sweet:2,sour:10,tropical:4,creamy:0,refreshing:9} },
+  { id:'blueberry',    name:'Blueberry',    biome:'HIGHLANDS', seedCost:220, baseValue:12, rarity:'legendary', icon:'🫐', color:'#4169e1', flavor:{sweet:6,sour:4,tropical:2,creamy:1,refreshing:4} },
 ];
+
+const RARITY = {
+  common:    { weight: 10, stockMin: 4, stockMax: 5, color: '#aaaaaa', label: 'COMMON' },
+  uncommon:  { weight:  5, stockMin: 3, stockMax: 4, color: '#55cc55', label: 'UNCOMMON' },
+  rare:      { weight:  2, stockMin: 2, stockMax: 3, color: '#5599ff', label: 'RARE' },
+  epic:      { weight:  1, stockMin: 1, stockMax: 2, color: '#cc77ff', label: 'EPIC' },
+  legendary: { weight:0.3, stockMin: 1, stockMax: 1, color: '#ffaa00', label: 'LEGENDARY' },
+};
 
 // ── smoothie combos ──
 const COMBOS = [
@@ -373,10 +437,41 @@ function scoreSmoothie(smoothie) {
 }
 
 // ── economy ──
-let coins = 30;
+let coins = 10;
 const inventory  = {}; // { seedId: count }
 const harvestBag = {}; // { seedId: count }
 const smoothies  = []; // [{ fruits:[seedId,...] }]
+
+// ── shop restock ──
+const RESTOCK_INTERVAL = 120000; // 2 minutes
+let shopStock = {};
+let lastRestockTime = 0;
+let shopTimerInterval = null;
+
+function restockShop() {
+  lastRestockTime = Date.now();
+  const newStock = {};
+  newStock['strawberry'] = Math.floor(Math.random() * 2) + 1;
+  const pool = SEEDS.filter(s => s.id !== 'strawberry').slice();
+  const slots = Math.floor(Math.random() * 2) + 3;
+  for (let i = 0; i < slots && pool.length > 0; i++) {
+    const totalWeight = pool.reduce((sum, s) => sum + RARITY[s.rarity].weight, 0);
+    let r = Math.random() * totalWeight;
+    for (let j = 0; j < pool.length; j++) {
+      r -= RARITY[pool[j].rarity].weight;
+      if (r <= 0) {
+        const cfg = RARITY[pool[j].rarity];
+        newStock[pool[j].id] = Math.floor(Math.random() * (cfg.stockMax - cfg.stockMin + 1)) + cfg.stockMin;
+        pool.splice(j, 1);
+        break;
+      }
+    }
+  }
+  shopStock = newStock;
+  if (shopOpen) buildShop();
+}
+
+setInterval(restockShop, RESTOCK_INTERVAL);
 
 // ── blender / destroy state ──
 let blendOpen = false;
@@ -446,26 +541,47 @@ function sellSmoothie(idx) {
   smoothies.splice(idx, 1);
   addCoins(sellPrice);
   playChaChingSound();
+  saveGame();
   updateSmoothieHUD();
   buildSmoothieList();
+}
+
+function restockTimerText() {
+  const ms = RESTOCK_INTERVAL - (Date.now() - lastRestockTime);
+  if (ms <= 0) return 'RESTOCKING...';
+  const s = Math.ceil(ms / 1000);
+  return `RESTOCK IN ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 
 function buildShop() {
   const grid = document.getElementById('shop-grid');
   grid.innerHTML = '';
+
+  const oldTimer = document.getElementById('restock-timer');
+  if (oldTimer) oldTimer.remove();
+  const timerEl = document.createElement('div');
+  timerEl.id = 'restock-timer';
+  timerEl.textContent = restockTimerText();
+  grid.before(timerEl);
+
   SEEDS.forEach(s => {
+    const stock = shopStock[s.id] || 0;
     const owned = inventory[s.id] || 0;
+    const outOfStock = stock === 0;
     const canAfford = coins >= s.seedCost;
+    const cfg = RARITY[s.rarity];
     const card = document.createElement('div');
-    card.className = 'seed-card';
+    card.className = 'seed-card' + (outOfStock ? ' out-of-stock' : '');
     card.id = 'card-' + s.id;
     card.innerHTML = `
+      <div class="seed-rarity" style="color:${cfg.color}">${cfg.label}</div>
       <div class="seed-icon">${s.icon}</div>
       <div class="seed-name">${s.name}</div>
       <div class="seed-biome">${s.biome}</div>
       <div class="seed-cost">💰 ${s.seedCost}</div>
+      <div class="seed-stock" id="stock-${s.id}">${outOfStock ? 'OUT OF STOCK' : stock + ' in stock'}</div>
       <div class="seed-owned" id="owned-${s.id}">owned: ${owned}</div>
-      <button class="seed-buy" id="buy-${s.id}" ${canAfford ? '' : 'disabled'}
+      <button class="seed-buy" id="buy-${s.id}" ${canAfford && !outOfStock ? '' : 'disabled'}
         onclick="buySeed('${s.id}')">BUY</button>
     `;
     grid.appendChild(card);
@@ -476,18 +592,25 @@ function refreshShopCards() {
   SEEDS.forEach(s => {
     const ownedEl = document.getElementById('owned-' + s.id);
     const buyEl   = document.getElementById('buy-'   + s.id);
+    const stockEl = document.getElementById('stock-' + s.id);
+    const cardEl  = document.getElementById('card-'  + s.id);
     if (!ownedEl) return;
+    const stock = shopStock[s.id] || 0;
     ownedEl.textContent = 'owned: ' + (inventory[s.id] || 0);
-    buyEl.disabled = coins < s.seedCost;
+    if (stockEl) stockEl.textContent = stock === 0 ? 'OUT OF STOCK' : stock + ' in stock';
+    if (cardEl) cardEl.className = 'seed-card' + (stock === 0 ? ' out-of-stock' : '');
+    buyEl.disabled = coins < s.seedCost || stock === 0;
   });
 }
 
 function buySeed(id) {
   const s = SEEDS.find(x => x.id === id);
-  if (!s || coins < s.seedCost) return;
+  if (!s || coins < s.seedCost || !(shopStock[id] > 0)) return;
   spendCoins(s.seedCost);
   inventory[id] = (inventory[id] || 0) + 1;
+  shopStock[id]--;
   refreshShopCards();
+  saveGame();
 }
 
 function openShop() {
@@ -497,10 +620,16 @@ function openShop() {
   document.getElementById('shop-overlay').style.display = 'flex';
   openTab(shopTab);
   if (audioCtx) audioCtx.resume();
+  shopTimerInterval = setInterval(() => {
+    const el = document.getElementById('restock-timer');
+    if (el) el.textContent = restockTimerText();
+  }, 1000);
 }
 
 function closeShop() {
   shopOpen = false;
+  clearInterval(shopTimerInterval);
+  shopTimerInterval = null;
   document.getElementById('shop-overlay').style.display = 'none';
   tryLock();
 }
@@ -884,6 +1013,7 @@ function doPlant(seedId, x, y, z) {
   refreshShopCards();
   const mesh = buildStageMesh(seed, x, y, z, 'seed');
   plants.push({ seedId, mesh, x, z, stage: 'seed', plantedAt: Date.now() });
+  saveGame();
   closePlantSelect();
 }
 
@@ -923,6 +1053,7 @@ function doHarvest(plant) {
   updateHarvestHUD();
   plant.stage = 'regrowing';
   plant.plantedAt = Date.now();
+  saveGame();
 }
 
 function destroyPlant(plant) {
@@ -933,6 +1064,7 @@ function destroyPlant(plant) {
   hoveredPlant = null;
   destroyTarget = null;
   destroyConfirmEl.style.display = 'none';
+  saveGame();
 }
 
 function openBlend() {
@@ -1007,6 +1139,7 @@ function doBlend() {
   smoothies.push({ fruits });
   blendSelected = [null, null, null, null, null];
   playBlendSound();
+  saveGame();
   updateSmoothieHUD();
   updateHarvestHUD();
   buildBlendUI();
@@ -1760,6 +1893,93 @@ scene.registerBeforeRender(() => {
   compassCtx.textAlign = 'center';
   compassCtx.fillText('N', 30, 10);
 });
+
+// ── save system ──
+function saveGame() {
+  const state = {
+    coins,
+    inventory: {...inventory},
+    harvestBag: {...harvestBag},
+    smoothies: smoothies.map(s => ({...s})),
+    shopStock: {...shopStock},
+    lastRestockTime,
+    plants: plants.map(p => ({ seedId: p.seedId, x: p.x, z: p.z, stage: p.stage, plantedAt: p.plantedAt })),
+  };
+  localStorage.setItem('polyisland-save', JSON.stringify(state));
+}
+
+function loadGame() {
+  const raw = localStorage.getItem('polyisland-save');
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    coins = state.coins ?? 10;
+    Object.assign(inventory,  state.inventory  || {});
+    Object.assign(harvestBag, state.harvestBag || {});
+    smoothies.push(...(state.smoothies || []));
+    Object.assign(shopStock, state.shopStock || {});
+    if (state.lastRestockTime) lastRestockTime = state.lastRestockTime;
+    for (const p of (state.plants || [])) {
+      const seed = SEEDS.find(s => s.id === p.seedId);
+      if (!seed) continue;
+      const y = getH(p.x, p.z);
+      const mesh = buildStageMesh(seed, p.x, y, p.z, p.stage);
+      plants.push({ seedId: p.seedId, mesh, x: p.x, z: p.z, stage: p.stage, plantedAt: p.plantedAt });
+    }
+    document.getElementById('hud-coins').textContent = '💰 ' + coins;
+    updateHarvestHUD();
+  } catch(e) { console.warn('Save load failed', e); }
+}
+
+function resetGame() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  localStorage.removeItem('polyisland-save');
+  location.reload();
+}
+
+function saveHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+function exportSave() {
+  const raw = localStorage.getItem('polyisland-save') || JSON.stringify({ coins, inventory: {...inventory}, harvestBag: {...harvestBag}, smoothies: smoothies.map(s=>({...s})), shopStock: {...shopStock}, lastRestockTime, plants: plants.map(p=>({ seedId:p.seedId, x:p.x, z:p.z, stage:p.stage, plantedAt:p.plantedAt })) });
+  const code = btoa(raw + '|' + saveHash(raw));
+  document.getElementById('save-code-box').value = code;
+  document.getElementById('save-status').textContent = '✅ Copy the code and keep it safe!';
+  document.getElementById('save-status').style.color = '#52b788';
+}
+
+function importSave() {
+  const raw = document.getElementById('load-code-box').value.trim();
+  if (!raw) { setSaveStatus('⚠ Paste a save code first.', '#e67e22'); return; }
+  try {
+    const decoded = atob(raw);
+    const pipe = decoded.lastIndexOf('|');
+    const payload = decoded.substring(0, pipe);
+    const check = decoded.substring(pipe + 1);
+    if (saveHash(payload) !== check) { setSaveStatus('❌ Invalid or modified code.', '#cc4444'); return; }
+    localStorage.setItem('polyisland-save', payload);
+    setSaveStatus('✅ Imported! Reloading...', '#52b788');
+    setTimeout(() => location.reload(), 900);
+  } catch(e) { setSaveStatus('❌ Could not read code.', '#cc4444'); }
+}
+
+function setSaveStatus(msg, color) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+window.addEventListener('beforeunload', saveGame);
+
+restockShop();
+loadGame();
+
+const loadingScreen = document.getElementById('loading-screen');
+loadingScreen.style.opacity = '0';
+setTimeout(() => loadingScreen.style.display = 'none', 450);
 
 engine.runRenderLoop(() => scene.render());
 window.addEventListener('resize', () => engine.resize());

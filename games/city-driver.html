@@ -135,8 +135,8 @@ canvas{display:block;}
   </div>
   <div id="signin-section">
     <div class="si-title">💾 SAVE &amp; LOAD PROGRESS</div>
-    <p style="color:#888;font-size:.74rem;margin:0 0 10px;">Click GET CODE to save your progress as a code. Paste it back anytime to restore.</p>
-    <button onclick="exportSave()" style="width:100%;padding:9px;background:#27ae60;color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:.88rem;margin-bottom:8px;">GET SAVE CODE</button>
+    <p style="color:#888;font-size:.74rem;margin:0 0 10px;">Auto-saves when you leave this page. Use save codes to move to another device or as a backup.</p>
+    <button onclick="exportSave()" style="width:100%;padding:9px;background:#27ae60;color:#000;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:.88rem;margin-bottom:8px;">📋 EXPORT SAVE CODE</button>
     <div id="save-code-row" style="display:none;margin-bottom:8px;">
       <textarea id="save-code-box" rows="3" readonly onclick="this.focus();this.select();"
         style="width:100%;background:#111;color:#f1c40f;border:1px solid #444;border-radius:6px;
@@ -153,7 +153,7 @@ canvas{display:block;}
              font-size:.7rem;padding:6px;resize:none;font-family:monospace;margin-bottom:4px;
              cursor:text;"></textarea>
     <button onclick="importSave()" style="width:100%;padding:6px;background:#3498db;color:#000;
-      border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.78rem;">📂 LOAD FROM CODE</button>
+      border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.78rem;">📂 IMPORT SAVE CODE</button>
     <div id="signin-status" style="margin-top:6px;"></div>
   </div>
   <button id="settings-close" onclick="closeSettings()">DONE</button>
@@ -547,6 +547,7 @@ function importSave(){
   setControl(controlMode);
   document.getElementById('bestScore').innerText=bestScore;
   document.getElementById('load-code-box').value='';
+  cdAutoSave();
   setSS('✅ Loaded! Best: '+bestScore+'s — '+SKINS[selectedSkin].name,'#27ae60');
 }
 
@@ -825,7 +826,7 @@ function update(){
   if(!gameActive)return;
   score=effScore();
   document.getElementById('currentScore').innerText=score;
-  if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;if(currentUser)saveProgress().catch(()=>{});}
+  if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;cdAutoSave();}
 
   const ns=Math.min(5,Math.max(1,1+Math.floor(score/100)));
   if(ns!==wantedStars){wantedStars=ns;updateStars();}
@@ -957,12 +958,38 @@ function drawMM(){
   mmX.fillStyle='#f1c40f';mmX.beginPath();mmX.arc(car.x*sx,car.y*sy,4,0,Math.PI*2);mmX.fill();
 }
 
+// ─── Local Storage Auto-Save ─────────────────────────
+function cdAutoSave(){
+  try{
+    const payload=makeSaveCode();
+    if(payload)localStorage.setItem('citydriver-save',payload);
+  }catch(e){}
+}
+
+function cdAutoLoad(){
+  try{
+    const raw=localStorage.getItem('citydriver-save');
+    if(!raw)return;
+    const data=parseSaveCode(raw);
+    if(!data)return;
+    bestScore=data.bestScore||0;
+    selectedSkin=Math.max(0,Math.min(SKINS.length-1,data.selectedSkin||0));
+    controlMode=data.controlMode||'wasd';
+    car.maxSpeed=SKINS[selectedSkin].spd;
+    setControl(controlMode);
+    document.getElementById('bestScore').innerText=bestScore;
+  }catch(e){}
+}
+
+window.addEventListener('beforeunload',cdAutoSave);
+
 // ─── Loop ────────────────────────────────────────────
 function loop(){animFrame=requestAnimationFrame(loop);update();draw();drawMM();}
 
 // Start render loop immediately so canvas isn't black during bake
 loop();
-// Then bake grid async — shows start screen when done
+// Load save then bake grid async
+cdAutoLoad();
 bakeAsync();
 </script>
 </body>
