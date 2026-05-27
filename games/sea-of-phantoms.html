@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Sea of Phantoms</title>
 <link href="https://fonts.googleapis.com/css2?family=Gentium+Basic:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
@@ -199,6 +199,11 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
   border-radius:6px;color:rgba(180,210,255,0.8);
 }
 #sop-status{font-size:11px;text-align:center;min-height:14px;color:#2ecc71;font-family:'Gentium Basic',Georgia,serif;}
+#sop-dpad{position:fixed;bottom:50px;left:16px;
+  display:none;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(3,60px);gap:5px;z-index:5;}
+.sop-btn{width:60px;height:60px;background:rgba(0,0,0,0.65);border:2px solid rgba(241,196,15,0.4);
+  border-radius:10px;color:#f1c40f;font-size:24px;display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;touch-action:none;}
 </style>
 </head>
 <body>
@@ -247,6 +252,11 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
     <canvas id="c"></canvas>
     <div id="wb"></div>
     <div id="dmgfl"></div>
+    <div id="sop-dpad">
+      <div></div><div class="sop-btn" id="sop-up">↑</div><div></div>
+      <div class="sop-btn" id="sop-left">←</div><div></div><div class="sop-btn" id="sop-right">→</div>
+      <div></div><div class="sop-btn" id="sop-down">↓</div><div></div>
+    </div>
 
     <div id="ov" class="modal">
       <div class="modal-box">
@@ -1184,6 +1194,32 @@ document.addEventListener('keydown',e=>{
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase()))e.preventDefault();
 });
 document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+const isMobile=navigator.maxTouchPoints>0&&window.matchMedia('(pointer: coarse)').matches;
+if(isMobile){
+  document.getElementById('sop-dpad').style.display='grid';
+  const sopMap={'sop-up':'arrowup','sop-down':'arrowdown','sop-left':'arrowleft','sop-right':'arrowright'};
+  Object.entries(sopMap).forEach(([id,k])=>{
+    const el=document.getElementById(id);
+    el.addEventListener('touchstart',e=>{e.preventDefault();if(keys)keys[k]=true;},{passive:false});
+    el.addEventListener('touchend',  e=>{e.preventDefault();if(keys)keys[k]=false;},{passive:false});
+    el.addEventListener('touchcancel',()=>{if(keys)keys[k]=false;});
+  });
+}
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(!mouse)return;
+  const t=e.touches[0],r=canvas.getBoundingClientRect(),sx=W/r.width,sy=H/r.height;
+  mouse.x=(t.clientX-r.left)*sx;mouse.y=(t.clientY-r.top)*sy;
+  if(gs==='playing'){mouse.wx=(mouse.x-W/2)/ZOOM+camX;mouse.wy=(mouse.y-H/2)/ZOOM+camY;fire();}
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(!mouse)return;
+  const t=e.touches[0],r=canvas.getBoundingClientRect(),sx=W/r.width,sy=H/r.height;
+  mouse.x=(t.clientX-r.left)*sx;mouse.y=(t.clientY-r.top)*sy;
+  if(gs==='playing'){mouse.wx=(mouse.x-W/2)/ZOOM+camX;mouse.wy=(mouse.y-H/2)/ZOOM+camY;}
+},{passive:false});
 // ─── Save System ─────────────────────────────────────
 const SOP_SALT='sop_k7rNx2p';
 function sopHash(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return(h>>>0).toString(36);}

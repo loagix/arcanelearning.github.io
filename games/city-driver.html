@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>City Driver: Police Escape</title>
 <style>
 *{box-sizing:border-box;}
@@ -94,6 +94,11 @@ canvas{display:block;}
 #loading-screen{display:block;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   background:rgba(0,0,0,0.95);color:white;padding:40px 60px;text-align:center;
   border-radius:20px;border:2px solid #f1c40f;z-index:300;min-width:300px;}
+#touch-dpad{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  display:none;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;z-index:100;}
+.tc-btn{width:64px;height:64px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.4);
+  border-radius:12px;color:white;font-size:26px;display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;touch-action:none;}
 </style>
 </head>
 <body>
@@ -198,6 +203,11 @@ canvas{display:block;}
 
 <canvas id="gameCanvas"></canvas>
 <canvas id="minimap" width="180" height="135"></canvas>
+<div id="touch-dpad">
+  <div></div><div class="tc-btn" id="tc-up">↑</div><div></div>
+  <div class="tc-btn" id="tc-left">←</div><div></div><div class="tc-btn" id="tc-right">→</div>
+  <div></div><div class="tc-btn" id="tc-down">↓</div><div></div>
+</div>
 
 <script>
 // ─── Canvas ─────────────────────────────────────────
@@ -471,6 +481,23 @@ window.addEventListener('keyup',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
   keys[e.code]=false;
 });
+
+const isMobile=navigator.maxTouchPoints>0&&window.matchMedia('(pointer: coarse)').matches;
+if(isMobile){
+  document.getElementById('touch-dpad').style.display='grid';
+  const tcMap={
+    'tc-up':   ['ArrowUp','KeyW'],
+    'tc-down': ['ArrowDown','KeyS'],
+    'tc-left': ['ArrowLeft','KeyA'],
+    'tc-right':['ArrowRight','KeyD']
+  };
+  Object.entries(tcMap).forEach(([id,kl])=>{
+    const el=document.getElementById(id);
+    el.addEventListener('touchstart',e=>{e.preventDefault();kl.forEach(k=>keys[k]=true);},{passive:false});
+    el.addEventListener('touchend',  e=>{e.preventDefault();kl.forEach(k=>keys[k]=false);},{passive:false});
+    el.addEventListener('touchcancel',()=>kl.forEach(k=>keys[k]=false));
+  });
+}
 
 // ─── Settings ───────────────────────────────────────
 function setControl(m){

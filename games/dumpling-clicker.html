@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Dumpling Clicker</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap');
@@ -177,6 +177,22 @@
   .frenzy-banner { display: none; background: linear-gradient(90deg,#ff4400,#ff9900,#ff4400); border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 900; color: white; text-align: center; animation: frenzyPulse 0.6s ease-in-out infinite alternate; }
   .frenzy-banner.active { display: block; }
   @keyframes frenzyPulse { from { transform: scale(1); } to { transform: scale(1.04); } }
+
+  @media (max-width: 650px) {
+    .layout { flex-direction: column; }
+    .left-panel { flex: none; width: 100%; }
+    .right-panel { flex: none; width: 100%; }
+  }
+  #mg-touch-controls {
+    display: none; position: absolute; bottom: 8px; left: 8px; right: 8px;
+    pointer-events: none; z-index: 10; align-items: flex-end; justify-content: space-between;
+  }
+  #mg-touch-controls.active { display: flex; }
+  .mg-dpad { display: grid; grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(3, 54px); gap: 4px; pointer-events: auto; }
+  .mg-dpad-btn { width: 54px; height: 54px; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.35); border-radius: 10px; color: white; font-size: 22px; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: none; }
+  .mg-action-btn { width: 70px; height: 70px; background: rgba(192,82,42,0.8); border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center; pointer-events: auto; user-select: none; -webkit-user-select: none; touch-action: none; align-self: center; }
+  .mg-lr-btns { display: flex; gap: 12px; pointer-events: auto; }
+  .mg-lr-btn { width: 80px; height: 64px; background: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.35); border-radius: 10px; color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: none; }
 </style>
 </head>
 <body>
@@ -300,7 +316,7 @@
       <div><div class="mg-title" id="mgTitle">Minigame!</div><div class="mg-reward" id="mgReward">Reward: 🥟 1,000</div></div>
       <div class="mg-timer-display" id="mgTimerDisp">30</div>
     </div>
-    <div class="mg-canvas-wrap"><canvas id="mgCanvas" width="660" height="360"></canvas></div>
+    <div class="mg-canvas-wrap"><canvas id="mgCanvas" width="660" height="360"></canvas><div id="mg-touch-controls"></div></div>
     <div class="mg-instructions" id="mgInstructions"></div>
     <div class="mg-result" id="mgResult">
       <div class="mg-result-icon" id="mgResultIcon">🥟</div>
@@ -312,6 +328,7 @@
 </div>
 
 <script>
+const isMobile = navigator.maxTouchPoints > 0 && window.matchMedia('(pointer: coarse)').matches;
 // ─── UPGRADE DATA ───
 const UPGRADES = [
   { id:0,  name:'Chopstick helper',    emoji:'🥢', desc:'A friend helps you fold faster',          baseCost:10,    basePower:0,  basePassive:0.1,  type:'passive' },
@@ -742,6 +759,7 @@ function endMinigame(won, reward) {
   document.removeEventListener('keydown',mgKeyDown); document.removeEventListener('keyup',mgKeyUp);
   const cv=document.getElementById('mgCanvas');
   cv.onmousedown=null; cv.onmousemove=null; cv.onmouseup=null;
+  hideTouchControls();
   const finalReward = won && reward > 0 ? Math.round(reward * rebirthMult) : 0;
   if (won && finalReward > 0) { dumplings += finalReward; totalEarned += finalReward; }
   if (won) mgWinsTotal++;
@@ -752,6 +770,7 @@ function endMinigame(won, reward) {
   document.getElementById('mgResult').classList.add('visible');
 }
 
+function hideTouchControls() { const c=document.getElementById('mg-touch-controls');c.className='';c.innerHTML=''; }
 function closeMinigame() {
   mgActive=false; mgScheduled=false; mgRunning=false;
   clearInterval(mgTimerInterval); cancelAnimationFrame(mgRAF);
@@ -1156,6 +1175,19 @@ function initHeist() {
   document.addEventListener('keydown',_kd);document.addEventListener('keyup',_ku);
   mgKeyDown=_kd;mgKeyUp=_ku;
 
+  if (isMobile) {
+    const ctrl=document.getElementById('mg-touch-controls');
+    ctrl.innerHTML='<div class="mg-dpad"><div></div><div class="mg-dpad-btn" id="tc-up">↑</div><div></div><div class="mg-dpad-btn" id="tc-left">←</div><div></div><div class="mg-dpad-btn" id="tc-right">→</div><div></div><div class="mg-dpad-btn" id="tc-down">↓</div><div></div></div><div></div>';
+    ctrl.className='active';
+    const tcMap={'tc-up':'ArrowUp','tc-down':'ArrowDown','tc-left':'ArrowLeft','tc-right':'ArrowRight'};
+    Object.entries(tcMap).forEach(([id,key])=>{
+      const el=document.getElementById(id);
+      el.addEventListener('touchstart',e=>{e.preventDefault();keys[key]=true;},{passive:false});
+      el.addEventListener('touchend',  e=>{e.preventDefault();keys[key]=false;},{passive:false});
+      el.addEventListener('touchcancel',()=>{keys[key]=false;});
+    });
+  }
+
   function loop(){
     mgRAF=requestAnimationFrame(loop);
     ctx.clearRect(0,0,CW,CH);tick++;
@@ -1264,6 +1296,23 @@ function initInvasion(){
   _emojiCtx.textAlign='center';
   _emojiCtx.textBaseline='middle';
   _emojiCtx.fillText('🥟',24,24);
+
+  if (isMobile) {
+    const ctrl=document.getElementById('mg-touch-controls');
+    ctrl.innerHTML='<div class="mg-dpad"><div></div><div class="mg-dpad-btn" id="tc-up">↑</div><div></div><div class="mg-dpad-btn" id="tc-left">←</div><div></div><div class="mg-dpad-btn" id="tc-right">→</div><div></div><div class="mg-dpad-btn" id="tc-down">↓</div><div></div></div><div class="mg-action-btn" id="tc-swing">⚔️</div>';
+    ctrl.className='active';
+    const tcMap={'tc-up':'ArrowUp','tc-down':'ArrowDown','tc-left':'ArrowLeft','tc-right':'ArrowRight'};
+    Object.entries(tcMap).forEach(([id,key])=>{
+      const el=document.getElementById(id);
+      el.addEventListener('touchstart',e=>{e.preventDefault();keys[key]=true;},{passive:false});
+      el.addEventListener('touchend',  e=>{e.preventDefault();keys[key]=false;},{passive:false});
+      el.addEventListener('touchcancel',()=>{keys[key]=false;});
+    });
+    document.getElementById('tc-swing').addEventListener('touchstart',e=>{
+      e.preventDefault();
+      if(!player.swinging&&mgRunning){player.swinging=true;player.swingAngle=-1.2;player.swingTimer=0;}
+    },{passive:false});
+  }
 
   function loop(){
     mgRAF=requestAnimationFrame(loop);
@@ -1388,6 +1437,30 @@ function initKnockout() {
     proj.vx=-pullX*0.22;proj.vy=-pullY*0.22;proj.active=true;
     pullX=0;pullY=0;shots--;
   };
+  canvas.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(!mgRunning||launched||shots<=0)return;
+    const t=e.touches[0],rect=canvas.getBoundingClientRect();
+    const mx=(t.clientX-rect.left)*(W/rect.width),my=(t.clientY-rect.top)*(H/rect.height);
+    if(Math.hypot(mx-SLING_X,my-SLING_Y)<44)isDragging=true;
+  },{passive:false});
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(!isDragging)return;
+    const t=e.touches[0],rect=canvas.getBoundingClientRect();
+    const mx=(t.clientX-rect.left)*(W/rect.width),my=(t.clientY-rect.top)*(H/rect.height);
+    const dx=mx-SLING_X,dy=my-SLING_Y,dist=Math.hypot(dx,dy),cl=Math.min(dist,MAX_PULL);
+    pullX=(dx/dist)*cl;pullY=(dy/dist)*cl;
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{
+    e.preventDefault();
+    if(!isDragging)return;isDragging=false;
+    if(Math.hypot(pullX,pullY)<10){pullX=0;pullY=0;return;}
+    launched=true;
+    proj.x=SLING_X+pullX;proj.y=SLING_Y+pullY;
+    proj.vx=-pullX*0.22;proj.vy=-pullY*0.22;proj.active=true;
+    pullX=0;pullY=0;shots--;
+  },{passive:false});
   document.addEventListener('keydown',mgKeyDown=(e)=>e.preventDefault());
   document.addEventListener('keyup',  mgKeyUp  =()=>{});
 
@@ -1885,6 +1958,14 @@ function initDash() {
   document.addEventListener('keydown', _kd);
   document.addEventListener('keyup', _ku);
   mgKeyDown = _kd; mgKeyUp = _ku;
+
+  if (isMobile) {
+    const ctrl=document.getElementById('mg-touch-controls');
+    ctrl.innerHTML='<div class="mg-lr-btns"><div class="mg-lr-btn" id="tc-dash-left">←</div><div class="mg-lr-btn" id="tc-dash-right">→</div></div><div></div>';
+    ctrl.className='active';
+    document.getElementById('tc-dash-left').addEventListener('touchstart',e=>{e.preventDefault();_kd({key:'ArrowLeft',preventDefault:()=>{}});},{passive:false});
+    document.getElementById('tc-dash-right').addEventListener('touchstart',e=>{e.preventDefault();_kd({key:'ArrowRight',preventDefault:()=>{}});},{passive:false});
+  }
 
   let frameCount = 0;
 

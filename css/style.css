@@ -183,3 +183,23 @@ footer {
   color: var(--dim);
   letter-spacing: 2px;
 }
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  header {
+    padding: 30px 16px 20px;
+  }
+
+  .divider {
+    margin-bottom: 30px;
+  }
+
+  .game-grid {
+    padding: 0 16px 40px;
+    gap: 16px;
+  }
+
+  .game-card {
+    width: 100%;
+  }
+}
