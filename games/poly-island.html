@@ -114,12 +114,34 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   cursor: pointer; letter-spacing: 2px;
 }
 #shop-close:hover { background: #52b788; color: #000; }
-#shop-reset {
-  width: 100%; padding: 8px; margin-top: 6px; background: transparent;
-  border: 1px solid #663333; color: #cc4444; font-family: monospace;
+#shop-factory-reset {
+  width: 100%; padding: 8px; margin-top: 4px; background: transparent;
+  border: 1px solid #440000; color: #ff2222; font-family: monospace;
   font-size: 11px; border-radius: 6px; cursor: pointer; letter-spacing: 2px;
 }
-#shop-reset:hover { background: #cc4444; color: #fff; }
+#shop-factory-reset:hover { background: #ff2222; color: #fff; }
+#admin-section { margin-top: 16px; border-top: 1px solid #1a3328; padding-top: 12px; }
+#admin-label { font-size: 10px; color: #445; letter-spacing: 2px; margin-bottom: 8px; }
+#admin-input {
+  width: 100%; padding: 7px; background: #0a1a0f; border: 1px solid #1a3328;
+  border-radius: 6px; color: #74c69d; font-family: monospace; font-size: 11px;
+  margin-bottom: 6px; box-sizing: border-box;
+}
+#admin-unlock-btn {
+  width: 100%; padding: 8px; background: transparent; border: 1px solid #2d5a3d;
+  color: #52b788; font-family: monospace; font-size: 11px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 2px; margin-bottom: 4px;
+}
+#admin-unlock-btn:hover { background: #2d5a3d; }
+#admin-status { font-size: 10px; min-height: 14px; color: #cc4444; margin-bottom: 4px; }
+#admin-controls { display: none; }
+#admin-give-btn {
+  width: 100%; padding: 8px; background: transparent; border: 1px solid #ffe600;
+  color: #ffe600; font-family: monospace; font-size: 11px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 1px;
+}
+#admin-give-btn:hover { background: #ffe600; color: #000; }
+#admin-give-status { font-size: 10px; color: #52b788; margin-top: 4px; min-height: 14px; }
 #save-section { margin: 12px 0 6px; display: flex; flex-direction: column; gap: 6px; }
 #save-info { font-size: 9px; color: #778; line-height: 1.6; text-align: center; padding: 0 4px; }
 #save-export-btn, #save-import-btn {
@@ -351,6 +373,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div id="shop-tabs">
       <button id="tab-seeds"     class="shop-tab active" onclick="openTab('seeds')">🌱 SEEDS</button>
       <button id="tab-smoothies" class="shop-tab"        onclick="openTab('smoothies')">🍹 SMOOTHIES</button>
+      <button id="tab-settings"  class="shop-tab"        onclick="openTab('settings')">⚙ SETTINGS</button>
     </div>
     <div id="shop-header">
       <div id="shop-title">🌿 SEED SHOP</div>
@@ -360,16 +383,31 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div id="smoothie-list" style="display:none"></div>
     <button id="shop-close" onclick="closeShop()">BACK TO ISLAND [TAB]</button>
 
-    <div id="save-section">
-      <div id="save-info">💾 Auto-saves when you leave. Use save codes to move your progress to another device or as a backup.</div>
-      <button id="save-export-btn" onclick="exportSave()">📋 EXPORT SAVE CODE</button>
-      <textarea id="save-code-box" rows="2" readonly onclick="this.select()" placeholder="Your save code will appear here..."></textarea>
-      <textarea id="load-code-box" rows="2" placeholder="Paste a save code here to import..."></textarea>
-      <button id="save-import-btn" onclick="importSave()">📂 IMPORT SAVE CODE</button>
-      <div id="save-status"></div>
-    </div>
+    <div id="settings-panel" style="display:none">
+      <div id="save-section">
+        <div id="save-info">💾 Auto-saves when you leave. Use save codes to move your progress to another device or as a backup.</div>
+        <button id="save-export-btn" onclick="exportSave()">📋 EXPORT SAVE CODE</button>
+        <textarea id="save-code-box" rows="2" readonly onclick="this.select()" placeholder="Your save code will appear here..."></textarea>
+        <textarea id="load-code-box" rows="2" placeholder="Paste a save code here to import..."></textarea>
+        <button id="save-import-btn" onclick="importSave()">📂 IMPORT SAVE CODE</button>
+        <div id="save-status"></div>
+      </div>
+      <button id="shop-factory-reset" onclick="factoryReset()">☠ FACTORY RESET — DELETE WORLD PERMANENTLY</button>
 
-    <button id="shop-reset" onclick="resetGame()">⚠ RESET SAVE</button>
+      <div id="admin-section">
+        <div id="admin-label">⚙ ADMIN PANEL</div>
+        <div id="admin-lock">
+          <input id="admin-input" type="password" placeholder="Enter passcode...">
+          <button id="admin-unlock-btn" onclick="tryAdminUnlock()">UNLOCK</button>
+          <div id="admin-status"></div>
+        </div>
+        <div id="admin-controls">
+          <div style="font-size:10px;color:#52b788;margin-bottom:8px;letter-spacing:1px;">✅ ADMIN UNLOCKED</div>
+          <button id="admin-give-btn" onclick="adminGiveAllSeeds()">🌱 GIVE ALL SEEDS (×1 each)</button>
+          <div id="admin-give-status"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -380,17 +418,18 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
 // ── game data ──
 const SEEDS = [
-  { id:'strawberry',   name:'Strawberry',   biome:'GRASSLAND', seedCost:10,  baseValue:2,  rarity:'common',    icon:'🍓', color:'#ff4466', flavor:{sweet:7,sour:3,tropical:2,creamy:1,refreshing:5} },
-  { id:'coconut',      name:'Coconut',      biome:'BEACH',     seedCost:35,  baseValue:6,  rarity:'common',    icon:'🥥', color:'#c8a96e', flavor:{sweet:4,sour:0,tropical:9,creamy:8,refreshing:3} },
-  { id:'seaweed',      name:'Seaweed',      biome:'OCEAN',     seedCost:30,  baseValue:3,  rarity:'common',    icon:'🌿', color:'#2d8a4e', flavor:{sweet:0,sour:2,tropical:5,creamy:2,refreshing:6} },
-  { id:'watermelon',   name:'Watermelon',   biome:'GRASSLAND', seedCost:40,  baseValue:8,  rarity:'uncommon',  icon:'🍉', color:'#ff6b6b', flavor:{sweet:8,sour:1,tropical:3,creamy:1,refreshing:9} },
-  { id:'pineapple',    name:'Pineapple',    biome:'BEACH',     seedCost:35,  baseValue:8,  rarity:'uncommon',  icon:'🍍', color:'#ffd700', flavor:{sweet:6,sour:7,tropical:9,creamy:1,refreshing:7} },
-  { id:'raspberry',    name:'Raspberry',    biome:'JUNGLE',    seedCost:55,  baseValue:8,  rarity:'uncommon',  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
-  { id:'mango',        name:'Mango',        biome:'JUNGLE',    seedCost:75,  baseValue:12, rarity:'rare',      icon:'🥭', color:'#ff9500', flavor:{sweet:9,sour:3,tropical:9,creamy:3,refreshing:6} },
-  { id:'seagrape',     name:'Sea Grape',    biome:'OCEAN',     seedCost:90,  baseValue:13, rarity:'rare',      icon:'🍇', color:'#4a9e6b', flavor:{sweet:3,sour:2,tropical:8,creamy:4,refreshing:7} },
-  { id:'passionfruit', name:'Passion Fruit',biome:'JUNGLE',    seedCost:120, baseValue:14, rarity:'epic',      icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
-  { id:'lemon',        name:'Lemon',        biome:'HIGHLANDS', seedCost:160, baseValue:10, rarity:'epic',      icon:'🍋', color:'#f7dc6f', flavor:{sweet:2,sour:10,tropical:4,creamy:0,refreshing:9} },
-  { id:'blueberry',    name:'Blueberry',    biome:'HIGHLANDS', seedCost:220, baseValue:12, rarity:'legendary', icon:'🫐', color:'#4169e1', flavor:{sweet:6,sour:4,tropical:2,creamy:1,refreshing:4} },
+  { id:'strawberry',   name:'Strawberry',   biome:'GRASSLAND', seedCost:10,  baseValue:1,  fruitYield:4, rarity:'common',    icon:'🍓', color:'#ff4466', flavor:{sweet:7,sour:3,tropical:2,creamy:1,refreshing:5} },
+  { id:'coconut',      name:'Coconut',      biome:'BEACH',     seedCost:35,  baseValue:4,  fruitYield:3, rarity:'common',    icon:'🥥', color:'#c8a96e', flavor:{sweet:4,sour:0,tropical:9,creamy:8,refreshing:3} },
+  { id:'seaweed',      name:'Seaweed',      biome:'OCEAN',     seedCost:30,  baseValue:2,  fruitYield:2, rarity:'common',    icon:'🌿', color:'#2d8a4e', flavor:{sweet:0,sour:2,tropical:5,creamy:2,refreshing:6} },
+  { id:'watermelon',   name:'Watermelon',   biome:'GRASSLAND', seedCost:40,  baseValue:9,  fruitYield:1, rarity:'uncommon',  icon:'🍉', color:'#ff6b6b', flavor:{sweet:8,sour:1,tropical:3,creamy:1,refreshing:9} },
+  { id:'pineapple',    name:'Pineapple',    biome:'BEACH',     seedCost:35,  baseValue:9,  fruitYield:1, rarity:'uncommon',  icon:'🍍', color:'#ffd700', flavor:{sweet:6,sour:7,tropical:9,creamy:1,refreshing:7} },
+  { id:'raspberry',    name:'Raspberry',    biome:'JUNGLE',    seedCost:55,  baseValue:6,  fruitYield:3, rarity:'uncommon',  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
+  { id:'mango',        name:'Mango',        biome:'JUNGLE',    seedCost:75,  baseValue:8,  fruitYield:3, rarity:'rare',      icon:'🥭', color:'#ff9500', flavor:{sweet:9,sour:3,tropical:9,creamy:3,refreshing:6} },
+  { id:'seagrape',     name:'Sea Grape',    biome:'OCEAN',     seedCost:90,  baseValue:6,  fruitYield:4, rarity:'rare',      icon:'🍇', color:'#4a9e6b', flavor:{sweet:3,sour:2,tropical:8,creamy:4,refreshing:7} },
+  { id:'passionfruit', name:'Passion Fruit',biome:'JUNGLE',    seedCost:120, baseValue:10, fruitYield:2, rarity:'epic',      icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
+  { id:'lemon',        name:'Lemon',        biome:'HIGHLANDS', seedCost:160, baseValue:7,  fruitYield:3, rarity:'epic',      icon:'🍋', color:'#f7dc6f', flavor:{sweet:2,sour:10,tropical:4,creamy:0,refreshing:9} },
+  { id:'blueberry',    name:'Blueberry',    biome:'HIGHLANDS', seedCost:220, baseValue:8,  fruitYield:4, rarity:'legendary', icon:'🫐', color:'#4169e1', flavor:{sweet:6,sour:4,tropical:2,creamy:1,refreshing:4} },
+  { id:'dragonfruit',  name:'Dragon Fruit', biome:'JUNGLE',    seedCost:400, baseValue:18, fruitYield:2, rarity:'legendary', icon:'🍚', color:'#ff1493', flavor:{sweet:9,sour:3,tropical:10,creamy:5,refreshing:8} },
 ];
 
 const RARITY = {
@@ -413,6 +452,8 @@ const COMBOS = [
   { name:'Highland Chill',    fruits:['lemon','blueberry'],                     bonus:1.2 },
   { name:'Coconut Dream',     fruits:['coconut','mango'],                       bonus:1.2 },
   { name:'Deep Sea',          fruits:['seaweed','seagrape'],                    bonus:1.2 },
+  { name:'Dragon Fire',       fruits:['dragonfruit','mango','passionfruit'],    bonus:2.0 },
+  { name:'Dragon Chill',      fruits:['dragonfruit','blueberry'],               bonus:1.6 },
 ];
 
 function scoreSmoothie(smoothie) {
@@ -496,13 +537,17 @@ let shopTab = 'seeds';
 
 function openTab(which) {
   shopTab = which;
-  const onSeeds = which === 'seeds';
-  document.getElementById('shop-header').style.display  = onSeeds ? 'flex'  : 'none';
-  document.getElementById('shop-grid').style.display    = onSeeds ? 'grid'  : 'none';
-  document.getElementById('smoothie-list').style.display = onSeeds ? 'none' : 'block';
+  const onSeeds     = which === 'seeds';
+  const onSmoothies = which === 'smoothies';
+  const onSettings  = which === 'settings';
+  document.getElementById('shop-header').style.display     = onSeeds     ? 'flex'  : 'none';
+  document.getElementById('shop-grid').style.display       = onSeeds     ? 'grid'  : 'none';
+  document.getElementById('smoothie-list').style.display   = onSmoothies ? 'block' : 'none';
+  document.getElementById('settings-panel').style.display  = onSettings  ? 'block' : 'none';
   document.getElementById('tab-seeds').classList.toggle('active', onSeeds);
-  document.getElementById('tab-smoothies').classList.toggle('active', !onSeeds);
-  if (!onSeeds) buildSmoothieList();
+  document.getElementById('tab-smoothies').classList.toggle('active', onSmoothies);
+  document.getElementById('tab-settings').classList.toggle('active', onSettings);
+  if (onSmoothies) buildSmoothieList();
 }
 
 function buildSmoothieList() {
@@ -653,8 +698,8 @@ const destroyConfirmEl   = document.getElementById('destroy-confirm');
 const blendOverlayEl     = document.getElementById('blend-overlay');
 
 // growth timing (seconds)
-const GROW_SEED_TO_SPROUT = 15;
-const GROW_SPROUT_TO_READY = 20;
+const GROW_SEED_TO_SPROUT = 30;
+const GROW_SPROUT_TO_READY = 40;
 
 function seedsForBiome(biome) {
   return SEEDS.filter(s => s.biome === biome && (inventory[s.id] || 0) > 0);
@@ -736,7 +781,7 @@ function buildFruitMeshes(seed, cx, cy, cz) {
       const body = ico(0.28);
       _stretchVerts(body, 1.10, 0.70, 1.10);
       body.position.set(cx, cy - 0.04, cz);
-      body.material = _fm(0.14, 0.60, 0.16, 0.02, 0.10, 0.02);
+      body.material = _fm(0.04, 0.22, 0.05, 0.01, 0.03, 0.01);
       meshes.push(body);
       break;
     }
@@ -819,6 +864,24 @@ function buildFruitMeshes(seed, cx, cy, cz) {
       break;
     }
 
+    case 'dragonfruit': {
+      const body = ico(0.26);
+      _stretchVerts(body, 0.82, 1.35, 0.82);
+      body.position.set(cx, cy + 0.06, cz);
+      body.material = _fm(0.94, 0.06, 0.50, 0.22, 0.01, 0.10);
+      const sm = _fm(0.08, 0.55, 0.12, 0.01, 0.08, 0.02);
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        const fin = cyl(0.18, 0.01, 0.08, 4);
+        fin.position.set(cx + Math.cos(a)*0.22, cy + 0.04 + (i % 2)*0.07, cz + Math.sin(a)*0.22);
+        fin.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), new BABYLON.Vector3(Math.cos(a), 0.5, Math.sin(a)).normalize());
+        fin.material = sm;
+        meshes.push(fin);
+      }
+      meshes.push(body);
+      break;
+    }
+
     default: {
       const body = ico(0.24);
       body.position.set(cx, cy, cz);
@@ -829,6 +892,20 @@ function buildFruitMeshes(seed, cx, cy, cz) {
   }
   meshes.forEach(m => { m._isFruit = true; });
   return meshes;
+}
+
+function spreadFruits(seed, cx, cy, cz, r) {
+  const count = seed.fruitYield || 1;
+  const all = [];
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2;
+    const ox = count > 1 ? Math.cos(a) * r : 0;
+    const oz = count > 1 ? Math.sin(a) * r : 0;
+    const group = buildFruitMeshes(seed, cx + ox, cy, cz + oz);
+    group.forEach(m => { m._fruitIndex = i; });
+    all.push(...group);
+  }
+  return all;
 }
 
 function buildStageMesh(seed, x, y, z, stage) {
@@ -864,6 +941,7 @@ function buildStageMesh(seed, x, y, z, stage) {
     strawberry:'bush', watermelon:'ground', passionfruit:'ground',
     pineapple:'pineapple',
     seaweed:'ocean', seagrape:'ocean',
+    dragonfruit:'cactus',
   }[seed.id] || 'stem';
 
   // ── seed ──
@@ -885,6 +963,13 @@ function buildStageMesh(seed, x, y, z, stage) {
         s.position.set(x+Math.cos(a)*0.06, y+0.225, z+Math.sin(a)*0.06);
         s.convertToFlatShadedMesh(); s.material = grn(); parts.push(s);
       }
+    } else if (type === 'cactus') {
+      const nub = BABYLON.MeshBuilder.CreateCylinder('pm', { height:0.35, diameterBottom:0.16, diameterTop:0.13, tessellation:3 }, scene);
+      nub.position.set(x, y+0.175, z); nub.convertToFlatShadedMesh();
+      const cm = new BABYLON.StandardMaterial('pm', scene);
+      cm.diffuseColor = new BABYLON.Color3(0.08, 0.45, 0.12);
+      cm.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+      nub.material = cm; parts.push(nub);
     } else {
       for (let i = 0; i < 3; i++) {
         const a = (i/3)*Math.PI*2;
@@ -906,7 +991,7 @@ function buildStageMesh(seed, x, y, z, stage) {
           parts.push(dirLeaf(tx, ty, tz, new BABYLON.Vector3(Math.cos(a)*0.90, -0.42, Math.sin(a)*0.90).normalize(), 0.85, 0.20, 0.02));
         }
         // coconut hangs just below the leaf crown
-        parts.push(...buildFruitMeshes(seed, tx, ty - 0.20, tz));
+        parts.push(...spreadFruits(seed, tx, ty - 0.20, tz, 0.28));
         break;
       }
 
@@ -917,7 +1002,7 @@ function buildStageMesh(seed, x, y, z, stage) {
           trunk.position.set(x, y+0.80, z); trunk.convertToFlatShadedMesh(); trunk.material = brn(); parts.push(trunk);
           const canopy = BABYLON.MeshBuilder.CreateIcoSphere('pm', { radius:0.46, subdivisions:1, flat:true }, scene);
           canopy.position.set(x, y+1.82, z); canopy.material = dkGrn(); parts.push(canopy);
-          parts.push(...buildFruitMeshes(seed, x, y+1.44, z)); // hangs within lower canopy
+          parts.push(...spreadFruits(seed, x, y+1.44, z, 0.22));
         } else {
           // lemon — short squat citrus tree with clustered canopy balls
           const ltGrn = () => { const m = new BABYLON.StandardMaterial('pm', scene); m.diffuseColor = new BABYLON.Color3(0.50, 0.80, 0.18); m.specularColor = new BABYLON.Color3(0.05,0.05,0.05); return m; };
@@ -927,7 +1012,7 @@ function buildStageMesh(seed, x, y, z, stage) {
             const ball = BABYLON.MeshBuilder.CreateIcoSphere('pm', { radius:0.24, subdivisions:1, flat:true }, scene);
             ball.position.set(x+ox, y+0.85+oy, z+oz); ball.material = ltGrn(); parts.push(ball);
           }
-          parts.push(...buildFruitMeshes(seed, x, y+0.68, z)); // hangs below the canopy cluster
+          parts.push(...spreadFruits(seed, x, y+0.68, z, 0.18));
         }
         break;
       }
@@ -944,7 +1029,7 @@ function buildStageMesh(seed, x, y, z, stage) {
         }
         const canopy = BABYLON.MeshBuilder.CreateIcoSphere('pm', { radius:0.26, subdivisions:1, flat:true }, scene);
         canopy.position.set(x, y+0.50, z); canopy.material = grn(); parts.push(canopy);
-        parts.push(...buildFruitMeshes(seed, x, seed.id === 'strawberry' ? y+0.72 : y+0.56, z));
+        parts.push(...spreadFruits(seed, x, seed.id === 'strawberry' ? y+0.72 : y+0.56, z, 0.20));
         break;
       }
 
@@ -956,7 +1041,7 @@ function buildStageMesh(seed, x, y, z, stage) {
         }
         const stem = BABYLON.MeshBuilder.CreateCylinder('pm', { height:0.16, diameter:0.06, tessellation:4 }, scene);
         stem.position.set(x, y+0.08, z); stem.convertToFlatShadedMesh(); stem.material = grn(); parts.push(stem);
-        parts.push(...buildFruitMeshes(seed, x, y+0.28, z));
+        parts.push(...spreadFruits(seed, x, y+0.28, z, 0.22));
         break;
       }
 
@@ -980,7 +1065,53 @@ function buildStageMesh(seed, x, y, z, stage) {
           stalk.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), new BABYLON.Vector3(Math.cos(a)*0.14, 1, Math.sin(a)*0.14).normalize());
           stalk.convertToFlatShadedMesh(); stalk.material = grn(); parts.push(stalk);
         }
-        parts.push(...buildFruitMeshes(seed, x, y+1.12, z));
+        parts.push(...spreadFruits(seed, x, y+1.12, z, 0.20));
+        break;
+      }
+
+      case 'cactus': {
+        const trunkMat = () => {
+          const m = new BABYLON.StandardMaterial('pm', scene);
+          m.diffuseColor = new BABYLON.Color3(0.48, 0.28, 0.10); // brown trunk
+          m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+          return m;
+        };
+        const stemMat = () => {
+          const m = new BABYLON.StandardMaterial('pm', scene);
+          m.diffuseColor = new BABYLON.Color3(0.06, 0.42, 0.12); // green stems
+          m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+          return m;
+        };
+        // brown triangular trunk
+        const trunk = BABYLON.MeshBuilder.CreateCylinder('pm', { height:2.2, diameterBottom:0.30, diameterTop:0.22, tessellation:3 }, scene);
+        trunk.position.set(x, y+1.1, z); trunk.convertToFlatShadedMesh(); trunk.material = trunkMat(); parts.push(trunk);
+        // 9 thick green drooping stems from the very top of the trunk
+        const topY = y + 2.2;
+        const stemTips = [];
+        for (let i = 0; i < 9; i++) {
+          const a = (i / 9) * Math.PI * 2;
+          const d1 = new BABYLON.Vector3(Math.cos(a)*0.82, 0.57, Math.sin(a)*0.82).normalize();
+          const seg1 = BABYLON.MeshBuilder.CreateCylinder('pm', { height:1.3, diameterBottom:0.22, diameterTop:0.16, tessellation:3 }, scene);
+          seg1.position.set(x + d1.x*0.65, topY + d1.y*0.65, z + d1.z*0.65);
+          seg1.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), d1);
+          seg1.convertToFlatShadedMesh(); seg1.material = stemMat(); parts.push(seg1);
+          const tx = x + d1.x*1.3, ty = topY + d1.y*1.3, tz = z + d1.z*1.3;
+          const d2 = new BABYLON.Vector3(Math.cos(a)*0.60, -0.80, Math.sin(a)*0.60).normalize();
+          const seg2 = BABYLON.MeshBuilder.CreateCylinder('pm', { height:1.2, diameterBottom:0.14, diameterTop:0.05, tessellation:3 }, scene);
+          seg2.position.set(tx + d2.x*0.60, ty + d2.y*0.60, tz + d2.z*0.60);
+          seg2.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), d2);
+          seg2.convertToFlatShadedMesh(); seg2.material = stemMat(); parts.push(seg2);
+          // store actual tip position for fruit placement
+          stemTips.push({ x: tx + d2.x*1.2, y: ty + d2.y*1.2, z: tz + d2.z*1.2 });
+        }
+        // place each fruit at the drooping tip of an evenly-spaced stem
+        const fruitCount = seed.fruitYield || 1;
+        for (let f = 0; f < fruitCount; f++) {
+          const tip = stemTips[Math.round((f / fruitCount) * 9) % 9];
+          const fmeshes = buildFruitMeshes(seed, tip.x, tip.y, tip.z);
+          fmeshes.forEach(m => { m._fruitIndex = f; });
+          parts.push(...fmeshes);
+        }
         break;
       }
 
@@ -1043,16 +1174,25 @@ function updateSmoothieHUD() {
 }
 
 function doHarvest(plant) {
-  // remove only fruit meshes — plant structure stays
-  if (plant.mesh._fruitMeshes) {
-    plant.mesh._fruitMeshes.filter(m => m._isFruit).forEach(m => m.dispose());
-    plant.mesh._fruitMeshes = plant.mesh._fruitMeshes.filter(m => !m._isFruit);
-  }
+  if (!plant.mesh._fruitMeshes) return;
+  const fruitMeshes = plant.mesh._fruitMeshes.filter(m => m._isFruit);
+  if (fruitMeshes.length === 0) return;
+
+  // remove all meshes belonging to the first remaining fruit group
+  const indices = [...new Set(fruitMeshes.map(m => m._fruitIndex))].sort((a, b) => a - b);
+  const toRemove = fruitMeshes.filter(m => m._fruitIndex === indices[0]);
+  toRemove.forEach(m => m.dispose());
+  plant.mesh._fruitMeshes = plant.mesh._fruitMeshes.filter(m => !toRemove.includes(m));
+
   harvestBag[plant.seedId] = (harvestBag[plant.seedId] || 0) + 1;
-  hoveredPlant = null;
   updateHarvestHUD();
-  plant.stage = 'regrowing';
-  plant.plantedAt = Date.now();
+
+  const remaining = plant.mesh._fruitMeshes.filter(m => m._isFruit).length;
+  if (remaining === 0) {
+    plant.stage = 'regrowing';
+    plant.plantedAt = Date.now();
+    hoveredPlant = null;
+  }
   saveGame();
 }
 
@@ -1683,6 +1823,7 @@ window.addEventListener('keyup', e => { keys[e.code] = false; });
 let locked = false;
 const overlay = document.getElementById('start-overlay');
 function tryLock() {
+  localStorage.removeItem('polyisland-no-save');
   startAudio();
   if (audioCtx) audioCtx.resume();
   canvas.requestPointerLock?.();
@@ -1808,8 +1949,11 @@ scene.registerBeforeRender(() => {
             stageLabel = '🍃 Regrowing';
             timeLabel  = 'Fruit in ' + Math.ceil(GROW_SPROUT_TO_READY - elapsed) + 's';
           } else {
+            const fruitsLeft = hoveredPlant.mesh._fruitMeshes
+              ? new Set(hoveredPlant.mesh._fruitMeshes.filter(m => m._isFruit).map(m => m._fruitIndex)).size
+              : 1;
             stageLabel = '✅ Ready to harvest';
-            timeLabel  = 'Press E to harvest';
+            timeLabel  = fruitsLeft > 1 ? `E — harvest (${fruitsLeft} left)` : 'E — harvest';
           }
           document.getElementById('plant-tooltip-icon').textContent    = seed.icon;
           document.getElementById('plant-tooltip-name').textContent    = seed.name;
@@ -1896,6 +2040,7 @@ scene.registerBeforeRender(() => {
 
 // ── save system ──
 function saveGame() {
+  if (localStorage.getItem('polyisland-no-save')) return;
   const state = {
     coins,
     inventory: {...inventory},
@@ -1909,6 +2054,7 @@ function saveGame() {
 }
 
 function loadGame() {
+  if (localStorage.getItem('polyisland-no-save')) return;
   const raw = localStorage.getItem('polyisland-save');
   if (!raw) return;
   try {
@@ -1931,9 +2077,27 @@ function loadGame() {
   } catch(e) { console.warn('Save load failed', e); }
 }
 
-function resetGame() {
-  if (!confirm('Reset all progress? This cannot be undone.')) return;
+function tryAdminUnlock() {
+  const val = document.getElementById('admin-input').value;
+  if (val === 'L0AGIXHUBADMIN11!@') {
+    document.getElementById('admin-lock').style.display = 'none';
+    document.getElementById('admin-controls').style.display = 'block';
+  } else {
+    document.getElementById('admin-status').textContent = '❌ Wrong passcode';
+  }
+}
+
+function adminGiveAllSeeds() {
+  SEEDS.forEach(s => { inventory[s.id] = (inventory[s.id] || 0) + 1; });
+  refreshShopCards();
+  saveGame();
+  document.getElementById('admin-give-status').textContent = '✅ Seeds added!';
+}
+
+function factoryReset() {
+  if (!confirm('FACTORY RESET: This permanently deletes your world and disables auto-save. Click Explore to start a brand new world.')) return;
   localStorage.removeItem('polyisland-save');
+  localStorage.setItem('polyisland-no-save', '1');
   location.reload();
 }
 
