@@ -220,9 +220,9 @@ function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
 window.addEventListener('resize',resize);resize();
 
 // ─── State ──────────────────────────────────────────
-let gameActive=false,gameStarted=false,sirenState=0;
+let gameActive=false,gameStarted=false,flashState=0;
 let score=0,bestScore=0,startTime=0,totalPausedMs=0,garagePauseStart=0,settingsPauseStart=0;
-let wantedStars=1,garageOpen=false,inGarage=false,animFrame=null;
+let levelStars=1,garageOpen=false,inGarage=false,animFrame=null;
 let controlMode='wasd',currentUser=null;
 const cam={x:0,y:0},mouse={x:0,y:0};
 window.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
@@ -455,7 +455,7 @@ function findPath(sx,sy,ex,ey){
 const sn=nd(1,1),cn=nd(COLS-2,ROWS-2);
 const car={x:sn.x,y:sn.y,w:18,h:34,angle:0,speed:0,
   maxSpeed:SKINS[0].spd,accel:0.38,friction:0.95,turn:0.057};
-const cop={x:cn.x,y:cn.y,w:20,h:36,angle:Math.PI,speed:0,
+const rival={x:cn.x,y:cn.y,w:20,h:36,angle:Math.PI,speed:0,
   maxSpeed:6.5,accel:0.22,friction:0.95,turn:0.055,
   wp:null,pt:0,st:0,dt:0,lx:cn.x,ly:cn.y};
 
@@ -670,15 +670,15 @@ function closeGarage(){
   totalPausedMs+=Date.now()-garagePauseStart;
   document.getElementById('garage').style.display='none';
   garageOpen=false;gameActive=true;car.speed=2;
-  // Punish garage camping: snap cop to the nearest road node to the player
+  // Punish garage camping: snap rival to the nearest road node to the player
   // so leaving the garage is always dangerous
-  let best=Infinity,bx=cop.x,by=cop.y;
+  let best=Infinity,bx=rival.x,by=rival.y;
   for(const n of nodes){
     const d=Math.hypot(n.x-car.x,n.y-car.y);
     // Pick a node that's close to player but not right on top of them
-    if(d>200&&d<best&&!checkCollision(n.x,n.y,cop.w+8,cop.h+8)){best=d;bx=n.x;by=n.y;}
+    if(d>200&&d<best&&!checkCollision(n.x,n.y,rival.w+8,rival.h+8)){best=d;bx=n.x;by=n.y;}
   }
-  cop.x=bx;cop.y=by;cop.speed=0;cop.wp=null;cop.pt=0;
+  rival.x=bx;rival.y=by;rival.speed=0;rival.wp=null;rival.pt=0;
   if(currentUser)saveProgress().catch(()=>{});
 }
 
@@ -689,11 +689,11 @@ function startGame(){
 }
 function resetGame(){
   car.x=sn.x;car.y=sn.y;car.speed=0;car.angle=0;car.maxSpeed=SKINS[selectedSkin].spd;
-  cop.x=cn.x;cop.y=cn.y;cop.speed=0;cop.angle=Math.PI;
-  cop.wp=null;cop.pt=0;cop.st=0;cop.dt=0;cop.lx=cop.x;cop.ly=cop.y;
+  rival.x=cn.x;rival.y=cn.y;rival.speed=0;rival.angle=Math.PI;
+  rival.wp=null;rival.pt=0;rival.st=0;rival.dt=0;rival.lx=rival.x;rival.ly=rival.y;
   npcs.length=0;for(let i=0;i<20;i++)npcs.push(makeNPC());
   gameActive=true;garageOpen=false;inGarage=false;
-  score=0;wantedStars=1;startTime=Date.now();totalPausedMs=0;garagePauseStart=0;
+  score=0;levelStars=1;startTime=Date.now();totalPausedMs=0;garagePauseStart=0;
   document.getElementById('game-over').style.display='none';
   document.getElementById('garage').style.display='none';
   updateStars();
@@ -705,7 +705,7 @@ function starsStr(n){
   const s=Math.max(0,Math.min(5,n|0));
   return'★'.repeat(s)+'☆'.repeat(5-s);
 }
-function updateStars(){document.getElementById('stars-row').textContent=starsStr(wantedStars);}
+function updateStars(){document.getElementById('stars-row').textContent=starsStr(levelStars);}
 function effScore(){return startTime?Math.max(0,Math.floor((Date.now()-startTime-totalPausedMs)/1000)):0;}
 
 // ─── Player update ──────────────────────────────────
@@ -750,77 +750,77 @@ function updatePlayer(){
   document.getElementById('offroad-tag').style.display=(onRoad||inferno)?'none':'block';
 }
 
-// ─── Cop update ─────────────────────────────────────
-function updateCop(){
-  const sc=1+(wantedStars-1)*0.12;
-  cop.maxSpeed=7.2*sc;cop.accel=0.26*sc;
+// ─── rival update ─────────────────────────────────────
+function updateRival(){
+  const sc=1+(levelStars-1)*0.12;
+  rival.maxSpeed=7.2*sc;rival.accel=0.26*sc;
 
-  const dist=Math.hypot(car.x-cop.x,car.y-cop.y);
+  const dist=Math.hypot(car.x-rival.x,car.y-rival.y);
   const la=Math.min(180,Math.abs(car.speed)*18);
   const tx=dist<300?car.x:car.x+Math.cos(car.angle)*la;
   const ty=dist<300?car.y:car.y+Math.sin(car.angle)*la;
   const rr=dist>600?45:dist>200?30:20;
 
-  cop.pt--;
-  if(!cop.wp||cop.wp.length===0||cop.pt<=0){cop.wp=findPath(cop.x,cop.y,tx,ty);cop.pt=rr;}
-  while(cop.wp&&cop.wp.length>1&&Math.hypot(cop.wp[0].x-cop.x,cop.wp[0].y-cop.y)<40)cop.wp.shift();
+  rival.pt--;
+  if(!rival.wp||rival.wp.length===0||rival.pt<=0){rival.wp=findPath(rival.x,rival.y,tx,ty);rival.pt=rr;}
+  while(rival.wp&&rival.wp.length>1&&Math.hypot(rival.wp[0].x-rival.x,rival.wp[0].y-rival.y)<40)rival.wp.shift();
 
-  const wp=cop.wp&&cop.wp.length?cop.wp[0]:{x:car.x,y:car.y};
-  let da=Math.atan2(wp.y-cop.y,wp.x-cop.x)-cop.angle;
+  const wp=rival.wp&&rival.wp.length?rival.wp[0]:{x:car.x,y:car.y};
+  let da=Math.atan2(wp.y-rival.y,wp.x-rival.x)-rival.angle;
   while(da<-Math.PI)da+=Math.PI*2;while(da>Math.PI)da-=Math.PI*2;
-  cop.angle+=Math.max(-cop.turn*2,Math.min(cop.turn*2,da*.22));
+  rival.angle+=Math.max(-rival.turn*2,Math.min(rival.turn*2,da*.22));
 
   const sharp=Math.abs(da)/Math.PI;
-  cop.speed=Math.min(cop.speed+cop.accel,cop.maxSpeed*(1-sharp*.45));
-  cop.speed*=cop.friction;
+  rival.speed=Math.min(rival.speed+rival.accel,rival.maxSpeed*(1-sharp*.45));
+  rival.speed*=rival.friction;
 
-  const nx=cop.x+Math.cos(cop.angle)*cop.speed;
-  const ny=cop.y+Math.sin(cop.angle)*cop.speed;
+  const nx=rival.x+Math.cos(rival.angle)*rival.speed;
+  const ny=rival.y+Math.sin(rival.angle)*rival.speed;
   let hx=false,hy=false;
-  if(!checkCollision(nx,cop.y,cop.w,cop.h))cop.x=nx;else hx=true;
-  if(!checkCollision(cop.x,ny,cop.w,cop.h))cop.y=ny;else hy=true;
+  if(!checkCollision(nx,rival.y,rival.w,rival.h))rival.x=nx;else hx=true;
+  if(!checkCollision(rival.x,ny,rival.w,rival.h))rival.y=ny;else hy=true;
 
   if(hx||hy){
-    cop.speed*=.15;
-    cop.st++;
-    cop.pt=0;
+    rival.speed*=.15;
+    rival.st++;
+    rival.pt=0;
     // Immediately nudge away from the wall on the blocked axis
-    if(hx){const push=cop.x>nx?1:-1; if(!checkCollision(cop.x+push*3,cop.y,cop.w,cop.h))cop.x+=push*3;}
-    if(hy){const push=cop.y>ny?1:-1; if(!checkCollision(cop.x,cop.y+push*3,cop.w,cop.h))cop.y+=push*3;}
-  }else if(cop.st>0){cop.st--;}
+    if(hx){const push=rival.x>nx?1:-1; if(!checkCollision(rival.x+push*3,rival.y,rival.w,rival.h))rival.x+=push*3;}
+    if(hy){const push=rival.y>ny?1:-1; if(!checkCollision(rival.x,rival.y+push*3,rival.w,rival.h))rival.y+=push*3;}
+  }else if(rival.st>0){rival.st--;}
 
   // Short-term stuck: find a clear road angle and turn toward it
-  if(cop.st>6){
-    cop.speed=-2.0;
+  if(rival.st>6){
+    rival.speed=-2.0;
     let escaped=false;
     // Try 16 evenly spaced angles around the full circle
     for(let i=0;i<16&&!escaped;i++){
-      const na=cop.angle+(i%2===0?1:-1)*Math.PI*(Math.floor(i/2)+1)/8;
+      const na=rival.angle+(i%2===0?1:-1)*Math.PI*(Math.floor(i/2)+1)/8;
       for(const probeD of[50,80,110,150]){
-        const px=cop.x+Math.cos(na)*probeD;
-        const py=cop.y+Math.sin(na)*probeD;
-        if(!checkCollision(px,py,cop.w+8,cop.h+8)&&isOnRoad(px,py,12)){
-          cop.angle=na;
+        const px=rival.x+Math.cos(na)*probeD;
+        const py=rival.y+Math.sin(na)*probeD;
+        if(!checkCollision(px,py,rival.w+8,rival.h+8)&&isOnRoad(px,py,12)){
+          rival.angle=na;
           escaped=true;
           break;
         }
       }
     }
-    cop.st=0;cop.pt=0;
+    rival.st=0;rival.pt=0;
   }
 
-  cop.dt++;
-  if(cop.dt>=90){
-    if(Math.hypot(cop.x-cop.lx,cop.y-cop.ly)<14){
+  rival.dt++;
+  if(rival.dt>=90){
+    if(Math.hypot(rival.x-rival.lx,rival.y-rival.ly)<14){
       // Snap to nearest road NODE (intersection) — always clear, never inside a building
-      let best=Infinity,bx=cop.x,by=cop.y;
+      let best=Infinity,bx=rival.x,by=rival.y;
       for(const n of nodes){
-        const d=Math.hypot(n.x-cop.x,n.y-cop.y);
-        if(d<best&&!checkCollision(n.x,n.y,cop.w+8,cop.h+8)){best=d;bx=n.x;by=n.y;}
+        const d=Math.hypot(n.x-rival.x,n.y-rival.y);
+        if(d<best&&!checkCollision(n.x,n.y,rival.w+8,rival.h+8)){best=d;bx=n.x;by=n.y;}
       }
-      cop.x=bx;cop.y=by;cop.speed=0;cop.wp=null;cop.pt=0;
+      rival.x=bx;rival.y=by;rival.speed=0;rival.wp=null;rival.pt=0;
     }
-    cop.lx=cop.x;cop.ly=cop.y;cop.dt=0;
+    rival.lx=rival.x;rival.ly=rival.y;rival.dt=0;
   }
 }
 
@@ -857,9 +857,9 @@ function update(){
   if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;cdAutoSave();}
 
   const ns=Math.min(5,Math.max(1,1+Math.floor(score/100)));
-  if(ns!==wantedStars){wantedStars=ns;updateStars();}
+  if(ns!==levelStars){levelStars=ns;updateStars();}
 
-  updatePlayer();updateCop();updateNPCs();
+  updatePlayer();updateRival();updateNPCs();
 
   const gd=Math.hypot(car.x-GARAGE.cx,car.y-GARAGE.cy);
   document.getElementById('garage-hint').style.display=gd<GARAGE.r&&!garageOpen?'block':'none';
@@ -870,14 +870,14 @@ function update(){
   cam.y+=(car.y-canvas.height/2-cam.y)*.1;
   cam.x=Math.max(0,Math.min(WW-canvas.width,cam.x));
   cam.y=Math.max(0,Math.min(WH-canvas.height,cam.y));
-  sirenState+=.15;
+  flashState+=.15;
 
-  if(Math.hypot(car.x-cop.x,car.y-cop.y)<36){
+  if(Math.hypot(car.x-rival.x,car.y-rival.y)<36){
     gameActive=false;
     if(score>bestScore){bestScore=score;document.getElementById('bestScore').innerText=bestScore;}
     document.getElementById('finalScore').innerText=score;
     document.getElementById('bestFinal').innerText=bestScore;
-    document.getElementById('final-stars').textContent=starsStr(wantedStars);
+    document.getElementById('final-stars').textContent=starsStr(levelStars);
     document.getElementById('game-over').style.display='block';
     if(currentUser)saveProgress().catch(()=>{});
   }
@@ -937,16 +937,16 @@ function draw(){
   ctx.font='bold 10px Segoe UI';ctx.fillStyle='#aaffcc';ctx.fillText('GARAGE',gcx,gcy+9);
   ctx.textAlign='left';
 
-  // NPCs, player, cop
+  // NPCs, player, rival
   for(const n of npcs)drawCar(n.x,n.y,n.angle,n.color,false,false);
   drawCar(car.x,car.y,car.angle,SKINS[selectedSkin].color,false,true);
-  drawCar(cop.x,cop.y,cop.angle,'#2464a8',true,false);
+  drawCar(rival.x,rival.y,rival.angle,'#cc4400',true,false);
   ctx.restore();
 }
 
-function drawCar(x,y,angle,color,isCop,isPlayer){
+function drawCar(x,y,angle,color,isRival,isPlayer){
   ctx.save();ctx.translate(x,y);ctx.rotate(angle+Math.PI/2);
-  const W=isPlayer?16:isCop?17:13,H=isPlayer?32:isCop?34:26;
+  const W=isPlayer?16:isRival?17:13,H=isPlayer?32:isRival?34:26;
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.fillRect(-W/2+3,-H/2+3,W,H);
   ctx.fillStyle='#111';
   ctx.fillRect(-W/2-4,-H/2+2,4,8);ctx.fillRect(W/2,-H/2+2,4,8);
@@ -954,11 +954,11 @@ function drawCar(x,y,angle,color,isCop,isPlayer){
   ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(-W/2,-H/2,W,H,4);ctx.fill();
   ctx.fillStyle='rgba(180,220,255,.55)';ctx.fillRect(-W/2+3,-H/2+5,W-6,8);
   ctx.fillStyle='rgba(180,220,255,.35)';ctx.fillRect(-W/2+3,H/2-13,W-6,6);
-  if(isCop){
-    const fl=Math.sin(sirenState*3)>0;
-    ctx.fillStyle=fl?'#ff1111':'#1111ff';ctx.fillRect(-W/2+2,-H/2-4,(W-4)/2,5);
-    ctx.fillStyle=fl?'#1111ff':'#ff1111';ctx.fillRect(1,-H/2-4,(W-4)/2,5);
-    ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=fl?'red':'blue';
+  if(isRival){
+    const fl=Math.sin(flashState*3)>0;
+    ctx.fillStyle=fl?'#ff8800':'#ffcc00';ctx.fillRect(-W/2+2,-H/2-4,(W-4)/2,5);
+    ctx.fillStyle=fl?'#ffcc00':'#ff8800';ctx.fillRect(1,-H/2-4,(W-4)/2,5);
+    ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=fl?'#ff8800':'#ffcc00';
     ctx.beginPath();ctx.arc(0,-H/2,20,0,Math.PI*2);ctx.fill();ctx.restore();
     ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(-W/2+2,-3,W-4,6);
   }else{
@@ -981,8 +981,8 @@ function drawMM(){
   for(const n of npcs){mmX.beginPath();mmX.arc(n.x*sx,n.y*sy,1.5,0,Math.PI*2);mmX.fill();}
   mmX.strokeStyle='rgba(255,255,255,.14)';mmX.lineWidth=1;mmX.lineCap='butt';
   mmX.strokeRect(cam.x*sx,cam.y*sy,canvas.width*sx,canvas.height*sy);
-  const fl=Math.sin(sirenState*3)>0;
-  mmX.fillStyle=fl?'#ff4444':'#4488ff';mmX.beginPath();mmX.arc(cop.x*sx,cop.y*sy,4,0,Math.PI*2);mmX.fill();
+  const fl=Math.sin(flashState*3)>0;
+  mmX.fillStyle=fl?'#ff8800':'#ffcc00';mmX.beginPath();mmX.arc(rival.x*sx,rival.y*sy,4,0,Math.PI*2);mmX.fill();
   mmX.fillStyle='#f1c40f';mmX.beginPath();mmX.arc(car.x*sx,car.y*sy,4,0,Math.PI*2);mmX.fill();
 }
 
