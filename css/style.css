@@ -106,6 +106,7 @@ header {
 /* per-game accent colors */
 .game-card.about-us:hover        { border-color: #ff00c8; box-shadow: 0 0 24px rgba(255,0,200,0.4); }
 .game-card.math-drive:hover      { border-color: #ff9f00; box-shadow: 0 0 24px rgba(255,159,0,0.4); }
+.game-card.city-racer:hover      { border-color: #00d4ff; box-shadow: 0 0 24px rgba(0,212,255,0.4); }
 .game-card.sea-of-phantoms:hover { border-color: #00b4d8; box-shadow: 0 0 24px rgba(0,180,216,0.4); }
 .game-card.last-stand:hover      { border-color: #00f5ff; box-shadow: 0 0 24px rgba(0,245,255,0.4); }
 .game-card.poly-island:hover     { border-color: #52b788; box-shadow: 0 0 24px rgba(82,183,136,0.4); }
@@ -121,6 +122,7 @@ header {
 
 .about-us        .card-icon { background: linear-gradient(135deg, #1a001a, #0d0020); }
 .math-drive      .card-icon { background: linear-gradient(135deg, #0a0800, #1a0f00); }
+.city-racer      .card-icon { background: linear-gradient(135deg, #00080a, #001a20); }
 .sea-of-phantoms .card-icon { background: linear-gradient(135deg, #000d1a, #001e38); }
 .last-stand      .card-icon { background: linear-gradient(135deg, #000d1a, #001428); }
 .poly-island     .card-icon { background: linear-gradient(135deg, #001a0d, #003320); }
@@ -147,6 +149,7 @@ header {
 
 .about-us        .card-title { color: #ff00c8; }
 .math-drive      .card-title { color: #ff9f00; }
+.city-racer      .card-title { color: #00d4ff; }
 .sea-of-phantoms .card-title { color: #00b4d8; }
 .last-stand      .card-title { color: #00f5ff; }
 .poly-island     .card-title { color: #52b788; }
@@ -171,6 +174,7 @@ header {
 
 .about-us        .play-btn { background: #ff00c8; }
 .math-drive      .play-btn { background: #ff9f00; }
+.city-racer      .play-btn { background: #00d4ff; }
 .sea-of-phantoms .play-btn { background: #00b4d8; }
 .last-stand      .play-btn { background: #00f5ff; }
 .poly-island     .play-btn { background: #52b788; }
