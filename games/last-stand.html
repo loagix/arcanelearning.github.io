@@ -26,6 +26,10 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
 .tbtn:hover{border-color:#00f5ff;background:#0a1628}
 .tbtn.sel{border-color:#00f5ff;color:#00f5ff;background:#0a1628}
 .tbtn.cant{opacity:0.35;cursor:not-allowed;pointer-events:none}
+#char-picker{position:fixed;top:10px;left:10px;background:rgba(4,10,28,0.92);border:1px solid rgba(0,245,255,0.25);padding:6px 8px;display:none;z-index:50;text-align:center;width:68px}
+#char-picker canvas{display:block;margin:0 auto 4px;image-rendering:pixelated}
+#char-picker .cp-name{font-size:5px;color:#00f5ff;font-family:'Press Start 2P',monospace;letter-spacing:1px;margin-bottom:3px}
+#char-picker .cp-hint{font-size:4px;color:#334;font-family:'Press Start 2P',monospace}
 </style>
 </head>
 <body>
@@ -34,6 +38,11 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
   <div id="stats">COINS:&nbsp;<b id="hCoins">150</b>&nbsp;&nbsp;LIVES:&nbsp;<b id="hLives">20</b>&nbsp;&nbsp;WAVE:&nbsp;<b id="hWave">0/7</b></div>
   <div id="msg"></div>
   <button id="waveBtn">START WAVE</button>
+</div>
+<div id="char-picker">
+  <canvas id="cp-canvas" width="48" height="48"></canvas>
+  <div class="cp-name" id="cp-name">REBEL</div>
+  <div class="cp-hint">Q / E</div>
 </div>
 <div id="main">
   <div id="canvas-wrap">
@@ -78,9 +87,13 @@ const TDEF={
 };
 
 const EDEF={
-  grunt: {hp:120, spd:1.4, reward:10, color:'#c77b3a', sz:14},
-  rusher:{hp:60,  spd:3.2, reward:8,  color:'#c4b800', sz:11},
-  heavy: {hp:500, spd:0.7, reward:30, color:'#b03030', sz:18},
+  grunt: {hp:120,  spd:1.4, reward:10,  color:'#c77b3a', sz:14},
+  rusher:{hp:60,   spd:3.2, reward:8,   color:'#c4b800', sz:11},
+  heavy: {hp:500,  spd:0.7, reward:30,  color:'#b03030', sz:18},
+  shield:{hp:350,  spd:0.8, reward:20,  color:'#4488cc', sz:16},
+  swarm: {hp:30,   spd:4.2, reward:3,   color:'#88cc44', sz:8},
+  ghost: {hp:200,  spd:2.2, reward:25,  color:'#cc88ff', sz:13, immune:true},
+  boss:  {hp:2500, spd:0.4, reward:150, color:'#ff2200', sz:22},
 };
 
 function mkWave(...groups){
@@ -90,7 +103,7 @@ function mkWave(...groups){
   });
   return out.sort((a,b)=>a.t-b.t);
 }
-const WAVES=[
+const WAVES_EASY=[
   mkWave({type:'grunt',  count:10, gap:1.4}),
   mkWave({type:'grunt',  count:14, gap:1.2},{type:'rusher',count:5,  start:5, gap:1.0}),
   mkWave({type:'grunt',  count:16, gap:1.0},{type:'rusher',count:10, start:3, gap:0.8}),
@@ -98,7 +111,161 @@ const WAVES=[
   mkWave({type:'heavy',  count:6,  gap:2.0},{type:'rusher',count:15, start:1, gap:0.6},{type:'grunt',count:8, start:6,gap:1.0}),
   mkWave({type:'heavy',  count:8,  gap:1.5},{type:'grunt', count:20, start:2, gap:0.8},{type:'rusher',count:15,start:4,gap:0.5}),
   mkWave({type:'heavy',  count:12, gap:1.2},{type:'rusher',count:20, start:1, gap:0.4},{type:'grunt',count:15,start:3,gap:0.6}),
+  mkWave({type:'heavy',  count:14, gap:1.0},{type:'rusher',count:25, start:1, gap:0.35},{type:'grunt',count:18,start:2,gap:0.5}),
+  mkWave({type:'heavy',  count:16, gap:0.9},{type:'rusher',count:30, start:0, gap:0.3},{type:'grunt',count:20,start:3,gap:0.45}),
+  mkWave({type:'heavy',  count:20, gap:0.8},{type:'rusher',count:35, start:0, gap:0.25},{type:'grunt',count:25,start:2,gap:0.4}),
 ];
+const WAVES_MEDIUM=[
+  ...WAVES_EASY,
+  mkWave({type:'swarm',  count:20, gap:0.4},{type:'grunt', count:10, start:5, gap:1.0}),
+  mkWave({type:'shield', count:4,  gap:3.5},{type:'grunt', count:15, start:2, gap:0.8}),
+  mkWave({type:'swarm',  count:30, gap:0.3},{type:'rusher',count:10, start:3, gap:0.6}),
+  mkWave({type:'shield', count:6,  gap:2.5},{type:'rusher',count:15, start:1, gap:0.5},{type:'swarm',count:20,start:5,gap:0.35}),
+  mkWave({type:'shield', count:8,  gap:2.0},{type:'heavy', count:5,  start:2, gap:2.0}),
+  mkWave({type:'swarm',  count:40, gap:0.25},{type:'shield',count:5, start:4, gap:2.0}),
+  mkWave({type:'shield', count:10, gap:1.8},{type:'rusher',count:20, start:1, gap:0.4},{type:'swarm',count:25,start:6,gap:0.3}),
+  mkWave({type:'heavy',  count:10, gap:1.2},{type:'shield',count:8,  start:3, gap:2.0},{type:'swarm',count:30,start:8,gap:0.3}),
+  mkWave({type:'shield', count:12, gap:1.5},{type:'swarm', count:50, start:0, gap:0.2},{type:'heavy',count:8,start:5,gap:1.0}),
+  mkWave({type:'shield', count:15, gap:1.2},{type:'swarm', count:60, start:0, gap:0.18},{type:'heavy',count:10,start:4,gap:0.9},{type:'rusher',count:20,start:2,gap:0.4}),
+  mkWave({type:'shield', count:18, gap:1.0},{type:'swarm', count:70, start:0, gap:0.15},{type:'heavy',count:12,start:3,gap:0.8},{type:'rusher',count:25,start:2,gap:0.35}),
+  mkWave({type:'shield', count:20, gap:0.9},{type:'swarm', count:80, start:0, gap:0.12},{type:'heavy',count:14,start:2,gap:0.7},{type:'rusher',count:30,start:1,gap:0.3}),
+  mkWave({type:'shield', count:22, gap:0.8},{type:'swarm', count:90, start:0, gap:0.1},{type:'heavy',count:16,start:2,gap:0.65},{type:'rusher',count:35,start:1,gap:0.28}),
+  mkWave({type:'shield', count:25, gap:0.7},{type:'swarm', count:100,start:0, gap:0.1},{type:'heavy',count:18,start:1,gap:0.6},{type:'rusher',count:40,start:0,gap:0.25}),
+  mkWave({type:'shield', count:28, gap:0.6},{type:'swarm', count:120,start:0, gap:0.08},{type:'heavy',count:20,start:1,gap:0.55},{type:'rusher',count:45,start:0,gap:0.22}),
+];
+const WAVES_HARD=[
+  ...WAVES_MEDIUM,
+  mkWave({type:'ghost',  count:6,  gap:2.0},{type:'grunt', count:20, start:2, gap:0.6}),
+  mkWave({type:'ghost',  count:8,  gap:1.8},{type:'shield',count:6,  start:3, gap:2.0}),
+  mkWave({type:'boss',   count:1,  gap:0  },{type:'swarm', count:40, start:2, gap:0.2}),
+  mkWave({type:'ghost',  count:12, gap:1.5},{type:'rusher',count:25, start:1, gap:0.4}),
+  mkWave({type:'boss',   count:2,  gap:8.0},{type:'ghost', count:10, start:3, gap:1.2}),
+  mkWave({type:'ghost',  count:15, gap:1.2},{type:'shield',count:10, start:2, gap:1.5},{type:'swarm',count:50,start:5,gap:0.18}),
+  mkWave({type:'boss',   count:2,  gap:6.0},{type:'heavy', count:15, start:4, gap:0.8},{type:'ghost',count:12,start:2,gap:1.0}),
+  mkWave({type:'ghost',  count:20, gap:1.0},{type:'shield',count:15, start:1, gap:1.2},{type:'swarm',count:80,start:3,gap:0.12}),
+  mkWave({type:'boss',   count:3,  gap:5.0},{type:'ghost', count:15, start:2, gap:0.9},{type:'shield',count:12,start:4,gap:1.0}),
+  mkWave({type:'boss',   count:4,  gap:4.0},{type:'ghost', count:20, start:1, gap:0.8},{type:'shield',count:15,start:3,gap:0.9},{type:'swarm',count:100,start:5,gap:0.1}),
+  mkWave({type:'boss',   count:5,  gap:3.5},{type:'ghost', count:25, start:0, gap:0.7},{type:'shield',count:18,start:2,gap:0.8},{type:'heavy',count:20,start:1,gap:0.6}),
+  mkWave({type:'boss',   count:6,  gap:3.0},{type:'ghost', count:30, start:0, gap:0.6},{type:'shield',count:20,start:1,gap:0.7},{type:'swarm',count:120,start:3,gap:0.08}),
+  mkWave({type:'boss',   count:7,  gap:2.5},{type:'ghost', count:35, start:0, gap:0.5},{type:'shield',count:22,start:1,gap:0.6},{type:'heavy',count:25,start:2,gap:0.5},{type:'swarm',count:150,start:4,gap:0.07}),
+  mkWave({type:'boss',   count:8,  gap:2.0},{type:'ghost', count:40, start:0, gap:0.45},{type:'shield',count:25,start:0,gap:0.55},{type:'heavy',count:30,start:1,gap:0.45},{type:'rusher',count:60,start:0,gap:0.2}),
+  mkWave({type:'boss',   count:10, gap:1.8},{type:'ghost', count:50, start:0, gap:0.4},{type:'shield',count:30,start:0,gap:0.5},{type:'heavy',count:35,start:0,gap:0.4},{type:'swarm',count:200,start:2,gap:0.05}),
+];
+let WAVES=[];
+
+// ── LOBBY ────────────────────────────────────────────────
+let screen='lobby';
+let lobbyChar=0;
+let CHAR_KEYS=null;
+const lp={x:480,y:240,spd:160};
+const lk={};
+let isInfinite=false;
+
+const DIFF_PADS=[
+  {id:'easy',    x:96,  y:380, w:130, h:100, color:'#005522', glow:'#00ff66', label:'EASY',    sub:'10 WAVES', waves:WAVES_EASY},
+  {id:'medium',  x:296, y:380, w:130, h:100, color:'#555500', glow:'#ffff00', label:'MEDIUM',  sub:'25 WAVES', waves:WAVES_MEDIUM},
+  {id:'hard',    x:534, y:380, w:130, h:100, color:'#551100', glow:'#ff6600', label:'HARD',    sub:'40 WAVES', waves:WAVES_HARD},
+  {id:'infinite',x:734, y:380, w:130, h:100, color:'#330055', glow:'#cc44ff', label:'INFINITE',sub:'∞ WAVES',  waves:WAVES_HARD},
+];
+
+function drawLobby(){
+  if(!CHAR_KEYS){CHAR_KEYS=Object.keys(TSPRITE);updateCharPicker();}
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,960,576);
+  // grid
+  ctx.strokeStyle='rgba(0,245,255,0.05)'; ctx.lineWidth=1;
+  for(let r=0;r<=12;r++){ctx.beginPath();ctx.moveTo(0,r*48);ctx.lineTo(960,r*48);ctx.stroke();}
+  for(let c=0;c<=20;c++){ctx.beginPath();ctx.moveTo(c*48,0);ctx.lineTo(c*48,576);ctx.stroke();}
+
+  // title
+  ctx.textAlign='center';
+  ctx.fillStyle='#00f5ff'; ctx.font='20px "Press Start 2P",monospace';
+  ctx.shadowColor='#00f5ff'; ctx.shadowBlur=20;
+  ctx.fillText('LAST STAND',480,60);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#555'; ctx.font='7px "Press Start 2P",monospace';
+  ctx.fillText('SELECT DIFFICULTY',480,90);
+
+  const sp=TSPRITE[CHAR_KEYS[lobbyChar]];
+
+  // difficulty pads
+  DIFF_PADS.forEach(pad=>{
+    const px=pad.x,py=pad.y,pw=pad.w,ph=pad.h;
+    const hover=(lp.x>px&&lp.x<px+pw&&lp.y>py&&lp.y<py+ph);
+    ctx.fillStyle=hover?pad.color.replace('00','44'):pad.color;
+    ctx.fillRect(px,py,pw,ph);
+    ctx.strokeStyle=hover?pad.glow:'rgba(255,255,255,0.15)';
+    ctx.lineWidth=hover?3:1;
+    ctx.strokeRect(px,py,pw,ph);
+    if(hover){
+      ctx.shadowColor=pad.glow; ctx.shadowBlur=15;
+      ctx.strokeRect(px,py,pw,ph);
+      ctx.shadowBlur=0;
+    }
+    ctx.fillStyle=hover?pad.glow:'#aaa';
+    ctx.font='9px "Press Start 2P",monospace';
+    ctx.fillText(pad.label,px+pw/2,py+ph/2-8);
+    ctx.fillStyle=hover?'#fff':'#666';
+    ctx.font='6px "Press Start 2P",monospace';
+    ctx.fillText(pad.sub,px+pw/2,py+ph/2+12);
+  });
+
+  // player sprite
+  ctx.save();
+  ctx.translate(lp.x,lp.y);
+  spr(sp.ox,sp.oy,sp.ps,sp.g,sp.p);
+  ctx.restore();
+
+  // walk hint
+  ctx.fillStyle='#333'; ctx.font='6px "Press Start 2P",monospace';
+  ctx.fillText('WASD TO MOVE',480,558);
+  ctx.textAlign='left';
+}
+
+function updateLobby(dt){
+  let dx=0,dy=0;
+  if(lk['w']||lk['arrowup'])   dy-=1;
+  if(lk['s']||lk['arrowdown']) dy+=1;
+  if(lk['a']||lk['arrowleft']) dx-=1;
+  if(lk['d']||lk['arrowright'])dx+=1;
+  if(dx&&dy){dx*=0.707;dy*=0.707;}
+  lp.x=Math.max(10,Math.min(950,lp.x+dx*lp.spd*dt));
+  lp.y=Math.max(10,Math.min(566,lp.y+dy*lp.spd*dt));
+
+  DIFF_PADS.forEach(pad=>{
+    if(lp.x>pad.x&&lp.x<pad.x+pad.w&&lp.y>pad.y&&lp.y<pad.y+pad.h){
+      startGame(pad);
+    }
+  });
+}
+
+function updateCharPicker(){
+  const k=CHAR_KEYS[lobbyChar];
+  const sp=TSPRITE[k];
+  const pc=document.getElementById('cp-canvas');
+  const c2=pc.getContext('2d');
+  c2.clearRect(0,0,48,48);
+  sprOn(c2,0,0,4,sp.g,sp.p);
+  document.getElementById('cp-name').textContent=k.toUpperCase();
+}
+
+function startGame(pad){
+  WAVES=pad.waves.map(w=>[...w]);
+  isInfinite=(pad.id==='infinite');
+  coins=150;lives=20;wave=0;
+  towers=[];enemies=[];projs=[];
+  waveActive=false;waveSchedule=[];waveTime=0;
+  selTower=null;gameOver=false;gameWon=false;
+  screen='game';
+  document.getElementById('char-picker').style.display='none';
+  document.getElementById('top-hud').style.display='';
+  document.getElementById('right-panel').style.display='';
+  document.getElementById('hCoins').textContent=coins;
+  document.getElementById('hLives').textContent=lives;
+  document.getElementById('hWave').textContent=isInfinite?`0/∞`:`0/${WAVES.length}`;
+  document.getElementById('msg').textContent='';
+  document.getElementById('waveBtn').disabled=false;
+  updateBtns();
+}
 
 // State
 let coins=150,lives=20,wave=0;
@@ -342,6 +509,70 @@ const ESPRITE={
     p:{O:'#1a0808',H:'#4a1515',h:'#6a2020',M:'#555566',E:'#ff0000',B:'#5a1a1a',b:'#3a0808',A:'#cc2222'},
     ps:3
   },
+  shield:{
+    g:['....HHHH....',
+       '..OHHhHHO...',
+       'SSHhSSSShHSS',
+       'SSHhSEEShHSS',
+       'SSHhSSSShHSS',
+       'SSHHhHhHHHSS',
+       '..OHBbBBHO..',
+       '..OBbAABbO..',
+       '..OBbBBbBO..',
+       '...ObBBbO...',
+       '...ObBBbO...',
+       '....OOOO....'],
+    p:{O:'#0a0a1e',H:'#1a3a6a',h:'#2a5a9a',S:'#4488cc',E:'#ff4444',B:'#1a3060',b:'#0a1a40',A:'#4488cc'},
+    ps:3
+  },
+  swarm:{
+    g:['............',
+       '............',
+       '.....HH.....',
+       '....HHHH....',
+       '...OhEhO....',
+       '...OHhHO....',
+       '....OBBO....',
+       '....OOOO....',
+       '............',
+       '............',
+       '............',
+       '............'],
+    p:{O:'#1a1a0a',H:'#5a7a1a',h:'#7aaa2a',E:'#ffee00',B:'#3a5010'},
+    ps:3
+  },
+  ghost:{
+    g:['....GGGG....',
+       '..GGggggGG..',
+       '.GGgWWWWgGG.',
+       '.GGgWEWWgGG.',
+       '.GGgWWEWgGG.',
+       '.GGggWWggGG.',
+       '..GGggggGG..',
+       '..GGggGGGG..',
+       '..GGgGGgGG..',
+       '...GGGGgG...',
+       '....GGgG....',
+       '....G..G....'],
+    p:{G:'#bb88ff',g:'#9966dd',W:'#eeddff',E:'#ff44ff'},
+    ps:3
+  },
+  boss:{
+    g:['HHHHHHHHHHHH',
+       'HhHhHHHhHhHH',
+       'HhHMMMMMMhHH',
+       'HhHMEEEEMhHH',
+       'HhHMEEEEMhHH',
+       'HhHMMMMMMhHH',
+       'HHHBbBBBbHHH',
+       'HHHBaAAAAHHH',
+       'HHHBaAAAAHHH',
+       'HHhBBBBBbHHH',
+       '.HHHHhHHHHH.',
+       '..HHHHHHH...'],
+    p:{H:'#4a0808',h:'#6a1010',M:'#222233',E:'#ff0000',B:'#3a0606',b:'#220404',a:'#cc1a1a',A:'#ff2200'},
+    ps:3
+  },
 };
 
 function drawTower(t){
@@ -430,38 +661,11 @@ function drawPreview(){
   ctx.lineWidth=1; ctx.stroke();
 }
 
-function drawFire(){
-  const t=Date.now()/1000;
-  const W=COLS*TILE, H=ROWS*TILE, ps=3;
-  const COLS2=['#cc0000','#ff3300','#ff7700','#ffaa00','#ffdd00'];
-  function fc(i){return COLS2[Math.min(i,COLS2.length-1)];}
-  // bottom edge — flames rise upward
-  for(let fx=0;fx<W;fx+=ps){
-    const h=Math.round(4+Math.sin(t*5+fx*0.17)*2.5+Math.sin(t*8.3+fx*0.33)*1.5);
-    for(let i=0;i<h;i++){ctx.fillStyle=fc(i);ctx.fillRect(fx,H-(i+1)*ps,ps,ps);}
-  }
-  // top edge — flames hang downward
-  for(let fx=0;fx<W;fx+=ps){
-    const h=Math.round(4+Math.sin(t*4.7+fx*0.19+1.2)*2.5+Math.sin(t*7.5+fx*0.31+2)*1.5);
-    for(let i=0;i<h;i++){ctx.fillStyle=fc(i);ctx.fillRect(fx,i*ps,ps,ps);}
-  }
-  // left edge — flames go rightward
-  for(let fy=0;fy<H;fy+=ps){
-    const h=Math.round(4+Math.sin(t*5.2+fy*0.17+3)*2.5+Math.sin(t*8+fy*0.35+4)*1.5);
-    for(let i=0;i<h;i++){ctx.fillStyle=fc(i);ctx.fillRect(i*ps,fy,ps,ps);}
-  }
-  // right edge — flames go leftward
-  for(let fy=0;fy<H;fy+=ps){
-    const h=Math.round(4+Math.sin(t*4.8+fy*0.2+5)*2.5+Math.sin(t*7.8+fy*0.3+6)*1.5);
-    for(let i=0;i<h;i++){ctx.fillStyle=fc(i);ctx.fillRect(W-(i+1)*ps,fy,ps,ps);}
-  }
-}
 
 function render(){
   ctx.clearRect(0,0,960,576);
   drawMap();
-  drawFire();
-  // penguin aura rings
+// penguin aura rings
   towers.filter(t=>t.type==='penguin').forEach(t=>{
     ctx.beginPath();
     ctx.arc(t.col*TILE+TILE/2,t.row*TILE+TILE/2,TDEF.penguin.range*TILE,0,Math.PI*2);
@@ -545,7 +749,7 @@ function updateTowers(dt){
     if(t.type==='penguin'){
       enemies.forEach(e=>{
         const dx=e.x-(t.col*TILE+TILE/2),dy=e.y-(t.row*TILE+TILE/2);
-        if(Math.sqrt(dx*dx+dy*dy)<=def.range*TILE) e.slowed=0.4;
+        if(Math.sqrt(dx*dx+dy*dy)<=def.range*TILE&&!e.def.immune) e.slowed=0.4;
       });
       return;
     }
@@ -568,7 +772,7 @@ function updateTowers(dt){
     if(def.proj==='zap'){
       target.hp-=def.dmg;
       projs.push({x:tx,y:ty,tx:target.x,ty:target.y,life:0.2,color:'#00f5ff'});
-      if(target.hp>0) target.frozen=1.2;
+      if(target.hp>0&&!target.def.immune) target.frozen=1.2;
       else killEnemy(target);
       return;
     }
@@ -620,7 +824,12 @@ function updateWave(dt){
   }
   if(waveSchedule.length===0&&enemies.length===0){
     waveActive=false;
-    if(wave>=WAVES.length){gameWon=true;return;}
+    if(wave>=WAVES.length){
+      if(isInfinite){
+        const last=WAVES[WAVES.length-1];
+        WAVES.push(last.map(e=>({...e,t:e.t})));
+      } else {gameWon=true;return;}
+    }
     coins+=50;
     document.getElementById('hCoins').textContent=coins;
     document.getElementById('msg').textContent=`WAVE ${wave} CLEAR! +50 COINS`;
@@ -630,10 +839,10 @@ function updateWave(dt){
 }
 
 function startWave(){
-  if(waveActive||wave>=WAVES.length||gameOver||gameWon) return;
+  if(waveActive||(wave>=WAVES.length&&!isInfinite)||gameOver||gameWon) return;
   waveSchedule=[...WAVES[wave]];
   wave++;waveTime=0;waveActive=true;
-  document.getElementById('hWave').textContent=`${wave}/${WAVES.length}`;
+  document.getElementById('hWave').textContent=isInfinite?`${wave}/∞`:`${wave}/${WAVES.length}`;
   document.getElementById('msg').textContent=`WAVE ${wave} INCOMING!`;
   document.getElementById('waveBtn').disabled=true;
 }
@@ -641,13 +850,18 @@ function startWave(){
 function loop(ts){
   const dt=Math.min((ts-lastTs)/1000,0.05);
   lastTs=ts;
-  if(!gameOver&&!gameWon){
-    updateWave(dt);
-    updateEnemies(dt);
-    updateTowers(dt);
-    updateProjs(dt);
+  if(screen==='lobby'){
+    updateLobby(dt);
+    drawLobby();
+  } else {
+    if(!gameOver&&!gameWon){
+      updateWave(dt);
+      updateEnemies(dt);
+      updateTowers(dt);
+      updateProjs(dt);
+    }
+    render();
   }
-  render();
   requestAnimationFrame(loop);
 }
 
@@ -692,8 +906,23 @@ cv.addEventListener('mousemove',e=>{
 cv.addEventListener('mouseleave',()=>{hCol=-1;hRow=-1;});
 cv.addEventListener('contextmenu',e=>{
   e.preventDefault();
-  selTower=null;
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
+  const r=cv.getBoundingClientRect();
+  const sx=960/r.width, sy=576/r.height;
+  const col=Math.floor((e.clientX-r.left)*sx/TILE);
+  const row=Math.floor((e.clientY-r.top)*sy/TILE);
+  const idx=towers.findIndex(t=>t.col===col&&t.row===row);
+  if(idx>=0){
+    const t=towers[idx];
+    const refund=Math.floor(TDEF[t.type].cost*0.6);
+    coins+=refund;
+    document.getElementById('hCoins').textContent=coins;
+    towers.splice(idx,1);
+    document.getElementById('msg').textContent=`SOLD ${TDEF[t.type].name} FOR ${refund} COINS`;
+    updateBtns();
+  } else {
+    selTower=null;
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
+  }
 });
 cv.addEventListener('click',e=>{
   if(gameOver||gameWon||!selTower) return;
@@ -710,8 +939,14 @@ cv.addEventListener('click',e=>{
   updateBtns();
 });
 document.addEventListener('keydown',e=>{
+  lk[e.key.toLowerCase()]=true;
+  if(screen==='lobby'&&CHAR_KEYS){
+    if(e.key.toLowerCase()==='q'){lobbyChar=(lobbyChar-1+CHAR_KEYS.length)%CHAR_KEYS.length;updateCharPicker();}
+    if(e.key.toLowerCase()==='e'){lobbyChar=(lobbyChar+1)%CHAR_KEYS.length;updateCharPicker();}
+  }
   if(e.key==='Escape'){selTower=null;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));}
 });
+document.addEventListener('keyup',e=>{lk[e.key.toLowerCase()]=false;});
 document.getElementById('waveBtn').onclick=startWave;
 
 
@@ -725,6 +960,9 @@ window.addEventListener('resize',resizeCanvas);
 resizeCanvas();
 
 buildUI();
+document.getElementById('top-hud').style.display='none';
+document.getElementById('right-panel').style.display='none';
+document.getElementById('char-picker').style.display='block';
 lastTs=performance.now();
 requestAnimationFrame(loop);
 </script>
