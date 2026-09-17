@@ -35,7 +35,7 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
 <body>
 <div id="top-hud">
   <span id="title">LAST STAND</span>
-  <div id="stats">COINS:&nbsp;<b id="hCoins">150</b>&nbsp;&nbsp;LIVES:&nbsp;<b id="hLives">20</b>&nbsp;&nbsp;WAVE:&nbsp;<b id="hWave">0/7</b></div>
+  <div id="stats">COINS:&nbsp;<b id="hCoins">100</b>&nbsp;&nbsp;LIVES:&nbsp;<b id="hLives">20</b>&nbsp;&nbsp;WAVE:&nbsp;<b id="hWave">0/7</b></div>
   <div id="msg"></div>
   <button id="waveBtn">START WAVE</button>
 </div>
@@ -79,21 +79,21 @@ const WP=[[-1,2],[6,2],[6,9],[13,9],[13,3],[20,3]];
 const WPX=WP.map(([c,r])=>({x:c*TILE+TILE/2,y:r*TILE+TILE/2}));
 
 const TDEF={
-  rebel:  {name:'REBEL',   cost:50,  dmg:25,  range:2.0, rate:1.2, highOnly:false, color:'#e74c3c', proj:'swing'},
-  slinger:{name:'SLINGER', cost:80,  dmg:10,  range:4.5, rate:2.5, highOnly:false, color:'#9b59b6', proj:'stone'},
-  penguin:{name:'PENGUIN', cost:75,  dmg:0,   range:2.5, rate:0,   highOnly:false, color:'#aaaaff', proj:'aura'},
-  sniper: {name:'SNIPER',  cost:200, dmg:100, range:6.0, rate:0.4, highOnly:true,  color:'#27ae60', proj:'bullet'},
-  hacker: {name:'H4CK3R',  cost:300, dmg:40,  range:3.5, rate:0.9, highOnly:false, color:'#00f5ff', proj:'zap'},
+  rebel:  {name:'REBEL',   cost:75,  dmg:40,  range:2.0, rate:2.0, highOnly:false, color:'#e74c3c', proj:'swing'},
+  slinger:{name:'SLINGER', cost:120, dmg:10,  range:4.5, rate:2.5, highOnly:false, color:'#9b59b6', proj:'stone'},
+  penguin:{name:'PENGUIN', cost:110, dmg:0,   range:2.5, rate:0,   highOnly:false, color:'#aaaaff', proj:'aura'},
+  sniper: {name:'SNIPER',  cost:280, dmg:100, range:6.0, rate:0.4, highOnly:true,  color:'#27ae60', proj:'bullet'},
+  hacker: {name:'H4CK3R',  cost:425, dmg:40,  range:3.5, rate:0.9, highOnly:false, color:'#00f5ff', proj:'zap'},
 };
 
 const EDEF={
-  grunt: {hp:120,  spd:1.4, reward:10,  color:'#c77b3a', sz:14},
-  rusher:{hp:60,   spd:3.2, reward:8,   color:'#c4b800', sz:11},
-  heavy: {hp:500,  spd:0.7, reward:30,  color:'#b03030', sz:18},
-  shield:{hp:350,  spd:0.8, reward:20,  color:'#4488cc', sz:16},
-  swarm: {hp:30,   spd:4.2, reward:3,   color:'#88cc44', sz:8},
-  ghost: {hp:200,  spd:2.2, reward:25,  color:'#cc88ff', sz:13, immune:true},
-  boss:  {hp:2500, spd:0.4, reward:150, color:'#ff2200', sz:22},
+  grunt: {hp:85,   spd:1.4, reward:7,   color:'#c77b3a', sz:14},
+  rusher:{hp:60,   spd:3.2, reward:5,   color:'#c4b800', sz:11},
+  heavy: {hp:500,  spd:0.7, reward:20,  color:'#b03030', sz:18},
+  shield:{hp:350,  spd:0.8, reward:14,  color:'#4488cc', sz:16},
+  swarm: {hp:30,   spd:4.2, reward:2,   color:'#88cc44', sz:8},
+  ghost: {hp:200,  spd:2.2, reward:18,  color:'#cc88ff', sz:13, immune:true},
+  boss:  {hp:2500, spd:0.4, reward:100, color:'#ff2200', sz:22},
 };
 
 function mkWave(...groups){
@@ -251,7 +251,7 @@ function updateCharPicker(){
 function startGame(pad){
   WAVES=pad.waves.map(w=>[...w]);
   isInfinite=(pad.id==='infinite');
-  coins=150;lives=20;wave=0;
+  coins=100;lives=20;wave=0;
   towers=[];enemies=[];projs=[];
   waveActive=false;waveSchedule=[];waveTime=0;
   selTower=null;gameOver=false;gameWon=false;
@@ -268,7 +268,7 @@ function startGame(pad){
 }
 
 // State
-let coins=150,lives=20,wave=0;
+let coins=100,lives=20,wave=0;
 let towers=[],enemies=[],projs=[];
 let waveActive=false,waveSchedule=[],waveTime=0;
 let selTower=null,gameOver=false,gameWon=false,lastTs=0;
@@ -571,7 +571,7 @@ const ESPRITE={
        '.HHHHhHHHHH.',
        '..HHHHHHH...'],
     p:{H:'#4a0808',h:'#6a1010',M:'#222233',E:'#ff0000',B:'#3a0606',b:'#220404',a:'#cc1a1a',A:'#ff2200'},
-    ps:3
+    ps:4
   },
 };
 
@@ -588,6 +588,9 @@ function drawTower(t){
   }
 }
 
+const _tc=document.createElement('canvas');_tc.width=48;_tc.height=48;
+const _tx=_tc.getContext('2d');
+
 function drawEnemy(e){
   const x=e.x, y=e.y;
   const sp=ESPRITE[e.type];
@@ -596,21 +599,17 @@ function drawEnemy(e){
   const ox=x-sw/2, oy=y-sh/2;
 
   if(e.frozen>0||e.slowed>0){
-    ctx.save();
-    ctx.globalAlpha=0.55;
-    ctx.fillStyle=e.frozen>0?'#00f5ff':'#8888ff';
-    ctx.fillRect(ox-1,oy-1,sw+2,sh+2);
-    ctx.restore();
-  }
-
-  spr(ox, oy, sp.ps, sp.g, sp.p);
-
-  if(e.frozen>0){
-    ctx.strokeStyle='#00f5ff'; ctx.lineWidth=2;
-    ctx.strokeRect(ox-1,oy-1,sw+2,sh+2);
-  } else if(e.slowed>0){
-    ctx.strokeStyle='#8888ff'; ctx.lineWidth=1;
-    ctx.strokeRect(ox-1,oy-1,sw+2,sh+2);
+    _tx.clearRect(0,0,sw,sh);
+    sprOn(_tx,0,0,sp.ps,sp.g,sp.p);
+    _tx.save();
+    _tx.globalCompositeOperation='source-atop';
+    _tx.globalAlpha=e.frozen>0?0.4:0.22;
+    _tx.fillStyle=e.frozen>0?'#00f5ff':'#88ccff';
+    _tx.fillRect(0,0,sw,sh);
+    _tx.restore();
+    ctx.drawImage(_tc,0,0,sw,sh,ox,oy,sw,sh);
+  } else {
+    spr(ox,oy,sp.ps,sp.g,sp.p);
   }
 
   const pct=e.hp/e.maxHp;
@@ -712,7 +711,7 @@ function updateEnemies(dt){
   for(let i=enemies.length-1;i>=0;i--){
     const e=enemies[i];
     if(e.frozen>0){e.frozen-=dt;continue;}
-    const spd=e.speed*(e.slowed>0?0.4:1);
+    const spd=e.speed*(e.slowed>0?0.65:1);
     if(e.slowed>0) e.slowed-=dt;
     const wp=WPX[e.wpIdx];
     const dx=wp.x-e.x,dy=wp.y-e.y;
@@ -778,15 +777,8 @@ function updateTowers(dt){
     }
 
     if(def.proj==='swing'){
-      // hit all enemies in range instantly
-      const cx=t.col*TILE+TILE/2,cy=t.row*TILE+TILE/2;
-      enemies.slice().forEach(e=>{
-        const ddx=e.x-cx,ddy=e.y-cy;
-        if(Math.sqrt(ddx*ddx+ddy*ddy)<=def.range*TILE){
-          e.hp-=def.dmg;
-          if(e.hp<=0) killEnemy(e);
-        }
-      });
+      target.hp-=def.dmg;
+      if(target.hp<=0) killEnemy(target);
       projs.push({type:'swing',x:tx,y:ty,life:0.25,color:def.color});
       return;
     }
@@ -830,9 +822,9 @@ function updateWave(dt){
         WAVES.push(last.map(e=>({...e,t:e.t})));
       } else {gameWon=true;return;}
     }
-    coins+=50;
+    coins+=30;
     document.getElementById('hCoins').textContent=coins;
-    document.getElementById('msg').textContent=`WAVE ${wave} CLEAR! +50 COINS`;
+    document.getElementById('msg').textContent=`WAVE ${wave} CLEAR! +30 COINS`;
     document.getElementById('waveBtn').disabled=false;
     updateBtns();
   }
