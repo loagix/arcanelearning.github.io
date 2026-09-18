@@ -26,10 +26,13 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
 .tbtn:hover{border-color:#00f5ff;background:#0a1628}
 .tbtn.sel{border-color:#00f5ff;color:#00f5ff;background:#0a1628}
 .tbtn.cant{opacity:0.35;cursor:not-allowed;pointer-events:none}
-#char-picker{position:fixed;top:10px;left:10px;background:rgba(4,10,28,0.92);border:1px solid rgba(0,245,255,0.25);padding:6px 8px;display:none;z-index:50;text-align:center;width:68px}
-#char-picker canvas{display:block;margin:0 auto 4px;image-rendering:pixelated}
-#char-picker .cp-name{font-size:5px;color:#00f5ff;font-family:'Press Start 2P',monospace;letter-spacing:1px;margin-bottom:3px}
-#char-picker .cp-hint{font-size:4px;color:#334;font-family:'Press Start 2P',monospace}
+#lobby-bar{display:none;align-items:center;gap:16px;padding:8px 16px;background:rgba(4,10,28,0.98);border-bottom:2px solid rgba(0,245,255,0.35);flex-shrink:0}
+#char-switch{display:flex;align-items:center;gap:8px}
+#cp-name{font-size:6px;color:#00f5ff;letter-spacing:2px;min-width:56px;text-align:center}
+.cp-arrow{padding:4px 10px;font-family:'Press Start 2P',monospace;font-size:8px;background:#071207;color:#00f5ff;border:1px solid rgba(0,245,255,0.4);cursor:pointer}
+.cp-arrow:hover{background:#0a1628;border-color:#00f5ff}
+#return-btn{display:none;position:fixed;top:58%;left:50%;transform:translateX(-50%);padding:10px 22px;font-family:'Press Start 2P',monospace;font-size:7px;background:#071207;color:#00ff88;border:2px solid #00ff88;cursor:pointer;z-index:200;letter-spacing:1px}
+#return-btn:hover{background:#0a2a18}
 </style>
 </head>
 <body>
@@ -39,11 +42,15 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
   <div id="msg"></div>
   <button id="waveBtn">START WAVE</button>
 </div>
-<div id="char-picker">
-  <canvas id="cp-canvas" width="48" height="48"></canvas>
-  <div class="cp-name" id="cp-name">REBEL</div>
-  <div class="cp-hint">Q / E</div>
+<div id="lobby-bar">
+  <div id="char-switch">
+    <button class="cp-arrow" id="cp-prev">◀</button>
+    <canvas id="cp-canvas" width="48" height="48" style="image-rendering:pixelated"></canvas>
+    <div id="cp-name">REBEL</div>
+    <button class="cp-arrow" id="cp-next">▶</button>
+  </div>
 </div>
+<button id="return-btn">RETURN TO LOBBY</button>
 <div id="main">
   <div id="canvas-wrap">
     <canvas id="c" width="960" height="576"></canvas>
@@ -51,6 +58,11 @@ canvas{cursor:crosshair;image-rendering:pixelated;display:block}
   <div id="right-panel">
     <div id="panel-label">TOWERS</div>
     <div id="towers"></div>
+    <div id="tower-info" style="display:none;flex-direction:column;align-items:center;gap:12px;padding:4px 0">
+      <canvas id="ti-canvas" width="48" height="48" style="image-rendering:pixelated"></canvas>
+      <div id="ti-name" style="font-size:8px;color:#00f5ff;letter-spacing:2px;text-align:center"></div>
+      <button id="ti-sell" class="tbtn" style="color:#ff5555;border-color:#882222;width:100%">SELL</button>
+    </div>
   </div>
 </div>
 
@@ -238,6 +250,28 @@ function updateLobby(dt){
   });
 }
 
+function cycleChar(dir){
+  if(!CHAR_KEYS) return;
+  lobbyChar=(lobbyChar+dir+CHAR_KEYS.length)%CHAR_KEYS.length;
+  updateCharPicker();
+}
+
+function returnToLobby(){
+  screen='lobby';
+  gameOver=false;gameWon=false;
+  towers=[];enemies=[];projs=[];
+  waveActive=false;waveSchedule=[];waveTime=0;
+  clearInspect();
+  selTower=null;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
+  lp.x=480;lp.y=240;
+  document.getElementById('top-hud').style.display='none';
+  document.getElementById('right-panel').style.display='none';
+  document.getElementById('return-btn').style.display='none';
+  document.getElementById('lobby-bar').style.display='flex';
+  if(CHAR_KEYS) updateCharPicker();
+}
+
 function updateCharPicker(){
   const k=CHAR_KEYS[lobbyChar];
   const sp=TSPRITE[k];
@@ -249,6 +283,7 @@ function updateCharPicker(){
 }
 
 function startGame(pad){
+  clearInspect();
   WAVES=pad.waves.map(w=>[...w]);
   isInfinite=(pad.id==='infinite');
   coins=100;lives=20;wave=0;
@@ -256,7 +291,7 @@ function startGame(pad){
   waveActive=false;waveSchedule=[];waveTime=0;
   selTower=null;gameOver=false;gameWon=false;
   screen='game';
-  document.getElementById('char-picker').style.display='none';
+  document.getElementById('lobby-bar').style.display='none';
   document.getElementById('top-hud').style.display='';
   document.getElementById('right-panel').style.display='';
   document.getElementById('hCoins').textContent=coins;
@@ -272,6 +307,7 @@ let coins=100,lives=20,wave=0;
 let towers=[],enemies=[],projs=[];
 let waveActive=false,waveSchedule=[],waveTime=0;
 let selTower=null,gameOver=false,gameWon=false,lastTs=0;
+let inspectedTower=null;
 
 const cv=document.getElementById('c');
 const ctx=cv.getContext('2d');
@@ -674,6 +710,20 @@ function render(){
   enemies.forEach(drawEnemy);
   projs.forEach(drawProj);
   drawPreview();
+  if(inspectedTower&&!gameOver&&!gameWon){
+    ctx.fillStyle='rgba(0,0,0,0.68)';
+    ctx.fillRect(0,0,960,576);
+    const idef=TDEF[inspectedTower.type];
+    const icx=inspectedTower.col*TILE+TILE/2,icy=inspectedTower.row*TILE+TILE/2;
+    ctx.beginPath();
+    ctx.arc(icx,icy,idef.range*TILE,0,Math.PI*2);
+    ctx.strokeStyle=idef.color;
+    ctx.lineWidth=2;
+    ctx.setLineDash([6,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    drawTower(inspectedTower);
+  }
   if(gameOver||gameWon){
     ctx.fillStyle='rgba(0,0,0,0.78)'; ctx.fillRect(0,0,960,576);
     ctx.textAlign='center';
@@ -820,7 +870,7 @@ function updateWave(dt){
       if(isInfinite){
         const last=WAVES[WAVES.length-1];
         WAVES.push(last.map(e=>({...e,t:e.t})));
-      } else {gameWon=true;return;}
+      } else {gameWon=true;document.getElementById('return-btn').style.display='block';return;}
     }
     coins+=30;
     document.getElementById('hCoins').textContent=coins;
@@ -865,6 +915,40 @@ function updateBtns(){
   });
 }
 
+function inspectTower(t){
+  inspectedTower=t;
+  const def=TDEF[t.type];
+  const sp=TSPRITE[t.type];
+  document.getElementById('towers').style.display='none';
+  const info=document.getElementById('tower-info');
+  info.style.display='flex';
+  const tc=document.getElementById('ti-canvas');
+  const tc2=tc.getContext('2d');
+  tc2.clearRect(0,0,48,48);
+  sprOn(tc2,0,0,4,sp.g,sp.p);
+  document.getElementById('ti-name').textContent=def.name;
+  const refund=Math.floor(def.cost*0.6);
+  const sell=document.getElementById('ti-sell');
+  sell.textContent=`SELL +${refund}¢`;
+  sell.onclick=()=>{
+    const idx=towers.indexOf(t);
+    if(idx>=0){
+      coins+=refund;
+      document.getElementById('hCoins').textContent=coins;
+      towers.splice(idx,1);
+      document.getElementById('msg').textContent=`SOLD ${def.name} FOR ${refund} COINS`;
+      updateBtns();
+    }
+    clearInspect();
+  };
+}
+
+function clearInspect(){
+  inspectedTower=null;
+  document.getElementById('towers').style.display='';
+  document.getElementById('tower-info').style.display='none';
+}
+
 function buildUI(){
   const panel=document.getElementById('towers');
   Object.entries(TDEF).forEach(([k,def])=>{
@@ -905,6 +989,7 @@ cv.addEventListener('contextmenu',e=>{
   const idx=towers.findIndex(t=>t.col===col&&t.row===row);
   if(idx>=0){
     const t=towers[idx];
+    if(t===inspectedTower) clearInspect();
     const refund=Math.floor(TDEF[t.type].cost*0.6);
     coins+=refund;
     document.getElementById('hCoins').textContent=coins;
@@ -917,29 +1002,38 @@ cv.addEventListener('contextmenu',e=>{
   }
 });
 cv.addEventListener('click',e=>{
-  if(gameOver||gameWon||!selTower) return;
+  if(gameOver||gameWon) return;
   const r=cv.getBoundingClientRect();
   const sx=960/r.width, sy=576/r.height;
   const col=Math.floor((e.clientX-r.left)*sx/TILE);
   const row=Math.floor((e.clientY-r.top)*sy/TILE);
-  if(!canPlace(col,row,TDEF[selTower])||coins<TDEF[selTower].cost) return;
-  coins-=TDEF[selTower].cost;
-  document.getElementById('hCoins').textContent=coins;
-  towers.push({type:selTower,col,row,cd:0});
-  selTower=null;
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
-  updateBtns();
+  if(selTower){
+    if(!canPlace(col,row,TDEF[selTower])||coins<TDEF[selTower].cost) return;
+    coins-=TDEF[selTower].cost;
+    document.getElementById('hCoins').textContent=coins;
+    towers.push({type:selTower,col,row,cd:0});
+    selTower=null;
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
+    updateBtns();
+    return;
+  }
+  const clicked=towers.find(t=>t.col===col&&t.row===row);
+  if(clicked) inspectTower(clicked);
+  else clearInspect();
 });
 document.addEventListener('keydown',e=>{
   lk[e.key.toLowerCase()]=true;
-  if(screen==='lobby'&&CHAR_KEYS){
-    if(e.key.toLowerCase()==='q'){lobbyChar=(lobbyChar-1+CHAR_KEYS.length)%CHAR_KEYS.length;updateCharPicker();}
-    if(e.key.toLowerCase()==='e'){lobbyChar=(lobbyChar+1)%CHAR_KEYS.length;updateCharPicker();}
+  if(screen==='lobby'){
+    if(e.key.toLowerCase()==='q') cycleChar(-1);
+    if(e.key.toLowerCase()==='e') cycleChar(1);
   }
   if(e.key==='Escape'){selTower=null;document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));}
 });
 document.addEventListener('keyup',e=>{lk[e.key.toLowerCase()]=false;});
 document.getElementById('waveBtn').onclick=startWave;
+document.getElementById('cp-prev').onclick=()=>cycleChar(-1);
+document.getElementById('cp-next').onclick=()=>cycleChar(1);
+document.getElementById('return-btn').onclick=returnToLobby;
 
 
 function resizeCanvas(){
@@ -954,7 +1048,7 @@ resizeCanvas();
 buildUI();
 document.getElementById('top-hud').style.display='none';
 document.getElementById('right-panel').style.display='none';
-document.getElementById('char-picker').style.display='block';
+document.getElementById('lobby-bar').style.display='flex';
 lastTs=performance.now();
 requestAnimationFrame(loop);
 </script>

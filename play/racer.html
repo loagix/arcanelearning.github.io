@@ -940,7 +940,7 @@ function draw(){
   // NPCs, player, rival
   for(const n of npcs)drawCar(n.x,n.y,n.angle,n.color,false,false);
   drawCar(car.x,car.y,car.angle,SKINS[selectedSkin].color,false,true);
-  drawCar(rival.x,rival.y,rival.angle,'#cc4400',true,false);
+  drawCar(rival.x,rival.y,rival.angle,'#f0f0f0',true,false);
   ctx.restore();
 }
 
@@ -956,11 +956,22 @@ function drawCar(x,y,angle,color,isRival,isPlayer){
   ctx.fillStyle='rgba(180,220,255,.35)';ctx.fillRect(-W/2+3,H/2-13,W-6,6);
   if(isRival){
     const fl=Math.sin(flashState*3)>0;
-    ctx.fillStyle=fl?'#ff8800':'#ffcc00';ctx.fillRect(-W/2+2,-H/2-4,(W-4)/2,5);
-    ctx.fillStyle=fl?'#ffcc00':'#ff8800';ctx.fillRect(1,-H/2-4,(W-4)/2,5);
-    ctx.save();ctx.globalAlpha=.22;ctx.fillStyle=fl?'#ff8800':'#ffcc00';
-    ctx.beginPath();ctx.arc(0,-H/2,20,0,Math.PI*2);ctx.fill();ctx.restore();
-    ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(-W/2+2,-3,W-4,6);
+    // Black hood and trunk panels
+    ctx.fillStyle='#111';
+    ctx.fillRect(-W/2,-H/2,W,5);
+    ctx.fillRect(-W/2,H/2-5,W,5);
+    // Light bar housing
+    ctx.fillStyle='#1a1a1a';ctx.fillRect(-W/2+2,-4,W-4,8);
+    // Red / blue alternating lights
+    ctx.fillStyle=fl?'#ff1111':'#660000';
+    ctx.fillRect(-W/2+3,-3,Math.floor((W-8)/2),6);
+    ctx.fillStyle=fl?'#0044ff':'#001188';
+    ctx.fillRect(1,-3,Math.floor((W-8)/2),6);
+    // Glow
+    ctx.save();ctx.globalAlpha=.18;ctx.fillStyle=fl?'#ff0000':'#0033ff';
+    ctx.beginPath();ctx.arc(0,-1,22,0,Math.PI*2);ctx.fill();ctx.restore();
+    // Police door stripe
+    ctx.fillStyle='rgba(0,50,200,.35)';ctx.fillRect(-W/2+1,-3,W-2,6);
   }else{
     ctx.fillStyle='#ffffaa';ctx.fillRect(-W/2+2,-H/2+1,4,3);ctx.fillRect(W/2-6,-H/2+1,4,3);
     ctx.fillStyle='#ff4444';ctx.fillRect(-W/2+2,H/2-4,4,3);ctx.fillRect(W/2-6,H/2-4,4,3);
@@ -982,7 +993,7 @@ function drawMM(){
   mmX.strokeStyle='rgba(255,255,255,.14)';mmX.lineWidth=1;mmX.lineCap='butt';
   mmX.strokeRect(cam.x*sx,cam.y*sy,canvas.width*sx,canvas.height*sy);
   const fl=Math.sin(flashState*3)>0;
-  mmX.fillStyle=fl?'#ff8800':'#ffcc00';mmX.beginPath();mmX.arc(rival.x*sx,rival.y*sy,4,0,Math.PI*2);mmX.fill();
+  mmX.fillStyle=fl?'#ff2200':'#0044ff';mmX.beginPath();mmX.arc(rival.x*sx,rival.y*sy,4,0,Math.PI*2);mmX.fill();
   mmX.fillStyle='#f1c40f';mmX.beginPath();mmX.arc(car.x*sx,car.y*sy,4,0,Math.PI*2);mmX.fill();
 }
 
