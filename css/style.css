@@ -111,6 +111,19 @@ header {
 .game-card.last-stand:hover      { border-color: #00f5ff; box-shadow: 0 0 24px rgba(0,245,255,0.4); }
 .game-card.poly-island:hover     { border-color: #52b788; box-shadow: 0 0 24px rgba(82,183,136,0.4); }
 
+/* ── UPDATE BADGE ── */
+.update-badge {
+  background: #52b788; color: #000;
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  padding: 4px 10px; text-align: center;
+  letter-spacing: 1px; border-radius: 4px 4px 0 0;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+@keyframes badge-pulse {
+  0%, 100% { background: #52b788; }
+  50% { background: #74c69d; }
+}
+
 /* ── CARD ICON ── */
 .card-icon {
   width: 100%;
