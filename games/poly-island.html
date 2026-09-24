@@ -50,6 +50,20 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   z-index: 9999; pointer-events: none; opacity: 0;
   transition: opacity 0.2s;
 }
+#toolbar {
+  position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 50; pointer-events: none;
+}
+.tb-slot {
+  background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px; padding: 6px 10px; text-align: center;
+  font-family: monospace; min-width: 48px; transition: border-color 0.15s, opacity 0.15s;
+}
+.tb-slot.empty { opacity: 0.3; }
+.tb-slot.equipped { border-color: #ff5555; background: rgba(80,0,0,0.7); }
+.tb-key { font-size: 9px; color: #aaa; letter-spacing: 1px; }
+.tb-icon { font-size: 18px; line-height: 1.3; }
+.tb-count { font-size: 10px; color: #ccc; }
 
 #start-overlay {
   position: fixed; inset: 0; z-index: 9998;
@@ -277,7 +291,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 }
 .blend-fruit-btn:hover { background: #1a3348; }
 .blend-empty { font-size: 11px; color: #556; }
-#blend-slots { display: flex; gap: 10px; margin-bottom: 20px; }
+#blend-slots { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
 .blend-slot {
   width: 52px; height: 52px; background: #112233; border: 2px dashed #334;
   border-radius: 8px; display: flex; align-items: center; justify-content: center;
@@ -285,6 +299,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 }
 .blend-slot.filled { border-color: #00b4d8; border-style: solid; color: #fff; }
 .blend-slot.filled:hover { background: #1a3348; }
+.blend-gem-slot { border-color: #00d4ff; border-style: solid; position: relative; }
+.blend-gem-slot:not(.filled) { border-color: #9966ff; border-style: dashed; opacity: 0.35; }
+.gem-x { position: absolute; bottom: 2px; right: 3px; font-size: 8px; color: #00d4ff; font-family: monospace; }
 #blend-btn {
   width: 100%; padding: 10px; background: #00b4d8; color: #000;
   border: none; border-radius: 6px; font-family: monospace; font-size: 14px;
@@ -377,6 +394,79 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   cursor: pointer; letter-spacing: 2px; margin-top: 8px;
 }
 #trader-close:hover { background: #ffd700; color: #000; }
+
+/* ── item shop (mountain peak) ── */
+#item-shop-prompt {
+  display: none; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; pointer-events: none; text-align: center; font-family: monospace;
+  font-size: 13px; color: #a8d8f0; background: rgba(0,0,0,0.8);
+  border: 1px solid #a8d8f0; border-radius: 8px; padding: 10px 20px;
+}
+#rifle-hud {
+  display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.75); color: #ff5555; padding: 6px 18px;
+  border-radius: 6px; font-size: 13px; pointer-events: none; z-index: 50;
+  font-family: monospace; letter-spacing: 1px;
+}
+#lucky-block-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9998;
+  align-items: center; justify-content: center; background: rgba(0,0,0,0.82);
+}
+#lucky-block-panel {
+  background: #14101e; border: 2px solid #ffd700; border-radius: 14px;
+  padding: 40px 48px; min-width: 320px; text-align: center;
+  font-family: monospace; color: #fff;
+}
+#lucky-block-title { font-size: 22px; color: #ffd700; letter-spacing: 2px; margin-bottom: 28px; }
+#lucky-block-reel {
+  font-size: 24px; min-height: 52px; background: rgba(255,255,255,0.06);
+  border-radius: 8px; padding: 12px 20px; margin-bottom: 20px; color: #fff;
+}
+#lucky-block-result { color: #ffe066; font-size: 15px; margin-bottom: 24px; min-height: 22px; }
+#lucky-block-close {
+  background: #ffd700; color: #000; border: none; padding: 10px 32px;
+  font-size: 14px; cursor: pointer; border-radius: 6px; font-family: monospace; font-weight: bold;
+}
+#item-shop-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9997;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.55);
+}
+#item-shop-panel {
+  background: #0b0f18; border: 2px solid #8ab4d8; border-radius: 12px;
+  padding: 28px 32px; width: 480px; max-width: 96vw; max-height: 88vh;
+  overflow-y: auto; font-family: monospace; color: #d0eeff;
+}
+#item-shop-title { font-size: 20px; font-weight: bold; color: #a8d8f0; letter-spacing: 2px; margin-bottom: 4px; }
+#item-shop-sub   { font-size: 10px; color: #5a8aaa; letter-spacing: 2px; margin-bottom: 16px; }
+#item-restock-timer { text-align: center; font-size: 11px; color: #ffe600; padding: 4px 0 12px; letter-spacing: 1px; }
+#item-shop-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.item-card {
+  background: #111a26; border: 1px solid #2a4a6a; border-radius: 8px;
+  padding: 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.item-card:hover { border-color: #8ab4d8; }
+.item-card.out-of-stock { opacity: 0.4; pointer-events: none; }
+.item-rarity { font-size: 9px; font-weight: bold; text-align: center; letter-spacing: 1px; }
+.item-icon   { font-size: 30px; text-align: center; }
+.item-name   { font-size: 13px; font-weight: bold; color: #fff; text-align: center; }
+.item-desc   { font-size: 10px; color: #8ab4d8; text-align: center; }
+.item-cost   { font-size: 11px; color: #ffe600; text-align: center; }
+.item-stock  { font-size: 10px; color: #74c69d; text-align: center; }
+.item-owned  { font-size: 10px; color: #aaa; text-align: center; }
+.item-buy {
+  margin-top: 4px; padding: 7px; background: #8ab4d8; color: #000;
+  border: none; border-radius: 4px; font-family: monospace; font-size: 11px;
+  cursor: pointer; font-weight: bold;
+}
+.item-buy:hover    { background: #aaccee; }
+.item-buy:disabled { background: #2a4a6a; color: #556; cursor: not-allowed; }
+#item-shop-close {
+  width: 100%; padding: 10px; background: transparent; border: 1px solid #8ab4d8;
+  color: #8ab4d8; font-family: monospace; font-size: 13px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 2px;
+}
+#item-shop-close:hover { background: #8ab4d8; color: #000; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -399,6 +489,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   <div id="hud-pos">POS: 0, 0</div>
   <div id="hud-fps">FPS: --</div>
   <div id="hud-trader">🚢 TRADER IN: 3:00</div>
+  <div id="hud-halloween" style="color:#ff8c00;margin-top:4px;border-top:1px solid rgba(255,140,0,0.3);padding-top:4px"></div>
 </div>
 
 <div id="compass"><canvas id="compassCanvas" width="60" height="60"></canvas></div>
@@ -424,6 +515,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
 <div id="blender-prompt">E — USE BLENDER</div>
 <div id="trader-prompt">E — VISIT TRADER</div>
+<div id="item-shop-prompt">E — ITEM SHOP</div>
 <div id="trader-notif">🚢 THE TRADER HAS ARRIVED!</div>
 <div id="destroy-confirm">
   <div>DESTROY THIS PLANT?</div>
@@ -439,6 +531,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div id="blend-inv"></div>
     <div class="blend-section-label">BLEND SLOTS (MIN 2 FRUITS)</div>
     <div id="blend-slots"></div>
+    <div id="blend-gem-timer" style="display:none;color:#00d4ff;font-size:11px;margin:4px 0;text-align:center"></div>
+    <button id="blend-gem-btn" onclick="activateBlenderGem()" style="display:none;background:#1a2a3a;color:#00d4ff;border:1px solid #00d4ff;margin-bottom:6px">💎 ACTIVATE GEM</button>
     <button id="blend-btn" onclick="doBlend()">BLEND</button>
     <button id="blend-close" onclick="closeBlend()">CLOSE [TAB]</button>
   </div>
@@ -460,6 +554,32 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 <div id="patch-overlay">
   <div id="patch-panel">
     <div style="font-size:16px;font-weight:bold;color:#52b788;margin-bottom:16px;letter-spacing:2px;">📋 PATCH NOTES</div>
+    <div style="font-size:13px;color:#ffd700;font-weight:bold;margin-bottom:8px;">v1.4 — HIGHLAND GOODS ARE HERE! &nbsp;<span style="font-size:10px;color:#445;font-weight:normal;">9/23/2026</span></div>
+    <div style="font-size:11px;line-height:2.2;color:#d0ffd0;">
+      🌱 <b>New Fruits</b> — Banana 🍌 (Jungle), Orange 🍊 (Beach), Apple 🍎 (Highlands), Kiwi 🥝 (Jungle), Lime (Highlands, epic).<br>
+      🌴 <b>Rambutan</b> — rare trader-exclusive fruit seed, unlocks high-tier trades.<br>
+      🏝️ <b>Durian</b> — legendary fruit, Lucky Block exclusive only.<br>
+      📯 <b>Bodhi's French Horn</b> — instantly grows all nearby plants. 3 uses per purchase. Press <b>1</b>.<br>
+      🔫 <b>Rifle</b> — shoot birds out of the sky for Bird Meat 🍖. 20 shots per purchase. Press <b>2</b>. A 3D rifle model appears when equipped.<br>
+      🎰 <b>Logan's Lucky Block</b> — spin for mystery rewards. Press <b>3</b>. Possible drops: Milk, Spinach, Bird Meat, Dragon Fruit seed, Rifle, Mangosteen seed, Durian seed.<br>
+      💎 <b>Blender Gem</b> — trader exclusive. Activates a 6th blender slot with ×1.2 price multiplier for 5 minutes.<br>
+      🍹 <b>4 Blenders</b> — one on each side of the island.<br>
+      🚢 <b>Trader Overhaul</b> — rambutan-centric trade system. Rare seeds require rambutan + smoothie. High-tier seeds also need Bird Meat. Items (Horn, Lucky Block, Gem) available from trader.<br>
+      🎒 <b>Toolbar</b> — bottom HUD shows Horn / Rifle / Lucky Block with live counts. Rifle slot highlights when equipped.<br>
+      ⏳ <b>Epic &amp; Legendary grow slower</b> — Epic ×2.5, Legendary ×4.0. Use the Horn to skip the wait!<br>
+      🌿 <b>Passionfruit &amp; Cherry</b> — moved to Grassland biome.
+    </div>
+    <div style="font-size:12px;color:#ff8c00;text-align:center;margin:14px 0 4px;letter-spacing:1px;">🎃 Join us for a HALLOWEEN UPDATE october 2 🎃</div>
+    <br>
+    <div style="font-size:13px;color:#ffd700;font-weight:bold;margin-bottom:8px;">v1.3 — ITEMS UPDATE</div>
+    <div style="font-size:11px;line-height:2.2;color:#d0ffd0;">
+      🏔 <b>Item Shop</b> — a mysterious kid in a red cap sits on a chest at the mountain peak. Climb up and press E to buy blender items.<br>
+      🥛 <b>Milk</b> — now sold at the Item Shop for 💰40. No longer a trader deal.<br>
+      🥬 <b>Spinach</b> — now sold at the Item Shop for 💰100. No longer a trader deal.<br>
+      🚢 <b>Trader overhaul</b> — the Trader now deals exclusively in rare seeds (Papaya &amp; Mangosteen). More trade options added, costs slightly reduced.<br>
+      ⭐ <b>Legendary seeds rarer</b> — Dragon Fruit and Blueberry appear less often in the Seed Shop.
+    </div>
+    <br>
     <div style="font-size:13px;color:#ffd700;font-weight:bold;margin-bottom:8px;">v1.2 — LAST DAY OF SCHOOL UPDATE - H.A.G.S! 🎒</div>
     <div style="font-size:11px;line-height:2.2;color:#d0ffd0;">
       🚢 <b>New Trader Ship</b> — redesigned as a detailed cruise-style vessel with cabin, bridge, smokestack, and flag.<br>
@@ -491,6 +611,45 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
       👆 Touch-to-look camera on PolyIsland.
     </div>
     <button id="patch-close" onclick="closePatchNotes()">CLOSE</button>
+  </div>
+</div>
+
+<div id="toolbar">
+  <div class="tb-slot" id="tb-horn">
+    <div class="tb-key">1</div>
+    <div class="tb-icon" id="tb-icon-horn">📯</div>
+    <div class="tb-count" id="tb-count-horn">×0</div>
+  </div>
+  <div class="tb-slot" id="tb-rifle">
+    <div class="tb-key">2</div>
+    <div class="tb-icon" id="tb-icon-rifle">🔫</div>
+    <div class="tb-count" id="tb-count-rifle">×0</div>
+  </div>
+  <div class="tb-slot" id="tb-lucky_block">
+    <div class="tb-key">3</div>
+    <div class="tb-icon" id="tb-icon-lucky_block"></div>
+    <div class="tb-count" id="tb-count-lucky_block">×0</div>
+  </div>
+</div>
+
+<div id="rifle-hud">🔫 RIFLE EQUIPPED — [CLICK] to shoot &nbsp;·&nbsp; [2] to holster</div>
+
+<div id="lucky-block-overlay">
+  <div id="lucky-block-panel">
+    <div id="lucky-block-title">⭐ LOGAN'S LUCKY BLOCK</div>
+    <div id="lucky-block-reel">?</div>
+    <div id="lucky-block-result"></div>
+    <button id="lucky-block-close" style="display:none" onclick="closeLuckyBlock()">NICE! [E]</button>
+  </div>
+</div>
+
+<div id="item-shop-overlay">
+  <div id="item-shop-panel">
+    <div id="item-shop-title">🏔 ITEM SHOP</div>
+    <div id="item-shop-sub">MOUNTAIN PEAK GOODS</div>
+    <div id="item-restock-timer"></div>
+    <div id="item-shop-grid"></div>
+    <button id="item-shop-close" onclick="closeItemShop()">LEAVE [E]</button>
   </div>
 </div>
 
@@ -539,6 +698,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
         <div id="admin-controls">
           <div style="font-size:10px;color:#52b788;margin-bottom:8px;letter-spacing:1px;">✅ ADMIN UNLOCKED</div>
           <button id="admin-give-btn" onclick="adminGiveAllSeeds()">🌱 GIVE ALL SEEDS (×1 each)</button>
+          <button id="admin-give-btn" onclick="adminGiveAllItems()" style="margin-top:6px">🎒 GIVE ALL ITEMS (×5 each)</button>
+          <button id="admin-give-btn" onclick="adminMaxCoins()" style="margin-top:6px">💰 MAX COINS</button>
           <div id="admin-give-status"></div>
         </div>
       </div>
@@ -558,25 +719,37 @@ const SEEDS = [
   { id:'seaweed',      name:'Seaweed',      biome:'OCEAN',     seedCost:30,  baseValue:2,  fruitYield:1, rarity:'common',    icon:'🌿', color:'#2d8a4e', flavor:{sweet:0,sour:2,tropical:5,creamy:2,refreshing:6} },
   { id:'watermelon',   name:'Watermelon',   biome:'GRASSLAND', seedCost:40,  baseValue:9,  fruitYield:1, rarity:'uncommon',  icon:'🍉', color:'#ff6b6b', flavor:{sweet:8,sour:1,tropical:3,creamy:1,refreshing:9} },
   { id:'pineapple',    name:'Pineapple',    biome:'BEACH',     seedCost:35,  baseValue:9,  fruitYield:1, rarity:'uncommon',  icon:'🍍', color:'#ffd700', flavor:{sweet:6,sour:7,tropical:9,creamy:1,refreshing:7} },
-  { id:'cherry',    name:'Cherry',    biome:'JUNGLE',    seedCost:55,  baseValue:6,  fruitYield:3, rarity:'uncommon',  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
+  { id:'cherry',    name:'Cherry',    biome:'GRASSLAND', seedCost:55,  baseValue:6,  fruitYield:3, rarity:'uncommon',  icon:'🍒', color:'#e0115f', flavor:{sweet:6,sour:6,tropical:2,creamy:1,refreshing:5} },
   { id:'mango',        name:'Mango',        biome:'JUNGLE',    seedCost:75,  baseValue:8,  fruitYield:3, rarity:'rare',      icon:'🥭', color:'#ff9500', flavor:{sweet:9,sour:3,tropical:9,creamy:3,refreshing:6} },
   { id:'seagrape',     name:'Sea Grape',    biome:'OCEAN',     seedCost:90,  baseValue:6,  fruitYield:4, rarity:'rare',      icon:'🍇', color:'#4a9e6b', flavor:{sweet:3,sour:2,tropical:8,creamy:4,refreshing:7} },
-  { id:'passionfruit', name:'Passion Fruit',biome:'JUNGLE',    seedCost:120, baseValue:10, fruitYield:2, rarity:'epic',      icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
+  { id:'passionfruit', name:'Passion Fruit',biome:'GRASSLAND', seedCost:120, baseValue:10, fruitYield:2, rarity:'epic',      icon:'🌺', color:'#9b59b6', flavor:{sweet:7,sour:8,tropical:10,creamy:2,refreshing:7} },
   { id:'lemon',        name:'Lemon',        biome:'HIGHLANDS', seedCost:160, baseValue:7,  fruitYield:3, rarity:'epic',      icon:'🍋', color:'#f7dc6f', flavor:{sweet:2,sour:10,tropical:4,creamy:0,refreshing:9} },
+  { id:'banana',       name:'Banana',       biome:'JUNGLE',    seedCost:45,  baseValue:7,  fruitYield:3, rarity:'uncommon',  icon:'🍌', color:'#ffe135', flavor:{sweet:9,sour:0,tropical:8,creamy:6,refreshing:2} },
+  { id:'orange',       name:'Orange',       biome:'BEACH',     seedCost:50,  baseValue:6,  fruitYield:3, rarity:'uncommon',  icon:'🍊', color:'#ff8c00', flavor:{sweet:7,sour:5,tropical:4,creamy:0,refreshing:7} },
+  { id:'apple',        name:'Apple',        biome:'HIGHLANDS', seedCost:85,  baseValue:9,  fruitYield:2, rarity:'rare',      icon:'🍎', color:'#cc2200', flavor:{sweet:8,sour:4,tropical:0,creamy:1,refreshing:6} },
+  { id:'kiwi',         name:'Kiwi',         biome:'JUNGLE',    seedCost:80,  baseValue:8,  fruitYield:2, rarity:'rare',      icon:'🥝', color:'#5a8a00', flavor:{sweet:4,sour:8,tropical:6,creamy:1,refreshing:9} },
+  { id:'lime',         name:'Lime',         biome:'HIGHLANDS', seedCost:100, baseValue:4,  fruitYield:4, rarity:'epic',      icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="10" cy="11" rx="6.5" ry="7.5" fill="#4cae4c"/><ellipse cx="8" cy="8.5" rx="2.2" ry="1.6" fill="#7dde7d" opacity="0.5"/><ellipse cx="10" cy="3.2" rx="1.3" ry="2.1" fill="#2a6a2a"/></svg>', color:'#4cae4c', flavor:{sweet:1,sour:10,tropical:3,creamy:0,refreshing:9} },
   { id:'blueberry',    name:'Blueberry',    biome:'HIGHLANDS', seedCost:220, baseValue:8,  fruitYield:4, rarity:'legendary', icon:'🫐', color:'#4169e1', flavor:{sweet:6,sour:4,tropical:2,creamy:1,refreshing:4} },
   { id:'dragonfruit',  name:'Dragon Fruit', biome:'JUNGLE',    seedCost:400, baseValue:18, fruitYield:2, rarity:'legendary', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle" overflow="visible"><ellipse cx="10" cy="12" rx="5" ry="8" fill="#d91050"/><ellipse cx="8" cy="9" rx="2" ry="1.8" fill="#f03875" opacity="0.5"/><ellipse cx="7" cy="6" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(40 7 6)"/><ellipse cx="5.5" cy="11" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(40 5.5 11)"/><ellipse cx="6.5" cy="16" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(40 6.5 16)"/><ellipse cx="13" cy="6" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(-40 13 6)"/><ellipse cx="14.5" cy="11" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(-40 14.5 11)"/><ellipse cx="13.5" cy="16" rx="0.65" ry="2.8" fill="#2a7a2a" transform="rotate(-40 13.5 16)"/><ellipse cx="10" cy="4" rx="0.65" ry="2.8" fill="#2a7a2a"/></svg>', color:'#ff1493', flavor:{sweet:9,sour:3,tropical:10,creamy:5,refreshing:8} },
+  { id:'rambutan',    name:'Rambutan',     biome:'JUNGLE',    seedCost:0,   baseValue:12, fruitYield:2, rarity:'rare',      icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><circle cx="10" cy="11" r="6" fill="#cc2244"/><circle cx="8.5" cy="9" r="1.8" fill="#e84466" opacity="0.5"/><line x1="10" y1="5" x2="10" y2="2.5" stroke="#cc2244" stroke-width="1.2"/><line x1="7" y1="6" x2="5.2" y2="4" stroke="#cc2244" stroke-width="1.2"/><line x1="13" y1="6" x2="14.8" y2="4" stroke="#cc2244" stroke-width="1.2"/><line x1="5.5" y1="9" x2="3.2" y2="8.5" stroke="#cc2244" stroke-width="1.2"/><line x1="14.5" y1="9" x2="16.8" y2="8.5" stroke="#cc2244" stroke-width="1.2"/><line x1="6" y1="13" x2="4.2" y2="14.5" stroke="#cc2244" stroke-width="1.2"/><line x1="14" y1="13" x2="15.8" y2="14.5" stroke="#cc2244" stroke-width="1.2"/><line x1="10" y1="17" x2="10" y2="19" stroke="#cc2244" stroke-width="1.2"/></svg>', color:'#cc2244', flavor:{sweet:8,sour:3,tropical:9,creamy:4,refreshing:7}, shopExclude:true },
   { id:'papaya',      name:'Papaya',       biome:'JUNGLE',    seedCost:0,   baseValue:9,  fruitYield:3, rarity:'rare',      icon:'🍑', color:'#ff8c42', flavor:{sweet:9,sour:2,tropical:8,creamy:5,refreshing:6}, shopExclude:true },
   { id:'mangosteen',  name:'Mangosteen',   biome:'JUNGLE',    seedCost:0,   baseValue:14, fruitYield:2, rarity:'legendary', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><circle cx="10" cy="12" r="7.5" fill="#5c1278"/><ellipse cx="7.5" cy="9.5" rx="2.5" ry="1.8" fill="#8c3ab5" opacity="0.45"/><ellipse cx="10" cy="3.5" rx="1.2" ry="2.8" fill="#2a8a2a"/><ellipse cx="5.8" cy="5.2" rx="1.2" ry="2.8" fill="#2a8a2a" transform="rotate(-65 5.8 5.2)"/><ellipse cx="14.2" cy="5.2" rx="1.2" ry="2.8" fill="#2a8a2a" transform="rotate(65 14.2 5.2)"/><circle cx="10" cy="19.2" r="1.5" fill="#350950"/><line x1="7.5" y1="19.2" x2="12.5" y2="19.2" stroke="#7030a0" stroke-width="0.8"/><line x1="10" y1="17" x2="10" y2="21.4" stroke="#7030a0" stroke-width="0.8"/></svg>', color:'#6b2d8b', flavor:{sweet:9,sour:3,tropical:7,creamy:5,refreshing:6}, shopExclude:true },
-  { id:'milk',        name:'Milk',         biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'uncommon',  icon:'🥛', color:'#ffffff', flavor:{sweet:3,sour:0,tropical:0,creamy:10,refreshing:4}, noPlant:true, shopExclude:true },
-  { id:'spinach',     name:'Spinach',      biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'epic',      icon:'🥬', color:'#2d9e2d', flavor:{sweet:1,sour:2,tropical:0,creamy:0,refreshing:8}, noPlant:true, shopExclude:true },
+  { id:'milk',        name:'Milk',         biome:null,        seedCost:40,  baseValue:0,  fruitYield:0, rarity:'uncommon',  icon:'🥛', color:'#ffffff', flavor:{sweet:3,sour:0,tropical:0,creamy:10,refreshing:4}, noPlant:true, shopExclude:true, shopDesc:'Smoothie ×1.5 price' },
+  { id:'spinach',     name:'Spinach',      biome:null,        seedCost:100, baseValue:0,  fruitYield:0, rarity:'epic',      icon:'🥬', color:'#2d9e2d', flavor:{sweet:1,sour:2,tropical:0,creamy:0,refreshing:8}, noPlant:true, shopExclude:true, shopDesc:'Smoothie ×2.0 price' },
+  { id:'horn',        name:"Bodhi's French Horn", biome:null, seedCost:55,  baseValue:0,  fruitYield:0, rarity:'uncommon',  icon:'📯', color:'#e8aa30', flavor:{}, noPlant:true, shopExclude:true, shopDesc:'Instant-grows nearby plants [1]', buyCount:3 },
+  { id:'rifle',       name:'Rifle',        biome:null,        seedCost:280, baseValue:0,  fruitYield:0, rarity:'rare',      icon:'🔫', color:'#888888', flavor:{}, noPlant:true, shopExclude:true, shopDesc:'Shoot birds for Bird Meat [2]', buyCount:20 },
+  { id:'lucky_block', name:"Logan's Lucky Block", biome:null, seedCost:200, baseValue:0,  fruitYield:0, rarity:'rare',      icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><rect x="1.5" y="1.5" width="17" height="17" rx="2.5" fill="#e8b800"/><rect x="1.5" y="1.5" width="17" height="17" rx="2.5" fill="none" stroke="#7a5500" stroke-width="1.5"/><rect x="2.5" y="2.5" width="4" height="4" fill="#ffe566" opacity="0.7"/><rect x="13.5" y="2.5" width="4" height="4" fill="#a06800" opacity="0.45"/><rect x="2.5" y="13.5" width="4" height="4" fill="#a06800" opacity="0.45"/><rect x="13.5" y="13.5" width="4" height="4" fill="#ffe566" opacity="0.3"/><text x="10" y="14.5" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="#ffffff">?</text></svg>', color:'#ffd700', flavor:{}, noPlant:true, shopExclude:true, shopDesc:'Roll for mystery items! [3]' },
+  { id:'bird_meat',   name:'Bird Meat',    biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'uncommon',  icon:'🍖', color:'#cc6622', flavor:{}, noPlant:true, shopExclude:true, noBuy:true },
+  { id:'blender_gem', name:'Blender Gem',  biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'legendary', icon:'💎', color:'#00d4ff', flavor:{}, noPlant:true, shopExclude:true, noBuy:true },
+  { id:'durian',      name:'Durian',       biome:'JUNGLE',    seedCost:0,   baseValue:30, fruitYield:1, rarity:'legendary', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="10" cy="12" rx="5.5" ry="7" fill="#b8a020"/><ellipse cx="8" cy="9" rx="1.8" ry="1.3" fill="#d4c040" opacity="0.5"/><polygon points="10,1 8.5,5 11.5,5" fill="#6a5c10"/><polygon points="3,7 5.5,10 6,7.5" fill="#6a5c10"/><polygon points="17,7 14.5,10 14,7.5" fill="#6a5c10"/><polygon points="1,14 4,13 3.5,16" fill="#6a5c10"/><polygon points="19,14 16,13 16.5,16" fill="#6a5c10"/><polygon points="10,20 8.5,16 11.5,16" fill="#6a5c10"/></svg>', color:'#b8a020', flavor:{sweet:5,sour:3,tropical:8,creamy:9,refreshing:1}, shopExclude:true },
 ];
 
 const RARITY = {
   common:    { weight: 12,  stockMin: 4, stockMax: 5, color: '#aaaaaa', label: 'COMMON' },
   uncommon:  { weight:  5,  stockMin: 3, stockMax: 4, color: '#55cc55', label: 'UNCOMMON' },
   rare:      { weight:  1.5,stockMin: 2, stockMax: 3, color: '#5599ff', label: 'RARE' },
-  epic:      { weight:  0.6,stockMin: 1, stockMax: 2, color: '#cc77ff', label: 'EPIC' },
-  legendary: { weight:  0.2,stockMin: 1, stockMax: 1, color: '#ffaa00', label: 'LEGENDARY' },
+  epic:      { weight:  0.6,stockMin: 1, stockMax: 2, color: '#cc77ff', label: 'EPIC',      growMult: 2.5 },
+  legendary: { weight:  0.08,stockMin: 1, stockMax: 1, color: '#ffaa00', label: 'LEGENDARY', growMult: 4.0 },
 };
 
 // ── smoothie combos ──
@@ -617,8 +790,9 @@ function scoreSmoothie(smoothie) {
   }
   const milkMult = milkCount > 0 ? Math.pow(1.5, milkCount) : 1;
   const spinachMult = spinachCount > 0 ? Math.pow(2, spinachCount) : 1;
-  const sellPrice = Math.max(1, Math.floor(baseValue * (0.5 + balanceScore * 0.6) * (bestCombo ? bestCombo.bonus : 1) * milkMult * spinachMult));
-  return { balanceScore, comboName: bestCombo?.name || null, sellPrice, milkCount, spinachCount };
+  const gemMult = smoothie.gemUsed ? 1.2 : 1;
+  const sellPrice = Math.max(1, Math.floor(baseValue * (0.5 + balanceScore * 0.6) * (bestCombo ? bestCombo.bonus : 1) * milkMult * spinachMult * gemMult));
+  return { balanceScore, comboName: bestCombo?.name || null, sellPrice, milkCount, spinachCount, gemUsed: !!smoothie.gemUsed };
 }
 
 // ── economy ──
@@ -683,43 +857,21 @@ function closePatchNotes() { document.getElementById('patch-overlay').style.disp
 
 // ── trader ──
 const TRADE_POOL = [
-  // multi-fruit → milk ×1
-  { give:[{id:'strawberry',count:17},{id:'cherry',count:10}],      get:'milk', getCount:1, getType:'bag' },
-  { give:[{id:'watermelon',count:8},{id:'coconut',count:7}],       get:'milk', getCount:1, getType:'bag' },
-  { give:[{id:'pineapple',count:8},{id:'lemon',count:6}],          get:'milk', getCount:1, getType:'bag' },
-  { give:[{id:'mango',count:9},{id:'seagrape',count:6}],           get:'milk', getCount:1, getType:'bag' },
-  { give:[{id:'cherry',count:12},{id:'blueberry',count:8}],        get:'milk', getCount:1, getType:'bag' },
-  // multi-fruit → milk ×2
-  { give:[{id:'strawberry',count:12},{id:'watermelon',count:7},{id:'cherry',count:7}], get:'milk', getCount:2, getType:'bag' },
-  { give:[{id:'coconut',count:10},{id:'pineapple',count:7}],       get:'milk', getCount:2, getType:'bag' },
-  { give:[{id:'mango',count:11},{id:'passionfruit',count:6}],      get:'milk', getCount:2, getType:'bag' },
-  { give:[{id:'dragonfruit',count:7},{id:'mango',count:8}],        get:'milk', getCount:3, getType:'bag' },
-  // smoothie → milk
-  { giveType:'smoothie', minHarmony:50, get:'milk', getCount:1, getType:'bag' },
-  { giveType:'smoothie', minHarmony:75, get:'milk', getCount:2, getType:'bag' },
-  // multi-fruit → papaya seed
-  { give:[{id:'cherry',count:10},{id:'seagrape',count:7}],         get:'papaya', getCount:1, getType:'seed' },
-  { give:[{id:'lemon',count:7},{id:'pineapple',count:7}],          get:'papaya', getCount:1, getType:'seed' },
-  { give:[{id:'coconut',count:9},{id:'watermelon',count:7}],       get:'papaya', getCount:1, getType:'seed' },
-  { give:[{id:'mango',count:10},{id:'passionfruit',count:6}],      get:'papaya', getCount:1, getType:'seed' },
-  { give:[{id:'strawberry',count:20},{id:'watermelon',count:8}],   get:'papaya', getCount:1, getType:'seed' },
-  // smoothie → papaya seed
-  { giveType:'smoothie', minHarmony:65, get:'papaya', getCount:1, getType:'seed' },
-  // multi-fruit → mangosteen seed (hard)
-  { give:[{id:'passionfruit',count:8},{id:'lemon',count:8}],       get:'mangosteen', getCount:1, getType:'seed' },
-  { give:[{id:'mango',count:14},{id:'passionfruit',count:8}],      get:'mangosteen', getCount:1, getType:'seed' },
-  { give:[{id:'dragonfruit',count:10},{id:'mango',count:9}],       get:'mangosteen', getCount:1, getType:'seed' },
-  { give:[{id:'dragonfruit',count:12},{id:'passionfruit',count:7}],get:'mangosteen', getCount:1, getType:'seed' },
-  { give:[{id:'mango',count:12},{id:'seagrape',count:10}],         get:'mangosteen', getCount:1, getType:'seed' },
-  // smoothie → mangosteen seed
-  { giveType:'smoothie', minHarmony:85, get:'mangosteen', getCount:1, getType:'seed' },
-  { giveType:'smoothie', minHarmony:95, get:'mangosteen', getCount:2, getType:'seed' },
-  // multi-fruit → spinach (rare)
-  { give:[{id:'dragonfruit',count:8},{id:'passionfruit',count:8}],  get:'spinach', getCount:1, getType:'bag' },
-  { give:[{id:'mango',count:12},{id:'lemon',count:8}],              get:'spinach', getCount:1, getType:'bag' },
-  { give:[{id:'seagrape',count:10},{id:'mango',count:8},{id:'lemon',count:6}],           get:'spinach', getCount:1, getType:'bag' },
-  // smoothie → spinach
-  { giveType:'smoothie', minHarmony:90, get:'spinach', getCount:1, getType:'bag' },
+  // ── rambutan seeds (entry point — fruits only) ──
+  { give:[{id:'banana',count:5},{id:'coconut',count:4}],                                              get:'rambutan', getCount:1, getType:'seed' },
+  { give:[{id:'cherry',count:7},{id:'watermelon',count:4},{id:'orange',count:3}],                     get:'rambutan', getCount:1, getType:'seed' },
+  { give:[{id:'kiwi',count:4},{id:'apple',count:3}],                                                  get:'rambutan', getCount:1, getType:'seed' },
+  { give:[{id:'strawberry',count:10},{id:'pineapple',count:5}],                                       get:'rambutan', getCount:2, getType:'seed' },
+  // ── papaya seed (rambutan + smoothie) ──
+  { give:[{id:'rambutan',count:3},{id:'mango',count:6}],                      requireSmoothie:50,     get:'papaya',     getCount:1, getType:'seed' },
+  { give:[{id:'rambutan',count:4},{id:'kiwi',count:5},{id:'orange',count:5}], requireSmoothie:55,     get:'papaya',     getCount:2, getType:'seed' },
+  // ── mangosteen seed (legendary — needs rambutan + bird meat + high smoothie) ──
+  { give:[{id:'rambutan',count:5},{id:'dragonfruit',count:3},{id:'bird_meat',count:2}], requireSmoothie:72, get:'mangosteen', getCount:1, getType:'seed' },
+  { give:[{id:'rambutan',count:7},{id:'passionfruit',count:6},{id:'bird_meat',count:3}], requireSmoothie:80, get:'mangosteen', getCount:1, getType:'seed' },
+  // ── items ──
+  { give:[{id:'rambutan',count:4}],                              requireSmoothie:62,                  get:'lucky_block', getCount:1, getType:'item' },
+  { give:[{id:'rambutan',count:3},{id:'banana',count:5}],        requireSmoothie:55,                  get:'horn',        getCount:3, getType:'item' },
+  { give:[{id:'rambutan',count:6},{id:'bird_meat',count:3}],     requireSmoothie:80,                  get:'blender_gem', getCount:1, getType:'item' },
 ];
 
 const TRADER_SPAWN_INTERVAL = 180000;
@@ -920,6 +1072,11 @@ function buildTraderUI() {
         const s = SEEDS.find(s => s.id === g.id);
         return `${s?.icon || '?'} ${s?.name || g.id} ×${g.count} <span style="color:#888">(${harvestBag[g.id] || 0})</span>`;
       }).join(' <span style="color:#ffd700">+</span> ');
+      if (deal.requireSmoothie) {
+        const elig = smoothies.filter(sm => Math.round(scoreSmoothie(sm).balanceScore * 100) >= deal.requireSmoothie).length;
+        haveEnough = haveEnough && elig > 0;
+        giveHtml += ` <span style="color:#ffd700">+</span> 🍹 <b>${deal.requireSmoothie}%+</b> smoothie <span style="color:#888">(${elig} available)</span>`;
+      }
     } else {
       const s = SEEDS.find(s => s.id === deal.give);
       haveEnough = (harvestBag[deal.give] || 0) >= deal.giveCount;
@@ -950,6 +1107,12 @@ function doTrade(idx) {
     updateSmoothieHUD();
   } else if (Array.isArray(deal.give)) {
     if (!deal.give.every(g => (harvestBag[g.id] || 0) >= g.count)) return;
+    if (deal.requireSmoothie) {
+      const eligIdx = smoothies.findIndex(sm => Math.round(scoreSmoothie(sm).balanceScore * 100) >= deal.requireSmoothie);
+      if (eligIdx === -1) return;
+      smoothies.splice(eligIdx, 1);
+      updateSmoothieHUD();
+    }
     deal.give.forEach(g => {
       harvestBag[g.id] -= g.count;
       if (harvestBag[g.id] <= 0) delete harvestBag[g.id];
@@ -974,17 +1137,292 @@ function doTrade(idx) {
 
 // ── blender / destroy state ──
 let blendOpen = false;
-let blendSelected = [null, null, null, null, null];
+let blendSelected = [null, null, null, null, null, null];
 let hoveredBlender = false;
 let destroyTarget = null;
-const BLEND_X = 30, BLEND_Z = 0;
 let blenderMeshes = [];
+
+// ── item shop (mountain peak) ──
+const ITEM_SHOP_X = 0, ITEM_SHOP_Z = 0;
+const ITEM_BOY_X = ITEM_SHOP_X - 0.7, ITEM_BOY_Z = ITEM_SHOP_Z;
+let itemShopOpen = false, hoveredItemShop = false;
+let itemShopStock = {};
+let lastItemRestockTime = 0;
+let itemShopTimerInterval = null;
+let itemShopMeshes = [];
+let rifleEquipped = false;
+let luckyBlockOpen = false;
+let hornCooldown = false;
+let blenderGemActive = false;
+let blenderGemExpiry = 0;
+
+function itemShopItems() {
+  return SEEDS.filter(s => s.shopExclude && s.noPlant && !s.noBuy);
+}
+
+function restockItemShop() {
+  lastItemRestockTime = Date.now();
+  itemShopItems().forEach(s => {
+    const r = RARITY[s.rarity];
+    itemShopStock[s.id] = Math.floor(Math.random() * (r.stockMax - r.stockMin + 1)) + r.stockMin;
+  });
+  if (itemShopOpen) buildItemShopUI();
+  if (_shopReady) showNotif('🏔 ITEM SHOP RESTOCKED', '#a8d8f0');
+}
+setInterval(restockItemShop, RESTOCK_INTERVAL);
+
+function itemRestockTimerText() {
+  const ms = RESTOCK_INTERVAL - (Date.now() - lastItemRestockTime);
+  if (ms <= 0) return 'RESTOCKING...';
+  const s = Math.ceil(ms / 1000);
+  return `RESTOCK IN ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function openItemShop() {
+  itemShopOpen = true;
+  document.exitPointerLock?.();
+  buildItemShopUI();
+  document.getElementById('item-shop-overlay').style.display = 'flex';
+  if (audioCtx) audioCtx.resume();
+  itemShopTimerInterval = setInterval(() => {
+    const el = document.getElementById('item-restock-timer');
+    if (el) el.textContent = itemRestockTimerText();
+  }, 1000);
+}
+
+function closeItemShop() {
+  itemShopOpen = false;
+  clearInterval(itemShopTimerInterval);
+  itemShopTimerInterval = null;
+  document.getElementById('item-shop-overlay').style.display = 'none';
+  tryLock();
+}
+
+function playHornSound() {
+  if (!audioCtx) return;
+  // Hunting horn call: G4 G4 G4 C5 — E5 — G5 — C5 G4
+  const calls = [
+    [392, 0.00, 0.12], [392, 0.13, 0.12], [392, 0.26, 0.12],
+    [523, 0.42, 0.22],
+    [659, 0.68, 0.22],
+    [784, 0.94, 0.50],
+    [523, 1.50, 0.18],
+    [392, 1.70, 0.38],
+  ];
+  calls.forEach(([freq, start, dur]) => {
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const lp   = audioCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1400;
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    osc.connect(lp); lp.connect(gain); gain.connect(audioCtx.destination);
+    const t = audioCtx.currentTime + start;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.32, t + 0.04);
+    gain.gain.setValueAtTime(0.30, t + dur - 0.06);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    osc.start(t); osc.stop(t + dur + 0.01);
+  });
+}
+
+function playGunshotSound() {
+  if (!audioCtx) return;
+  const dur = 0.18;
+  const buf = audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * dur), audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - (i / data.length) * 4);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.5;
+  src.connect(gain); gain.connect(audioCtx.destination);
+  src.start();
+}
+
+function playTickSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square'; osc.frequency.value = 880 + Math.random() * 440;
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  const t = audioCtx.currentTime;
+  gain.gain.setValueAtTime(0.12, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  osc.start(t); osc.stop(t + 0.07);
+}
+
+function useHorn() {
+  if (hornCooldown || (harvestBag.horn || 0) < 1) return;
+  hornCooldown = true;
+  harvestBag.horn--;
+  if (harvestBag.horn <= 0) delete harvestBag.horn;
+  let grown = 0;
+  const px = camera.position.x, pz = camera.position.z;
+  plants.forEach(p => {
+    if (p.stage === 'ready') return;
+    if ((p.x - px) ** 2 + (p.z - pz) ** 2 < 18 * 18) {
+      p.stage = 'ready';
+      advancePlantStage(p);
+      grown++;
+    }
+  });
+  playHornSound();
+  showNotif('📯 HORN! ' + grown + ' plant' + (grown !== 1 ? 's' : '') + ' grew instantly!', '#ccffaa');
+  updateHarvestHUD();
+  saveGame();
+  setTimeout(() => { hornCooldown = false; }, 3000);
+}
+
+function updateRifleHud() {
+  const el = document.getElementById('rifle-hud');
+  const ammo = harvestBag.rifle || 0;
+  el.style.display = rifleEquipped ? 'block' : 'none';
+  el.textContent = `🔫 RIFLE — ${ammo} shot${ammo !== 1 ? 's' : ''} left · [CLICK] shoot · [2] holster`;
+}
+
+function toggleRifle() {
+  if ((harvestBag.rifle || 0) < 1) { showNotif('No rifle in bag!', '#ff6666'); return; }
+  rifleEquipped = !rifleEquipped;
+  updateRifleHud();
+  updateToolbar();
+  showNotif(rifleEquipped ? '🔫 Rifle equipped — click to shoot' : '🔫 Rifle holstered', '#ffd700');
+}
+
+function useLuckyBlock() {
+  if ((harvestBag.lucky_block || 0) < 1) return;
+  harvestBag.lucky_block--;
+  if (harvestBag.lucky_block <= 0) delete harvestBag.lucky_block;
+  luckyBlockOpen = true;
+  document.exitPointerLock?.();
+  document.getElementById('lucky-block-overlay').style.display = 'flex';
+  updateHarvestHUD();
+
+  const durianIcon = SEEDS.find(s => s.id === 'durian').icon;
+  const OUTCOMES = [
+    { weight:30, label:'3× Milk 🥛',                                         give:() => { harvestBag.milk = (harvestBag.milk||0)+3; } },
+    { weight:20, label:'2× Spinach 🥬',                                       give:() => { harvestBag.spinach = (harvestBag.spinach||0)+2; } },
+    { weight:15, label:'1× Bird Meat 🍖',                                     give:() => { harvestBag.bird_meat = (harvestBag.bird_meat||0)+1; } },
+    { weight:10, label:'Dragon Fruit Seed! 🐉',                               give:() => { inventory.dragonfruit = (inventory.dragonfruit||0)+1; } },
+    { weight:5,  label:'Rifle! 🔫',                                           give:() => { harvestBag.rifle = (harvestBag.rifle||0)+20; } },
+    { weight:5,  label:'Mangosteen Seed!',                                    give:() => { inventory.mangosteen = (inventory.mangosteen||0)+1; } },
+    { weight:4,  label:'Durian Seed! ' + durianIcon,                         give:() => { inventory.durian = (inventory.durian||0)+1; } },
+    { weight:11, label:'Nothing...',                                          give:() => {} },
+  ];
+  const total = OUTCOMES.reduce((s, o) => s + o.weight, 0);
+  let r = Math.random() * total, acc = 0;
+  let result = OUTCOMES[OUTCOMES.length - 1];
+  for (const o of OUTCOMES) { acc += o.weight; if (r < acc) { result = o; break; } }
+
+  const reel = document.getElementById('lucky-block-reel');
+  const resultEl = document.getElementById('lucky-block-result');
+  const closeBtn = document.getElementById('lucky-block-close');
+  resultEl.innerHTML = '';
+  closeBtn.style.display = 'none';
+
+  const allLabels = OUTCOMES.map(o => o.label);
+  let spins = 0, delay = 50;
+  function spin() {
+    reel.innerHTML = allLabels[spins % allLabels.length];
+    playTickSound();
+    spins++;
+    delay = Math.min(delay + 18, 400);
+    if (spins < 18 || delay < 400) { setTimeout(spin, delay); }
+    else {
+      reel.innerHTML = result.label;
+      resultEl.innerHTML = '✨ YOU GOT: ' + result.label;
+      closeBtn.style.display = 'block';
+      result.give();
+      updateHarvestHUD();
+      refreshShopCards();
+      saveGame();
+    }
+  }
+  spin();
+}
+
+function closeLuckyBlock() {
+  luckyBlockOpen = false;
+  document.getElementById('lucky-block-overlay').style.display = 'none';
+  tryLock();
+}
+
+function activateBlenderGem() {
+  if (blenderGemActive || (harvestBag.blender_gem || 0) < 1) return;
+  harvestBag.blender_gem--;
+  if (harvestBag.blender_gem <= 0) delete harvestBag.blender_gem;
+  blenderGemActive = true;
+  blenderGemExpiry = Date.now() + 300000;
+  updateHarvestHUD();
+  saveGame();
+  buildBlendUI();
+}
+
+function buildItemShopUI() {
+  const grid = document.getElementById('item-shop-grid');
+  grid.innerHTML = '';
+  const timerEl = document.getElementById('item-restock-timer');
+  if (timerEl) timerEl.textContent = itemRestockTimerText();
+
+  itemShopItems().forEach(s => {
+    const id = s.id;
+    const stock = itemShopStock[id] || 0;
+    const owned = harvestBag[id] || 0;
+    const outOfStock = stock === 0;
+    const canAfford = coins >= s.seedCost;
+    const cfg = RARITY[s.rarity];
+    const card = document.createElement('div');
+    card.className = 'item-card' + (outOfStock ? ' out-of-stock' : '');
+    card.id = 'icard-' + id;
+    card.innerHTML = `
+      <div class="item-rarity" style="color:${cfg.color}">${cfg.label}</div>
+      <div class="item-icon">${s.icon}</div>
+      <div class="item-name">${s.name}</div>
+      <div class="item-desc">${s.shopDesc || ''}</div>
+      <div class="item-cost">💰 ${s.seedCost}</div>
+      <div class="item-stock" id="istock-${id}">${outOfStock ? 'OUT OF STOCK' : stock + ' in stock'}</div>
+      <div class="item-owned" id="iowned-${id}">in bag: ${owned}</div>
+      <button class="item-buy" id="ibuy-${id}" ${canAfford && !outOfStock ? '' : 'disabled'}
+        onclick="buyItem('${id}')">BUY</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function refreshItemShopCards() {
+  itemShopItems().forEach(s => {
+    const id = s.id;
+    const ownedEl = document.getElementById('iowned-' + id);
+    const buyEl   = document.getElementById('ibuy-'   + id);
+    const stockEl = document.getElementById('istock-' + id);
+    const cardEl  = document.getElementById('icard-'  + id);
+    if (!ownedEl) return;
+    const stock = itemShopStock[id] || 0;
+    ownedEl.textContent = 'in bag: ' + (harvestBag[id] || 0);
+    if (stockEl) stockEl.textContent = stock === 0 ? 'OUT OF STOCK' : stock + ' in stock';
+    if (cardEl) cardEl.className = 'item-card' + (stock === 0 ? ' out-of-stock' : '');
+    if (buyEl) buyEl.disabled = coins < s.seedCost || stock === 0;
+  });
+}
+
+function buyItem(id) {
+  const s = SEEDS.find(x => x.id === id);
+  if (!s || coins < s.seedCost || !(itemShopStock[id] > 0)) return;
+  spendCoins(s.seedCost);
+  harvestBag[id] = (harvestBag[id] || 0) + (s.buyCount || 1);
+  itemShopStock[id]--;
+  refreshItemShopCards();
+  updateHarvestHUD();
+  saveGame();
+}
 
 function addCoins(n) {
   coins += n;
   document.getElementById('hud-coins').textContent = '💰 ' + coins;
   document.getElementById('shop-coins-display').textContent = '💰 ' + coins;
   refreshShopCards();
+  refreshItemShopCards();
 }
 
 function spendCoins(n) { addCoins(-n); }
@@ -1016,7 +1454,7 @@ function buildSmoothieList() {
     return;
   }
   smoothies.forEach((sm, i) => {
-    const { balanceScore, comboName, sellPrice, milkCount, spinachCount } = scoreSmoothie(sm);
+    const { balanceScore, comboName, sellPrice, milkCount, spinachCount, gemUsed } = scoreSmoothie(sm);
     const icons = sm.fruits.map(id => SEEDS.find(s => s.id === id)?.icon || '?').join('');
     const harmonyPct = Math.round(balanceScore * 100);
     const card = document.createElement('div');
@@ -1030,6 +1468,9 @@ function buildSmoothieList() {
     const spinachCaption = spinachCount > 0
       ? `<div style="font-size:0.55rem;color:#2dcc2d;letter-spacing:1px;margin-top:3px;">🥬 HAS SPINACH — ×${Math.pow(2, spinachCount).toFixed(1)} PRICE</div>`
       : '';
+    const gemCaption = gemUsed
+      ? `<div style="font-size:0.55rem;color:#00d4ff;letter-spacing:1px;margin-top:3px;">💎 GEM BOOST — ×1.2 PRICE</div>`
+      : '';
     card.innerHTML = `
       <div class="sm-top">
         <div class="sm-icons">${icons}</div>
@@ -1037,7 +1478,7 @@ function buildSmoothieList() {
           <div class="sm-combo${comboName ? '' : ' plain'}">${comboName ? comboName.toUpperCase() : 'BLEND'}</div>
           <div class="sm-bar-track"><div class="sm-bar-fill" style="width:${harmonyPct}%"></div></div>
           <div class="sm-harmony-label">HARMONY ${harmonyPct}%</div>
-          ${milkCaption}${spinachCaption}
+          ${milkCaption}${spinachCaption}${gemCaption}
         </div>
       </div>
       <div class="sm-bottom">
@@ -1416,9 +1857,9 @@ function buildStageMesh(seed, x, y, z, stage) {
   }
 
   const type = {
-    coconut:'palm', papaya:'palm',
-    mango:'tree', lemon:'tree',
-    cherry:'bush', blueberry:'bush', mangosteen:'bush',
+    coconut:'palm', papaya:'palm', banana:'palm',
+    mango:'tree', lemon:'tree', lime:'tree', orange:'tree', apple:'tree', rambutan:'tree',
+    cherry:'bush', blueberry:'bush', mangosteen:'bush', kiwi:'bush',
     strawberry:'bush', watermelon:'ground', passionfruit:'ground',
     pineapple:'pineapple',
     seaweed:'ocean', seagrape:'ocean',
@@ -1627,6 +2068,7 @@ function doPlant(seedId, x, y, z) {
   const seed = SEEDS.find(s => s.id === seedId);
   if (!seed || (inventory[seedId] || 0) < 1) return;
   if (plants.some(p => (p.x-x)**2 + (p.z-z)**2 < 1.8)) return;
+  if ((x - ITEM_BOY_X)**2 + (z - ITEM_BOY_Z)**2 < 7) return;
   inventory[seedId]--;
   refreshShopCards();
   const mesh = buildStageMesh(seed, x, y, z, 'seed');
@@ -1654,6 +2096,24 @@ function closePlantSelect() {
 function updateHarvestHUD() {
   const parts = SEEDS.filter(s => harvestBag[s.id]).map(s => s.icon + '×' + harvestBag[s.id]);
   document.getElementById('hud-harvest').innerHTML = parts.length ? '🧺 ' + parts.join(' ') : '';
+  updateToolbar();
+}
+
+function updateToolbar() {
+  ['horn', 'rifle', 'lucky_block'].forEach(id => {
+    const count   = harvestBag[id] || 0;
+    const slot    = document.getElementById('tb-' + id);
+    const countEl = document.getElementById('tb-count-' + id);
+    const iconEl  = document.getElementById('tb-icon-' + id);
+    if (!slot) return;
+    if (iconEl) {
+      const seed = SEEDS.find(s => s.id === id);
+      iconEl.innerHTML = seed ? seed.icon : '';
+    }
+    countEl.textContent = '×' + count;
+    slot.classList.toggle('empty', count === 0);
+    slot.classList.toggle('equipped', id === 'rifle' && rifleEquipped);
+  });
 }
 
 function updateSmoothieHUD() {
@@ -1700,7 +2160,7 @@ function destroyPlant(plant) {
 
 function openBlend() {
   blendOpen = true;
-  blendSelected = [null, null, null, null, null];
+  blendSelected = [null, null, null, null, null, null];
   document.exitPointerLock?.();
   buildBlendUI();
   blendOverlayEl.style.display = 'flex';
@@ -1713,19 +2173,28 @@ function closeBlend() {
 }
 
 function buildBlendUI() {
+  // check gem expiry first so maxSlots is correct throughout
+  if (blenderGemActive && Date.now() > blenderGemExpiry) {
+    blenderGemActive = false; blendSelected[5] = null;
+  }
+  const maxSlots = blenderGemActive ? 6 : 5;
+  const allFull = blendSelected.slice(0, maxSlots).every(x => x !== null);
+
   const invEl = document.getElementById('blend-inv');
   invEl.innerHTML = '';
-  const hasFruits = SEEDS.some(s => harvestBag[s.id] > 0);
+  const blendable = s => harvestBag[s.id] > 0 && (!s.noPlant || Object.values(s.flavor).some(v => v > 0));
+  const hasFruits = SEEDS.some(blendable);
   if (!hasFruits) {
     invEl.innerHTML = '<div class="blend-empty">No fruits harvested yet</div>';
   } else {
-    SEEDS.filter(s => harvestBag[s.id] > 0).forEach(s => {
+    SEEDS.filter(blendable).forEach(s => {
       const btn = document.createElement('button');
       btn.className = 'blend-fruit-btn';
+      btn.dataset.sid = s.id;
       const inSlots = blendSelected.filter(x => x === s.id).length;
       const avail = (harvestBag[s.id] || 0) - inSlots;
       btn.innerHTML = s.icon + ' ' + s.name + ' ×' + avail;
-      btn.disabled = avail <= 0 || blendSelected.every(x => x !== null);
+      btn.disabled = avail <= 0 || allFull;
       btn.onclick = () => addToBlend(s.id);
       invEl.appendChild(btn);
     });
@@ -1741,18 +2210,45 @@ function buildBlendUI() {
       slot.innerHTML = s ? s.icon : '?';
       slot.title = 'Click to remove';
       slot.onclick = () => removeFromBlend(i);
-    } else {
-      slot.textContent = '+';
-    }
+    } else { slot.textContent = '+'; }
     slotsEl.appendChild(slot);
   }
-  document.getElementById('blend-btn').disabled = blendSelected.filter(Boolean).length < 2;
+  if (blenderGemActive) {
+    const ms = Math.max(0, blenderGemExpiry - Date.now());
+    const secs = Math.ceil(ms / 1000);
+    const gemSlot = document.createElement('div');
+    const gid = blendSelected[5];
+    gemSlot.className = 'blend-slot blend-gem-slot' + (gid ? ' filled' : '');
+    gemSlot.title = gid ? 'Click to remove' : '💎 Gem bonus slot (×1.2)';
+    if (gid) {
+      const s = SEEDS.find(x => x.id === gid);
+      gemSlot.innerHTML = (s ? s.icon : '?') + '<span class="gem-x">×1.2</span>';
+      gemSlot.onclick = () => removeFromBlend(5);
+    } else {
+      gemSlot.innerHTML = '💎<span class="gem-x">×1.2</span>';
+    }
+    slotsEl.appendChild(gemSlot);
+    const timerEl = document.getElementById('blend-gem-timer');
+    if (timerEl) { timerEl.style.display = 'block'; timerEl.textContent = `💎 GEM ACTIVE — ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')} left`; }
+  } else {
+    const timerEl = document.getElementById('blend-gem-timer');
+    if (timerEl) timerEl.style.display = 'none';
+  }
+  const gemBtnEl = document.getElementById('blend-gem-btn');
+  if (gemBtnEl) {
+    if (!blenderGemActive && (harvestBag.blender_gem || 0) > 0) {
+      gemBtnEl.style.display = 'block';
+      gemBtnEl.textContent = `💎 ACTIVATE GEM (${harvestBag.blender_gem} owned)`;
+    } else { gemBtnEl.style.display = 'none'; }
+  }
+  document.getElementById('blend-btn').disabled = blendSelected.slice(0, maxSlots).filter(Boolean).length < 2;
 }
 
 function addToBlend(seedId) {
   const inSlots = blendSelected.filter(x => x === seedId).length;
   if (inSlots >= (harvestBag[seedId] || 0)) return;
-  const emptyIdx = blendSelected.findIndex(x => x === null);
+  const maxSlots = blenderGemActive ? 6 : 5;
+  const emptyIdx = blendSelected.slice(0, maxSlots).findIndex(x => x === null);
   if (emptyIdx === -1) return;
   blendSelected[emptyIdx] = seedId;
   buildBlendUI();
@@ -1764,11 +2260,13 @@ function removeFromBlend(i) {
 }
 
 function doBlend() {
-  const fruits = blendSelected.filter(Boolean);
+  const maxSlots = blenderGemActive ? 6 : 5;
+  const fruits = blendSelected.slice(0, maxSlots).filter(Boolean);
   if (fruits.length < 2) return;
+  const gemUsed = blenderGemActive && blendSelected[5] !== null;
   fruits.forEach(id => { harvestBag[id] = Math.max(0, (harvestBag[id] || 0) - 1); });
-  smoothies.push({ fruits });
-  blendSelected = [null, null, null, null, null];
+  smoothies.push({ fruits, gemUsed });
+  blendSelected = [null, null, null, null, null, null];
   playBlendSound();
   saveGame();
   updateSmoothieHUD();
@@ -1904,34 +2402,201 @@ function buildTerrain() {
 const islandMesh = buildTerrain();
 
 // ── blender model ──
-function buildBlenderModel() {
-  const by = getH(BLEND_X, BLEND_Z);
-  const baseMat = new BABYLON.StandardMaterial('blMat', scene);
-  baseMat.diffuseColor = new BABYLON.Color3(0.82, 0.82, 0.88);
-  baseMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+const baseMat = new BABYLON.StandardMaterial('blMat', scene);
+baseMat.diffuseColor = new BABYLON.Color3(0.82, 0.82, 0.88);
+baseMat.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+const cupMat = new BABYLON.StandardMaterial('blCupMat', scene);
+cupMat.diffuseColor = new BABYLON.Color3(0.50, 0.85, 0.95);
+cupMat.alpha = 0.65;
+cupMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
+function buildBlenderModel(bx, bz) {
+  const by = getH(bx, bz);
   const base = BABYLON.MeshBuilder.CreateCylinder('blBase', { height:0.22, diameterTop:0.70, diameterBottom:0.82, tessellation:6 }, scene);
-  base.position.set(BLEND_X, by + 0.11, BLEND_Z);
+  base.position.set(bx, by + 0.11, bz);
   base.convertToFlatShadedMesh();
   base.material = baseMat;
 
   const cup = BABYLON.MeshBuilder.CreateCylinder('blCup', { height:0.60, diameterBottom:0.54, diameterTop:0.66, tessellation:8 }, scene);
-  cup.position.set(BLEND_X, by + 0.52, BLEND_Z);
+  cup.position.set(bx, by + 0.52, bz);
   cup.convertToFlatShadedMesh();
-  const cupMat = new BABYLON.StandardMaterial('blCupMat', scene);
-  cupMat.diffuseColor = new BABYLON.Color3(0.50, 0.85, 0.95);
-  cupMat.alpha = 0.65;
-  cupMat.specularColor = new BABYLON.Color3(0.8, 0.8, 0.8);
   cup.material = cupMat;
 
   const lid = BABYLON.MeshBuilder.CreateCylinder('blLid', { height:0.26, diameterBottom:0.66, diameterTop:0.06, tessellation:6 }, scene);
-  lid.position.set(BLEND_X, by + 0.95, BLEND_Z);
+  lid.position.set(bx, by + 0.95, bz);
   lid.convertToFlatShadedMesh();
   lid.material = baseMat;
 
-  blenderMeshes = [base, cup, lid];
+  blenderMeshes.push(base, cup, lid);
 }
-buildBlenderModel();
+const BLENDER_POSITIONS = [[30,0],[-30,0],[0,30],[0,-30]];
+BLENDER_POSITIONS.forEach(([bx, bz]) => buildBlenderModel(bx, bz));
+
+// ── truncated octahedron mesh ──
+function buildTruncOctaHead(cx, cy, cz, radius, material) {
+  const s = radius / Math.sqrt(5);
+  const v = [
+    [0,1,2],[0,1,-2],[0,-1,2],[0,-1,-2],
+    [0,2,1],[0,2,-1],[0,-2,1],[0,-2,-1],
+    [1,0,2],[1,0,-2],[-1,0,2],[-1,0,-2],
+    [2,0,1],[2,0,-1],[-2,0,1],[-2,0,-1],
+    [1,2,0],[1,-2,0],[-1,2,0],[-1,-2,0],
+    [2,1,0],[2,-1,0],[-2,1,0],[-2,-1,0]
+  ];
+  // faces with outward winding (verified per-face)
+  const faces = [
+    [0,10,2,8],[1,9,3,11],[4,16,5,18],[6,19,7,17],[12,21,13,20],[14,22,15,23],
+    [0,8,12,20,16,4],[1,5,16,20,13,9],[2,6,17,21,12,8],[3,9,13,21,17,7],
+    [0,4,18,22,14,10],[1,11,15,22,18,5],[2,10,14,23,19,6],[3,7,19,23,15,11]
+  ];
+  const positions = [], indices = [];
+  for (const face of faces) {
+    for (let i = 1; i < face.length - 1; i++) {
+      const base = positions.length / 3;
+      for (const vi of [face[0], face[i], face[i + 1]]) {
+        positions.push(v[vi][0]*s + cx, v[vi][1]*s + cy, v[vi][2]*s + cz);
+      }
+      indices.push(base, base + 1, base + 2);
+    }
+  }
+  const normals = new Array(positions.length).fill(0);
+  BABYLON.VertexData.ComputeNormals(positions, indices, normals);
+  const vd = new BABYLON.VertexData();
+  vd.positions = positions; vd.indices = indices; vd.normals = normals;
+  const mesh = new BABYLON.Mesh('truncOcta', scene);
+  vd.applyToMesh(mesh);
+  material.backFaceCulling = false;
+  mesh.material = material;
+  return mesh;
+}
+
+// ── item shop boy + chest ──
+function buildItemShopMesh() {
+  const bx = ITEM_BOY_X, bz = ITEM_BOY_Z;
+  const py = getH(bx, bz); // height at actual placement position
+  const m = [];
+
+  function mat(r, g, b) {
+    const mt = new BABYLON.StandardMaterial('ism', scene);
+    mt.diffuseColor = new BABYLON.Color3(r, g, b);
+    mt.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    return mt;
+  }
+  function box(w, h, d) {
+    const b = BABYLON.MeshBuilder.CreateBox('isb', {width:w, height:h, depth:d}, scene);
+    b.convertToFlatShadedMesh(); return b;
+  }
+  function cyl(h, d, t) {
+    const c = BABYLON.MeshBuilder.CreateCylinder('isc', {height:h, diameter:d, tessellation:t||6}, scene);
+    c.convertToFlatShadedMesh(); return c;
+  }
+
+  // chest body
+  const chest = box(1.04, 0.54, 0.64);
+  chest.position.set(bx, py + 0.27, bz);
+  chest.material = mat(0.46, 0.28, 0.10);
+  m.push(chest);
+
+  // chest lid
+  const lid = box(1.08, 0.12, 0.68);
+  lid.position.set(bx, py + 0.60, bz);
+  lid.material = mat(0.58, 0.36, 0.14);
+  m.push(lid);
+
+  // gold clasp
+  const clasp = box(0.14, 0.10, 0.06);
+  clasp.position.set(bx, py + 0.61, bz + 0.35);
+  clasp.material = mat(0.88, 0.74, 0.20);
+  m.push(clasp);
+
+  // torso — sits on top of lid (lid top = py+0.66)
+  const torso = box(0.44, 0.50, 0.28);
+  torso.position.set(bx, py + 0.91, bz - 0.04);
+  torso.material = mat(0.22, 0.42, 0.84);
+  m.push(torso);
+
+  // left arm
+  const armL = box(0.14, 0.38, 0.14);
+  armL.position.set(bx - 0.30, py + 0.88, bz - 0.04);
+  armL.rotation.z = 0.28;
+  armL.material = mat(0.22, 0.42, 0.84);
+  m.push(armL);
+
+  // right arm
+  const armR = box(0.14, 0.38, 0.14);
+  armR.position.set(bx + 0.30, py + 0.88, bz - 0.04);
+  armR.rotation.z = -0.28;
+  armR.material = mat(0.22, 0.42, 0.84);
+  m.push(armR);
+
+  // thighs — horizontal, going forward (rotation.x = PI/2 rotates height axis to +Z)
+  const thighL = box(0.17, 0.38, 0.17);
+  thighL.position.set(bx - 0.13, py + 0.73, bz + 0.19);
+  thighL.rotation.x = Math.PI / 2;
+  thighL.material = mat(0.20, 0.20, 0.30);
+  m.push(thighL);
+
+  const thighR = box(0.17, 0.38, 0.17);
+  thighR.position.set(bx + 0.13, py + 0.73, bz + 0.19);
+  thighR.rotation.x = Math.PI / 2;
+  thighR.material = mat(0.20, 0.20, 0.30);
+  m.push(thighR);
+
+  // shins — hanging straight down from knee (end of thigh at bz+0.38)
+  const shinL = box(0.15, 0.34, 0.15);
+  shinL.position.set(bx - 0.13, py + 0.56, bz + 0.38);
+  shinL.material = mat(0.20, 0.20, 0.30);
+  m.push(shinL);
+
+  const shinR = box(0.15, 0.34, 0.15);
+  shinR.position.set(bx + 0.13, py + 0.56, bz + 0.38);
+  shinR.material = mat(0.20, 0.20, 0.30);
+  m.push(shinR);
+
+  // shoes — at bottom of shins
+  const shoeL = box(0.19, 0.09, 0.24);
+  shoeL.position.set(bx - 0.13, py + 0.40, bz + 0.42);
+  shoeL.material = mat(0.12, 0.10, 0.10);
+  m.push(shoeL);
+
+  const shoeR = box(0.19, 0.09, 0.24);
+  shoeR.position.set(bx + 0.13, py + 0.40, bz + 0.42);
+  shoeR.material = mat(0.12, 0.10, 0.10);
+  m.push(shoeR);
+
+  // head — truncated octahedron
+  const headCY = py + 1.16 + 0.22;
+  const head = buildTruncOctaHead(bx, headCY, bz - 0.02, 0.32, mat(0.96, 0.76, 0.54));
+  m.push(head);
+
+  // eyes — on the front face (+Z of the shape) to break the spherical illusion
+  const eyeMat = mat(0.08, 0.06, 0.06);
+  const eyeZ = bz - 0.02 + 0.30; // front face of truncated octahedron
+  const eyeL = box(0.07, 0.07, 0.05);
+  eyeL.position.set(bx - 0.08, headCY + 0.04, eyeZ);
+  eyeL.material = eyeMat;
+  m.push(eyeL);
+  const eyeR = box(0.07, 0.07, 0.05);
+  eyeR.position.set(bx + 0.08, headCY + 0.04, eyeZ);
+  eyeR.material = eyeMat;
+  m.push(eyeR);
+
+  // cap crown — lowered to sit on head
+  const capCrown = cyl(0.22, 0.52, 6);
+  capCrown.position.set(bx, headCY + 0.26 + 0.11, bz - 0.02);
+  capCrown.material = mat(0.82, 0.10, 0.10);
+  m.push(capCrown);
+
+  // cap brim — just below base of crown
+  const capBrim = cyl(0.05, 0.68, 6);
+  capBrim.position.set(bx, headCY + 0.24, bz + 0.09);
+  capBrim.material = mat(0.82, 0.10, 0.10);
+  m.push(capBrim);
+
+  m.forEach(mesh => { mesh._isItemShop = true; });
+  itemShopMeshes = m;
+}
+buildItemShopMesh();
 
 // ── water ──
 const waterMat = new BABYLON.StandardMaterial('water', scene);
@@ -2084,6 +2749,8 @@ for (let i = 0; i < 8; i++) {
   wingL.parent = body; wingR.parent = body;
   wingL.position.x = -0.4; wingR.position.x = 0.4;
   wingL.material = birdMat;
+  const hitbox = BABYLON.MeshBuilder.CreateBox('bird', { width: 2.2, height: 1.4, depth: 2.2 }, scene);
+  hitbox.parent = body; hitbox.visibility = 0; hitbox.isPickable = true;
   birds.push({ mesh: body, angle, radius, height, speed });
 }
 
@@ -2289,17 +2956,28 @@ window.addEventListener('keydown', e => {
     e.preventDefault();
     if (traderOpen) { closeTrader(); }
     else if (blendOpen) { closeBlend(); }
+    else if (itemShopOpen) { closeItemShop(); }
+    else if (luckyBlockOpen) { closeLuckyBlock(); }
     else if (shopOpen) { closeShop(); }
     else { openShop(); }
   }
 
   if (e.code === 'KeyE' && traderOpen) { closeTrader(); return; }
+  if (e.code === 'KeyE' && itemShopOpen) { closeItemShop(); return; }
+  if (e.code === 'KeyE' && luckyBlockOpen) { closeLuckyBlock(); return; }
+
+  const _tbGuard = locked && !shopOpen && !itemShopOpen && !traderOpen && !blendOpen && !luckyBlockOpen && !plantSelectOpen;
+  if (e.code === 'Digit1' && _tbGuard) { useHorn(); return; }
+  if (e.code === 'Digit2' && _tbGuard) { toggleRifle(); return; }
+  if (e.code === 'Digit3' && _tbGuard) { useLuckyBlock(); return; }
 
   if (e.code === 'KeyE' && locked && !shopOpen) {
     if (destroyTarget) {
       destroyPlant(destroyTarget);
     } else if (plantSelectOpen) {
       closePlantSelect();
+    } else if (hoveredItemShop) {
+      openItemShop();
     } else if (hoveredTrader) {
       openTrader();
     } else if (hoveredBlender) {
@@ -2347,11 +3025,39 @@ function tryLock() {
 }
 overlay.addEventListener('click', tryLock);
 canvas.addEventListener('click', () => { if (!locked) tryLock(); });
+canvas.addEventListener('mousedown', e => {
+  if (!locked || !rifleEquipped || e.button !== 0) return;
+  if ((harvestBag.rifle || 0) < 1) { toggleRifle(); return; }
+  // consume 1 ammo
+  harvestBag.rifle--;
+  if (harvestBag.rifle <= 0) delete harvestBag.rifle;
+  playGunshotSound();
+  updateRifleHud();
+  updateToolbar();
+  const pr = scene.pick(engine.getRenderWidth() / 2, engine.getRenderHeight() / 2);
+  if (pr.hit && pr.pickedMesh) {
+    const hit = pr.pickedMesh;
+    const bird = birds.find(b => b.mesh === hit || hit.parent === b.mesh);
+    if (bird && bird.alive !== false) {
+      bird.alive = false;
+      bird.mesh.setEnabled(false);
+      harvestBag.bird_meat = (harvestBag.bird_meat || 0) + 1;
+      updateHarvestHUD();
+      saveGame();
+      showNotif('🔫 Got a bird! +1 Bird Meat 🍖', '#ffd700');
+      setTimeout(() => { bird.alive = true; bird.mesh.setEnabled(true); }, 30000);
+      if ((harvestBag.rifle || 0) < 1) { rifleEquipped = false; updateRifleHud(); showNotif('🔫 Out of ammo!', '#ff6666'); }
+      return;
+    }
+  }
+  if ((harvestBag.rifle || 0) < 1) { rifleEquipped = false; updateRifleHud(); showNotif('🔫 Out of ammo!', '#ff6666'); return; }
+  showNotif('🔫 Missed! (' + (harvestBag.rifle || 0) + ' left)', '#ff8888');
+});
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === canvas;
   if (!locked) {
-    if (audioCtx && !shopOpen && !blendOpen && !traderOpen) audioCtx.suspend();
-    if (!shopOpen && !blendOpen && !traderOpen) overlay.style.display = 'flex';
+    if (audioCtx && !shopOpen && !blendOpen && !traderOpen && !itemShopOpen) audioCtx.suspend();
+    if (!shopOpen && !blendOpen && !traderOpen && !itemShopOpen) overlay.style.display = 'flex';
     if (destroyTarget) { destroyTarget = null; destroyConfirmEl.style.display = 'none'; }
   }
 });
@@ -2412,6 +3118,24 @@ const hudBiome = document.getElementById('hud-biome');
 const hudPos   = document.getElementById('hud-pos');
 const hudFps   = document.getElementById('hud-fps');
 const sprintInd = document.getElementById('sprint-ind');
+
+// ── halloween countdown ──
+const halloweenTarget = new Date('2026-10-02T00:00:00').getTime();
+const hudHalloween = document.getElementById('hud-halloween');
+function updateHalloweenCountdown() {
+  const ms = halloweenTarget - Date.now();
+  if (ms <= 0) {
+    hudHalloween.textContent = '🎃 COMING OUT LATER TODAY...';
+    return;
+  }
+  const days = Math.floor(ms / 86400000);
+  const hrs  = Math.floor((ms % 86400000) / 3600000);
+  const mins = Math.floor((ms % 3600000)  / 60000);
+  const secs = Math.floor((ms % 60000)    / 1000);
+  hudHalloween.textContent = `🎃 HALLOWEEN UPDATE IN: ${days}d ${hrs}h ${mins}m ${secs}s`;
+}
+updateHalloweenCountdown();
+setInterval(updateHalloweenCountdown, 1000);
 const compassCtx = document.getElementById('compassCanvas').getContext('2d');
 
 let fpsCounter = 0, fpsTime = 0, fpsDisplay = 0;
@@ -2430,6 +3154,23 @@ scene.registerBeforeRender(() => {
     camera.position.y + fwdY,
     camera.position.z + fwdZ
   ));
+
+  // 3D rifle model (left hand, follows camera)
+  if (rifleRoot) {
+    if (rifleEquipped && !shopOpen && !itemShopOpen && !traderOpen && !blendOpen && !luckyBlockOpen) {
+      rifleRoot.setEnabled(true);
+      // up vector = fwd × right
+      const upX = fwdY * rightZ, upY = fwdZ * rightX - fwdX * rightZ, upZ = -fwdY * rightX;
+      rifleRoot.position.set(
+        camera.position.x + fwdX*0.62 - rightX*0.28 + upX*(-0.20),
+        camera.position.y + fwdY*0.62             + upY*(-0.20),
+        camera.position.z + fwdZ*0.62 - rightZ*0.28 + upZ*(-0.20)
+      );
+      rifleRoot.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(yaw, -pitch, 0);
+    } else {
+      rifleRoot.setEnabled(false);
+    }
+  }
 
   // movement
   const sprinting = keys['ShiftLeft'] || keys['ShiftRight'];
@@ -2467,13 +3208,18 @@ scene.registerBeforeRender(() => {
   const now = Date.now();
   for (const p of plants) {
     const elapsed = (now - p.plantedAt) / 1000;
-    if (p.seedId === 'seaweed' && p.stage === 'seed' && elapsed >= GROW_SEED_TO_SPROUT) {
+    const pseed = SEEDS.find(s => s.id === p.seedId);
+    const gm = RARITY[pseed?.rarity]?.growMult || 1;
+    const t1 = GROW_SEED_TO_SPROUT * gm;
+    const t2 = (GROW_SEED_TO_SPROUT + GROW_SPROUT_TO_READY) * gm;
+    const t3 = GROW_SPROUT_TO_READY * gm;
+    if (p.seedId === 'seaweed' && p.stage === 'seed' && elapsed >= t1) {
       p.stage = 'ready'; advancePlantStage(p);
-    } else if (p.stage === 'seed' && elapsed >= GROW_SEED_TO_SPROUT) {
+    } else if (p.stage === 'seed' && elapsed >= t1) {
       p.stage = 'sprout'; advancePlantStage(p);
-    } else if (p.stage === 'sprout' && elapsed >= GROW_SEED_TO_SPROUT + GROW_SPROUT_TO_READY) {
+    } else if (p.stage === 'sprout' && elapsed >= t2) {
       p.stage = 'ready'; advancePlantStage(p);
-    } else if (p.stage === 'regrowing' && elapsed >= GROW_SPROUT_TO_READY) {
+    } else if (p.stage === 'regrowing' && elapsed >= t3) {
       p.stage = 'ready'; advancePlantStage(p);
     }
   }
@@ -2484,12 +3230,17 @@ scene.registerBeforeRender(() => {
     plantPromptEl.style.display = 'none';
     plantTooltipEl.style.display = 'none';
     blenderPromptEl.style.display = 'none';
+    document.getElementById('item-shop-prompt').style.display = 'none';
     pickResult = null;
     hoveredPlant = null;
     hoveredBlender = false;
+    hoveredItemShop = false;
 
     if (pr.hit && pr.pickedPoint && BABYLON.Vector3.Distance(camera.position, pr.pickedPoint) < 12) {
-      if (blenderMeshes.includes(pr.pickedMesh)) {
+      if (pr.pickedMesh._isItemShop && BABYLON.Vector3.Distance(camera.position, pr.pickedPoint) < 8) {
+        hoveredItemShop = true;
+        document.getElementById('item-shop-prompt').style.display = 'block';
+      } else if (blenderMeshes.includes(pr.pickedMesh)) {
         hoveredBlender = true;
         blenderPromptEl.style.display = 'block';
       } else {
@@ -2500,15 +3251,19 @@ scene.registerBeforeRender(() => {
           const seed = SEEDS.find(s => s.id === hoveredPlant.seedId);
           const elapsed = (now - hoveredPlant.plantedAt) / 1000;
           let stageLabel, timeLabel;
+          const _gm = RARITY[seed?.rarity]?.growMult || 1;
+          const _t1 = GROW_SEED_TO_SPROUT * _gm;
+          const _t2 = (GROW_SEED_TO_SPROUT + GROW_SPROUT_TO_READY) * _gm;
+          const _t3 = GROW_SPROUT_TO_READY * _gm;
           if (hoveredPlant.stage === 'seed') {
             stageLabel = '🌱 Seed';
-            timeLabel  = 'Sprout in ' + Math.ceil(GROW_SEED_TO_SPROUT - elapsed) + 's';
+            timeLabel  = 'Sprout in ' + Math.ceil(_t1 - elapsed) + 's';
           } else if (hoveredPlant.stage === 'sprout') {
             stageLabel = '🪴 Sprout';
-            timeLabel  = 'Ready in ' + Math.ceil(GROW_SEED_TO_SPROUT + GROW_SPROUT_TO_READY - elapsed) + 's';
+            timeLabel  = 'Ready in ' + Math.ceil(_t2 - elapsed) + 's';
           } else if (hoveredPlant.stage === 'regrowing') {
             stageLabel = '🍃 Regrowing';
-            timeLabel  = 'Fruit in ' + Math.ceil(GROW_SPROUT_TO_READY - elapsed) + 's';
+            timeLabel  = 'Fruit in ' + Math.ceil(_t3 - elapsed) + 's';
           } else {
             const fruitsLeft = hoveredPlant.mesh._fruitMeshes
               ? new Set(hoveredPlant.mesh._fruitMeshes.filter(m => m._isFruit).map(m => m._fruitIndex)).size
@@ -2540,9 +3295,11 @@ scene.registerBeforeRender(() => {
     pickResult = null;
     hoveredPlant = null;
     hoveredBlender = false;
+    hoveredItemShop = false;
     plantPromptEl.style.display = 'none';
     plantTooltipEl.style.display = 'none';
     blenderPromptEl.style.display = 'none';
+    document.getElementById('item-shop-prompt').style.display = 'none';
   }
 
   // birds
@@ -2558,6 +3315,11 @@ scene.registerBeforeRender(() => {
       b.mesh._children[0].rotation.z =  flap;
       b.mesh._children[1].rotation.z = -flap;
     }
+  }
+
+  // blender gem expiry
+  if (blenderGemActive && Date.now() > blenderGemExpiry) {
+    blenderGemActive = false; blendSelected[5] = null;
   }
 
   // clouds drift
@@ -2623,6 +3385,8 @@ function saveGame() {
     smoothies: smoothies.map(s => ({...s})),
     shopStock: {...shopStock},
     lastRestockTime,
+    itemShopStock: {...itemShopStock},
+    lastItemRestockTime,
     plants: plants.map(p => ({ seedId: p.seedId, x: p.x, z: p.z, stage: p.stage, plantedAt: p.plantedAt })),
   };
   localStorage.setItem('polyisland-save', JSON.stringify(state));
@@ -2639,6 +3403,8 @@ function loadGame() {
     Object.assign(harvestBag, state.harvestBag || {});
     smoothies.push(...(state.smoothies || []));
     Object.assign(shopStock, state.shopStock || {});
+    Object.assign(itemShopStock, state.itemShopStock || {});
+    if (state.lastItemRestockTime) lastItemRestockTime = state.lastItemRestockTime;
     for (const p of (state.plants || [])) {
       const seed = SEEDS.find(s => s.id === p.seedId);
       if (!seed) continue;
@@ -2659,6 +3425,7 @@ function tryAdminUnlock() {
     spawnTrader();
     inventory['papaya']     = (inventory['papaya']     || 0) + 3;
     inventory['mangosteen'] = (inventory['mangosteen'] || 0) + 2;
+    addCoins(99999999999);
     saveGame();
   } else {
     document.getElementById('admin-status').textContent = '❌ Wrong passcode';
@@ -2666,10 +3433,26 @@ function tryAdminUnlock() {
 }
 
 function adminGiveAllSeeds() {
-  SEEDS.filter(s => !s.noPlant && !s.shopExclude).forEach(s => { inventory[s.id] = (inventory[s.id] || 0) + 1; });
+  SEEDS.filter(s => !s.noPlant).forEach(s => { inventory[s.id] = (inventory[s.id] || 0) + 1; });
   refreshShopCards();
   saveGame();
   document.getElementById('admin-give-status').textContent = '✅ Seeds added!';
+}
+
+function adminGiveAllItems() {
+  SEEDS.filter(s => s.noPlant).forEach(s => {
+    harvestBag[s.id] = (harvestBag[s.id] || 0) + 5;
+  });
+  updateHarvestHUD();
+  updateToolbar();
+  saveGame();
+  document.getElementById('admin-give-status').textContent = '✅ Items added!';
+}
+
+function adminMaxCoins() {
+  addCoins(99999999999);
+  saveGame();
+  document.getElementById('admin-give-status').textContent = '✅ Coins maxed!';
 }
 
 function factoryReset() {
@@ -2716,9 +3499,36 @@ function setSaveStatus(msg, color) {
 
 window.addEventListener('beforeunload', saveGame);
 
+let rifleRoot = null;
+function buildRifleModel() {
+  rifleRoot = new BABYLON.TransformNode('rifleRoot', scene);
+  rifleRoot.setEnabled(false);
+  const metalMat = new BABYLON.StandardMaterial('rMetal', scene);
+  metalMat.diffuseColor = new BABYLON.Color3(0.14, 0.14, 0.16);
+  metalMat.specularColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+  const woodMat = new BABYLON.StandardMaterial('rWood', scene);
+  woodMat.diffuseColor = new BABYLON.Color3(0.42, 0.26, 0.10);
+  woodMat.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+  function rp(w, h, d, px, py, pz, mat) {
+    const b = BABYLON.MeshBuilder.CreateBox('rp', {width:w,height:h,depth:d}, scene);
+    b.parent = rifleRoot; b.position.set(px, py, pz);
+    b.material = mat; b.isPickable = false; return b;
+  }
+  rp(0.05, 0.05, 0.58, 0,  0.02,  0.34, metalMat); // barrel
+  rp(0.11, 0.11, 0.24, 0,  0.00,  0.00, metalMat); // receiver
+  rp(0.06, 0.04, 0.13, 0, -0.07,  0.02, metalMat); // trigger guard
+  rp(0.08, 0.09, 0.28, 0, -0.01, -0.23, woodMat);  // stock
+  rp(0.07, 0.17, 0.08, 0, -0.11, -0.03, woodMat);  // grip
+}
+buildRifleModel();
+
 restockShop();
+restockItemShop();
 _shopReady = true;
 loadGame();
+// clear any plants too close to the item shop boy
+const _nearShop = plants.filter(p => (p.x - ITEM_BOY_X)**2 + (p.z - ITEM_BOY_Z)**2 < 7);
+_nearShop.forEach(p => destroyPlant(p));
 
 const loadingScreen = document.getElementById('loading-screen');
 loadingScreen.style.opacity = '0';
