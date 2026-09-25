@@ -446,6 +446,56 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   cursor: pointer; letter-spacing: 2px;
 }
 #item-shop-close:hover { background: #8ab4d8; color: #000; }
+
+/* ── tutorial ── */
+#tutorial-overlay {
+  display: none; position: fixed; inset: 0; z-index: 99998;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.7);
+}
+#tutorial-panel {
+  background: #0d1a12; border: 2px solid #52b788; border-radius: 12px;
+  padding: 32px 36px; width: 480px; max-width: 94vw;
+  font-family: monospace; color: #d0ffd0; text-align: center;
+}
+#tutorial-step-num { font-size: 10px; color: #52b788; letter-spacing: 2px; margin-bottom: 14px; }
+#tutorial-icon { font-size: 42px; margin-bottom: 12px; }
+#tutorial-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 12px; letter-spacing: 1px; }
+#tutorial-body { font-size: 12px; line-height: 2; color: #ccc; margin-bottom: 24px; }
+#tutorial-btns { display: flex; gap: 10px; }
+#tutorial-skip { flex: 1; padding: 10px; background: transparent; border: 1px solid #445; color: #667; font-family: monospace; font-size: 11px; border-radius: 6px; cursor: pointer; letter-spacing: 1px; }
+#tutorial-skip:hover { border-color: #888; color: #aaa; }
+#tutorial-next { flex: 2; padding: 10px; background: #52b788; color: #000; border: none; font-family: monospace; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; letter-spacing: 1px; }
+#tutorial-next:hover { background: #74c69d; }
+#tutorial-hint-bar {
+  display: none; position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+  z-index: 99998; background: rgba(0,0,0,0.88); border: 1px solid #52b788;
+  border-radius: 10px; padding: 12px 20px; font-family: monospace;
+  align-items: center; gap: 14px; white-space: nowrap;
+}
+#tutorial-hint-text { font-size: 12px; color: #fff; }
+#tutorial-hint-skip {
+  background: transparent; border: 1px solid #445; color: #667;
+  font-family: monospace; font-size: 10px; border-radius: 4px;
+  padding: 4px 10px; cursor: pointer; letter-spacing: 1px;
+}
+#tutorial-hint-skip:hover { border-color: #888; color: #aaa; }
+#tutorial-spotlight {
+  display: none; position: fixed; inset: 0; z-index: 9996;
+  background: rgba(0,0,0,0.78); pointer-events: none;
+}
+#shop-grid.tut-active .seed-card { opacity: 0.18; pointer-events: none; }
+#shop-grid.tut-active .seed-card.tutorial-highlight {
+  opacity: 1; pointer-events: auto;
+  box-shadow: 0 0 0 2px #ffe600, 0 0 28px rgba(255,230,0,0.55) !important;
+  border-color: #ffe600 !important;
+}
+#smoothie-list.tut-active .smoothie-card { opacity: 0.18; pointer-events: none; }
+#smoothie-list.tut-active .smoothie-card.tutorial-highlight {
+  opacity: 1; pointer-events: auto;
+  box-shadow: 0 0 0 2px #ffe600, 0 0 28px rgba(255,230,0,0.55) !important;
+  border-color: #ffe600 !important;
+}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -521,6 +571,25 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   <div></div><div class="poly-btn" id="poly-up">↑</div><div></div>
   <div class="poly-btn" id="poly-left">←</div><div></div><div class="poly-btn" id="poly-right">→</div>
   <div></div><div class="poly-btn" id="poly-down">↓</div><div></div>
+</div>
+
+<div id="tutorial-overlay">
+  <div id="tutorial-panel">
+    <div id="tutorial-step-num"></div>
+    <div id="tutorial-icon"></div>
+    <div id="tutorial-title"></div>
+    <div id="tutorial-body"></div>
+    <div id="tutorial-btns">
+      <button id="tutorial-skip" onclick="skipTutorial()">SKIP</button>
+      <button id="tutorial-next" onclick="nextTutorialStep()">NEXT →</button>
+    </div>
+  </div>
+</div>
+<div id="tutorial-spotlight"></div>
+<div id="tutorial-hint-bar">
+  <span id="tutorial-hint-icon" style="font-size:20px"></span>
+  <span id="tutorial-hint-text"></span>
+  <button id="tutorial-hint-skip" onclick="skipTutorial()">SKIP</button>
 </div>
 
 <div id="start-overlay">
@@ -3560,6 +3629,234 @@ function loadGame() {
 }
 
 
+const TUTORIAL_STEPS = [
+  { mode:'click',          icon:'🌴', title:'WELCOME TO POLYISLAND!', body:'Explore the island, grow fruits, blend smoothies, and earn coins.<br><br>Follow along to learn the basics!', btn:'BEGIN →' },
+  { mode:'wasd',           icon:'🕹️', hint:'Press <b>W A S D</b> to walk around...' },
+  { mode:'tab',            icon:'🛒', hint:'Press <b>TAB</b> to open the shop...' },
+  { mode:'buy_strawberry', icon:'🍓', hint:'Buy a <b>strawberry</b> 🍓 with your coins...' },
+  { mode:'shop_close',     icon:'🚪', hint:'Close the shop when you\'re done...' },
+  { mode:'plant',          icon:'🌱', hint:'Walk to the <b>Grassland</b> biome (<b>SHIFT</b> to sprint) and press <b>E</b> to plant...' },
+  { mode:'horn',           icon:'📯', hint:'Press <b>1</b> to use the French Horn — instantly grows nearby plants!' },
+  { mode:'harvest',        icon:'🍓', hint:'Walk to your plant and press <b>E</b> to harvest it...' },
+  { mode:'blend_open',     icon:'🍹', hint:'Find a blender on the island and press <b>E</b> to open it...' },
+  { mode:'blend',          icon:'🔀', hint:'Add your fruits to the slots, then press <b>BLEND</b>...' },
+  { mode:'sell',           icon:'💰', hint:'Close blender · Press <b>TAB</b> · Go to <b>SMOOTHIES</b> · Press <b>SELL</b>!' },
+  { mode:'click', icon:'🎉', title:"YOU'RE ALL SET!", body:'Sell smoothies for coins, buy more seeds, and grow your island!<br><br>Good luck! 🌴', btn:"LET'S GO! 🌴" },
+];
+let _tutStep = 0;
+let _tutObserver = null;
+let _tutListeners = [];
+let _tutIntervals = [];
+
+function showTutorial() {
+  _tutStep = 0;
+  if (!hornOwned && (harvestBag.horn || 0) < 1) {
+    harvestBag.horn = 1;
+    updateToolbar();
+  }
+  _showTutStep();
+}
+
+function playTutorialYay() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.11;
+      gain.gain.setValueAtTime(0.25, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      osc.start(t); osc.stop(t + 0.28);
+    });
+  } catch(e) {}
+}
+
+function _applyTutSpotlight(type) {
+  document.getElementById('tutorial-spotlight').style.display = 'block';
+  if (type === 'smoothie') {
+    openTab('smoothies');
+    const list = document.getElementById('smoothie-list');
+    if (list) {
+      list.classList.add('tut-active');
+      list.querySelectorAll('.smoothie-card').forEach(c => c.classList.add('tutorial-highlight'));
+    }
+  } else {
+    const grid = document.getElementById('shop-grid');
+    if (grid) grid.classList.add('tut-active');
+    document.querySelectorAll('.seed-card').forEach(c => {
+      if (c.textContent.includes('🍓')) c.classList.add('tutorial-highlight');
+    });
+  }
+}
+
+function _removeTutSpotlight() {
+  document.getElementById('tutorial-spotlight').style.display = 'none';
+  const grid = document.getElementById('shop-grid');
+  if (grid) grid.classList.remove('tut-active');
+  const list = document.getElementById('smoothie-list');
+  if (list) list.classList.remove('tut-active');
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+}
+
+function _showTutStep() {
+  _cleanTutListeners();
+  const s = TUTORIAL_STEPS[_tutStep];
+  if (s.mode === 'click') {
+    document.exitPointerLock();
+    document.getElementById('tutorial-hint-bar').style.display = 'none';
+    document.getElementById('tutorial-overlay').style.display = 'flex';
+    document.getElementById('tutorial-step-num').textContent = 'STEP ' + (_tutStep + 1) + ' OF ' + TUTORIAL_STEPS.length;
+    document.getElementById('tutorial-icon').textContent = s.icon;
+    document.getElementById('tutorial-title').textContent = s.title;
+    document.getElementById('tutorial-body').innerHTML = s.body;
+    document.getElementById('tutorial-next').textContent = s.btn || 'NEXT →';
+  } else {
+    document.getElementById('tutorial-overlay').style.display = 'none';
+    document.getElementById('tutorial-hint-icon').textContent = s.icon;
+    document.getElementById('tutorial-hint-text').innerHTML = s.hint;
+    document.getElementById('tutorial-hint-bar').style.display = 'flex';
+    _setupTutListener(s.mode);
+  }
+}
+
+function _setupTutListener(mode) {
+  if (mode === 'wasd') {
+    const fn = e => { if ('wasdWASD'.includes(e.key) && e.key.length === 1) _advanceTut(); };
+    document.addEventListener('keydown', fn);
+    _tutListeners.push(['keydown', fn]);
+
+  } else if (mode === 'tab') {
+    const fn = e => { if (e.key === 'Tab') _advanceTut(); };
+    document.addEventListener('keydown', fn);
+    _tutListeners.push(['keydown', fn]);
+
+  } else if (mode === 'buy_strawberry') {
+    const shopEl = document.getElementById('shop-overlay');
+    const tryBind = () => {
+      document.querySelectorAll('.seed-card').forEach(c => {
+        if (c.textContent.includes('🍓') && !c._tutBound) {
+          c._tutBound = true;
+          const btn = c.querySelector('.seed-buy');
+          if (btn) btn.addEventListener('click', () => _advanceTut(), { once: true });
+        }
+      });
+    };
+    const clickFn = e => {
+      if (e.target.classList.contains('seed-buy')) {
+        const card = e.target.closest('.seed-card');
+        if (card && card.textContent.includes('🍓')) _advanceTut();
+      }
+    };
+    document.addEventListener('click', clickFn);
+    _tutListeners.push(['click', clickFn]);
+    _tutObserver = new MutationObserver(() => {
+      const open = shopEl.style.display === 'flex';
+      if (open) { setTimeout(() => { _applyTutSpotlight('seed'); tryBind(); }, 80); }
+      else _removeTutSpotlight();
+    });
+    _tutObserver.observe(shopEl, { attributes: true, attributeFilter: ['style'] });
+    if (shopEl.style.display === 'flex') setTimeout(() => { _applyTutSpotlight('seed'); tryBind(); }, 80);
+
+  } else if (mode === 'shop_close') {
+    const el = document.getElementById('shop-overlay');
+    let wasOpen = el.style.display === 'flex';
+    _tutObserver = new MutationObserver(() => {
+      const open = el.style.display === 'flex';
+      if (wasOpen && !open) _advanceTut();
+      wasOpen = open;
+    });
+    _tutObserver.observe(el, { attributes: true, attributeFilter: ['style'] });
+
+  } else if (mode === 'plant') {
+    const fn = e => {
+      if (e.key === 'e' || e.key === 'E') {
+        const prompt = document.getElementById('plant-prompt');
+        if (prompt && prompt.style.display !== 'none') _advanceTut();
+      }
+    };
+    document.addEventListener('keydown', fn);
+    _tutListeners.push(['keydown', fn]);
+
+  } else if (mode === 'horn') {
+    const fn = e => { if (e.code === 'Digit1') _advanceTut(); };
+    document.addEventListener('keydown', fn);
+    _tutListeners.push(['keydown', fn]);
+
+  } else if (mode === 'harvest') {
+    const initial = harvestBag['strawberry'] || 0;
+    const target = initial + 4;
+    const updateCount = () => {
+      const n = Math.min((harvestBag['strawberry'] || 0) - initial, 4);
+      document.getElementById('tutorial-hint-text').innerHTML = `Walk to your plant and press <b>E</b> to pick strawberries (${n}/4)...`;
+    };
+    updateCount();
+    const iv = setInterval(() => {
+      updateCount();
+      if ((harvestBag['strawberry'] || 0) >= target) { clearInterval(iv); _advanceTut(); }
+    }, 300);
+    _tutIntervals.push(iv);
+
+  } else if (mode === 'blend_open') {
+    const el = document.getElementById('blend-overlay');
+    _tutObserver = new MutationObserver(() => {
+      if (el.style.display === 'flex') _advanceTut();
+    });
+    _tutObserver.observe(el, { attributes: true, attributeFilter: ['style'] });
+
+  } else if (mode === 'blend') {
+    const prevCount = smoothies.length;
+    const iv = setInterval(() => {
+      if (smoothies.length > prevCount) { clearInterval(iv); setTimeout(() => _advanceTut(), 850); }
+    }, 200);
+    _tutIntervals.push(iv);
+
+  } else if (mode === 'sell') {
+    const shopEl = document.getElementById('shop-overlay');
+    const applySmooth = () => setTimeout(() => _applyTutSpotlight('smoothie'), 80);
+    _tutObserver = new MutationObserver(() => {
+      if (shopEl.style.display === 'flex') applySmooth();
+      else _removeTutSpotlight();
+    });
+    _tutObserver.observe(shopEl, { attributes: true, attributeFilter: ['style'] });
+    if (shopEl.style.display === 'flex') applySmooth();
+    const fn = e => {
+      if (e.target.classList.contains('sm-sell-btn')) _advanceTut();
+    };
+    document.addEventListener('click', fn);
+    _tutListeners.push(['click', fn]);
+  }
+}
+
+function _advanceTut() {
+  _cleanTutListeners();
+  _removeTutSpotlight();
+  playTutorialYay();
+  _tutStep++;
+  if (_tutStep >= TUTORIAL_STEPS.length) { skipTutorial(); return; }
+  _showTutStep();
+}
+
+function _cleanTutListeners() {
+  _tutListeners.forEach(([t, fn]) => document.removeEventListener(t, fn));
+  _tutListeners = [];
+  _tutIntervals.forEach(iv => clearInterval(iv));
+  _tutIntervals = [];
+  if (_tutObserver) { _tutObserver.disconnect(); _tutObserver = null; }
+  document.querySelectorAll('._tutBound').forEach(el => delete el._tutBound);
+}
+
+function nextTutorialStep() { _advanceTut(); }
+
+function skipTutorial() {
+  _cleanTutListeners();
+  _removeTutSpotlight();
+  document.getElementById('tutorial-overlay').style.display = 'none';
+  document.getElementById('tutorial-hint-bar').style.display = 'none';
+  localStorage.setItem('polyisland-tutorial-seen', '1');
+}
+
 function factoryReset() {
   if (!confirm('FACTORY RESET: This permanently deletes your world and disables auto-save. Click Explore to start a brand new world.')) return;
   localStorage.removeItem('polyisland-save');
@@ -3639,7 +3936,10 @@ _nearShop.forEach(p => destroyPlant(p));
 
 const loadingScreen = document.getElementById('loading-screen');
 loadingScreen.style.opacity = '0';
-setTimeout(() => loadingScreen.style.display = 'none', 450);
+setTimeout(() => {
+  loadingScreen.style.display = 'none';
+  if (!localStorage.getItem('polyisland-tutorial-seen')) showTutorial();
+}, 450);
 
 engine.runRenderLoop(() => scene.render());
 window.addEventListener('resize', () => engine.resize());
