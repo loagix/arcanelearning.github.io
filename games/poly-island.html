@@ -135,28 +135,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   font-size: 11px; border-radius: 6px; cursor: pointer; letter-spacing: 2px;
 }
 #shop-factory-reset:hover { background: #ff2222; color: #fff; }
-#admin-section { margin-top: 16px; border-top: 1px solid #1a3328; padding-top: 12px; }
-#admin-label { font-size: 10px; color: #445; letter-spacing: 2px; margin-bottom: 8px; }
-#admin-input {
-  width: 100%; padding: 7px; background: #0a1a0f; border: 1px solid #1a3328;
-  border-radius: 6px; color: #74c69d; font-family: monospace; font-size: 11px;
-  margin-bottom: 6px; box-sizing: border-box;
-}
-#admin-unlock-btn {
-  width: 100%; padding: 8px; background: transparent; border: 1px solid #2d5a3d;
-  color: #52b788; font-family: monospace; font-size: 11px; border-radius: 6px;
-  cursor: pointer; letter-spacing: 2px; margin-bottom: 4px;
-}
-#admin-unlock-btn:hover { background: #2d5a3d; }
-#admin-status { font-size: 10px; min-height: 14px; color: #cc4444; margin-bottom: 4px; }
-#admin-controls { display: none; }
-#admin-give-btn {
-  width: 100%; padding: 8px; background: transparent; border: 1px solid #ffe600;
-  color: #ffe600; font-family: monospace; font-size: 11px; border-radius: 6px;
-  cursor: pointer; letter-spacing: 1px;
-}
-#admin-give-btn:hover { background: #ffe600; color: #000; }
-#admin-give-status { font-size: 10px; color: #52b788; margin-top: 4px; min-height: 14px; }
 #save-section { margin: 12px 0 6px; display: flex; flex-direction: column; gap: 6px; }
 #save-info { font-size: 9px; color: #778; line-height: 1.6; text-align: center; padding: 0 4px; }
 #save-export-btn, #save-import-btn {
@@ -707,21 +685,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
       </div>
       <button id="shop-factory-reset" onclick="factoryReset()">☠ FACTORY RESET — DELETE WORLD PERMANENTLY</button>
 
-      <div id="admin-section">
-        <div id="admin-label">⚙ ADMIN PANEL</div>
-        <div id="admin-lock">
-          <input id="admin-input" type="password" placeholder="Enter passcode...">
-          <button id="admin-unlock-btn" onclick="tryAdminUnlock()">UNLOCK</button>
-          <div id="admin-status"></div>
-        </div>
-        <div id="admin-controls">
-          <div style="font-size:10px;color:#52b788;margin-bottom:8px;letter-spacing:1px;">✅ ADMIN UNLOCKED</div>
-          <button id="admin-give-btn" onclick="adminGiveAllSeeds()">🌱 GIVE ALL SEEDS (×1 each)</button>
-          <button id="admin-give-btn" onclick="adminGiveAllItems()" style="margin-top:6px">🎒 GIVE ALL ITEMS (×5 each)</button>
-          <button id="admin-give-btn" onclick="adminMaxCoins()" style="margin-top:6px">💰 MAX COINS</button>
-          <div id="admin-give-status"></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -3596,43 +3559,6 @@ function loadGame() {
   updateHarvestHUD();
 }
 
-function tryAdminUnlock() {
-  const val = document.getElementById('admin-input').value;
-  if (val === 'L0AGIXHUBADMIN11!@') {
-    document.getElementById('admin-lock').style.display = 'none';
-    document.getElementById('admin-controls').style.display = 'block';
-    spawnTrader();
-    inventory['papaya']     = (inventory['papaya']     || 0) + 3;
-    inventory['mangosteen'] = (inventory['mangosteen'] || 0) + 2;
-    addCoins(99999999999);
-    saveGame();
-  } else {
-    document.getElementById('admin-status').textContent = '❌ Wrong passcode';
-  }
-}
-
-function adminGiveAllSeeds() {
-  SEEDS.filter(s => !s.noPlant).forEach(s => { inventory[s.id] = (inventory[s.id] || 0) + 1; });
-  refreshShopCards();
-  saveGame();
-  document.getElementById('admin-give-status').textContent = '✅ Seeds added!';
-}
-
-function adminGiveAllItems() {
-  SEEDS.filter(s => s.noPlant).forEach(s => {
-    harvestBag[s.id] = (harvestBag[s.id] || 0) + 5;
-  });
-  updateHarvestHUD();
-  updateToolbar();
-  saveGame();
-  document.getElementById('admin-give-status').textContent = '✅ Items added!';
-}
-
-function adminMaxCoins() {
-  addCoins(99999999999);
-  saveGame();
-  document.getElementById('admin-give-status').textContent = '✅ Coins maxed!';
-}
 
 function factoryReset() {
   if (!confirm('FACTORY RESET: This permanently deletes your world and disables auto-save. Click Explore to start a brand new world.')) return;
