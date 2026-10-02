@@ -406,6 +406,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   background: #ffd700; color: #000; border: none; padding: 10px 32px;
   font-size: 14px; cursor: pointer; border-radius: 6px; font-family: monospace; font-weight: bold;
 }
+#lucky-block-panel.hw-mode { border-color: #e05800 !important; }
+#lucky-block-panel.hw-mode #lucky-block-title { color: #ff8800 !important; }
+#lucky-block-panel.hw-mode #lucky-block-result { color: #ff9933 !important; }
+#lucky-block-panel.hw-mode #lucky-block-close { background: #e05800 !important; }
 #item-shop-overlay {
   display: none; position: fixed; inset: 0; z-index: 9997;
   align-items: center; justify-content: center;
@@ -446,6 +450,46 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
   cursor: pointer; letter-spacing: 2px;
 }
 #item-shop-close:hover { background: #8ab4d8; color: #000; }
+
+/* ── halloween shop ── */
+#halloween-shop-prompt {
+  display: none; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; pointer-events: none; text-align: center; font-family: monospace;
+  font-size: 13px; color: #ff9900; background: rgba(0,0,0,0.85);
+  border: 1px solid #ff6600; border-radius: 8px; padding: 10px 20px;
+}
+#halloween-shop-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9997;
+  align-items: center; justify-content: center; background: rgba(0,0,0,0.60);
+}
+#halloween-shop-panel {
+  background: #0d0808; border: 2px solid #cc5500; border-radius: 12px;
+  padding: 28px 32px; width: 480px; max-width: 96vw; max-height: 88vh;
+  overflow-y: auto; font-family: monospace; color: #ffcc88;
+}
+#halloween-shop-title { font-size: 20px; font-weight: bold; color: #ff8800; letter-spacing: 2px; margin-bottom: 4px; }
+#halloween-shop-sub   { font-size: 10px; color: #884400; letter-spacing: 2px; margin-bottom: 16px; }
+#halloween-restock-timer { text-align: center; font-size: 11px; color: #ffe600; padding: 4px 0 12px; letter-spacing: 1px; }
+#halloween-shop-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.hween-card {
+  background: #1a0a0a; border: 1px solid #6a2a00; border-radius: 8px;
+  padding: 14px; display: flex; flex-direction: column; gap: 6px;
+}
+.hween-card:hover { border-color: #cc5500; }
+.hween-card.out-of-stock { opacity: 0.4; pointer-events: none; }
+.hween-buy {
+  margin-top: 4px; padding: 7px; background: #cc5500; color: #fff;
+  border: none; border-radius: 4px; font-family: monospace; font-size: 11px;
+  cursor: pointer; font-weight: bold;
+}
+.hween-buy:hover    { background: #ff7722; }
+.hween-buy:disabled { background: #442200; color: #664422; cursor: not-allowed; }
+#halloween-shop-close {
+  width: 100%; padding: 10px; background: transparent; border: 1px solid #cc5500;
+  color: #cc5500; font-family: monospace; font-size: 13px; border-radius: 6px;
+  cursor: pointer; letter-spacing: 2px;
+}
+#halloween-shop-close:hover { background: #cc5500; color: #fff; }
 
 /* ── tutorial ── */
 #tutorial-overlay {
@@ -545,6 +589,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 <div id="blender-prompt">E — USE BLENDER</div>
 <div id="trader-prompt">E — VISIT TRADER</div>
 <div id="item-shop-prompt">E — ITEM SHOP</div>
+<div id="halloween-shop-prompt">E — HALLOWEEN SHOP</div>
 <div id="trader-notif">🚢 THE TRADER HAS ARRIVED!</div>
 <div id="destroy-confirm">
   <div>DESTROY THIS PLANT?</div>
@@ -602,6 +647,21 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 <div id="patch-overlay">
   <div id="patch-panel">
     <div style="font-size:16px;font-weight:bold;color:#52b788;margin-bottom:16px;letter-spacing:2px;">📋 PATCH NOTES</div>
+    <div style="font-size:13px;color:#ff8800;font-weight:bold;margin-bottom:8px;">v1.6 — 🎃 HALLOWEEN UPDATE &nbsp;<span style="font-size:10px;color:#445;font-weight:normal;">10/1/2026</span></div>
+    <div style="font-size:11px;line-height:2.2;color:#ffcc88;">
+      🏝️ <b>Hallowlands Island</b> — a new dark island has appeared to the <b>north</b>. Sprint across the ocean to reach it. Grow Halloween-exclusive plants, visit the Headless Horseman's shop, and earn candy.<br>
+      🍬 <b>Candy Currency</b> — a new currency exclusive to the Hallowlands. Blend Halloween plants in any blender to earn candy instead of making a smoothie.<br>
+      🛒 <b>Horseman's Shop</b> — visit the Headless Horseman on the Hallowlands to buy exclusive plants and items:<br>
+      &nbsp;&nbsp;&nbsp;🎃 <b>Pumpkin</b> — uncommon. Grows in the Hallowlands. Costs 💰65 coins.<br>
+      &nbsp;&nbsp;&nbsp;👻 <b>Ghost Shroom</b> — rare. Yields 2 fruit. Creamy &amp; mystical flavor. Costs 🍬110 candy.<br>
+      &nbsp;&nbsp;&nbsp;🍬 <b>Candy Corn Bush</b> — uncommon. Yields 4 candy corn per harvest. Sweet flavor. Costs 🍬45 candy.<br>
+      &nbsp;&nbsp;&nbsp;🫐 <b>Vampire Plum</b> — <span style="color:#cc88ff">EPIC</span>. Yields 3 fruit, high harmony across all flavor types. Costs 🍬90 candy.<br>
+      🎃 <b>Halloween Lucky Block</b> — costs 25 🍬 candy. Press <b>5</b> to spin. Prizes: 2× Pumpkin Seeds (50%), Ghost Shroom Seed (25%), Candy Corn Seed (15%), Durian Seed (5%), Vampire Plum Seed (5%).<br>
+      🫐 <b>Vampire Plum</b> — new epic plant in the Hallowlands. 3 fruit yield, high harmony stats, costs 90 🍬 candy.<br>
+      🍬 <b>Candy Corn fixed</b> — plant model now actually looks like candy corn (wide yellow base tapering to a white tip).<br>
+      🦇 <b>Bat Wing removed</b> — retired from the Halloween shop.
+    </div>
+    <br>
     <div style="font-size:13px;color:#ffd700;font-weight:bold;margin-bottom:8px;">v1.5 — Bug Fixes &amp; Polishes &nbsp;<span style="font-size:10px;color:#445;font-weight:normal;">9/24/2026</span></div>
     <div style="font-size:11px;line-height:2.2;color:#d0ffd0;">
       🔫 <b>Rifle rework</b> — buy once, get 3 shots. Bullet Packs (💰15 for 3) replace the rifle slot in the item shop after purchase.<br>
@@ -696,6 +756,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div class="tb-count" id="tb-count-blender_gem">×0</div>
     <div class="tb-timer" id="tb-timer-blender_gem"></div>
   </div>
+  <div class="tb-slot" id="tb-halloween_lucky_block">
+    <div class="tb-key">5</div>
+    <div class="tb-icon" id="tb-icon-halloween_lucky_block">🎃</div>
+    <div class="tb-count" id="tb-count-halloween_lucky_block">×0</div>
+  </div>
 </div>
 
 <div id="rifle-hud">🔫 RIFLE EQUIPPED — [CLICK] to shoot &nbsp;·&nbsp; [2] to holster</div>
@@ -716,6 +781,16 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
     <div id="item-restock-timer"></div>
     <div id="item-shop-grid"></div>
     <button id="item-shop-close" onclick="closeItemShop()">LEAVE [E]</button>
+  </div>
+</div>
+
+<div id="halloween-shop-overlay">
+  <div id="halloween-shop-panel">
+    <div id="halloween-shop-title">🎃 HALLOWEEN SHOP</div>
+    <div id="halloween-shop-sub">HORSEMAN'S PEAK GOODS</div>
+    <div id="halloween-restock-timer"></div>
+    <div id="halloween-shop-grid"></div>
+    <button id="halloween-shop-close" onclick="closeHalloweenShop()">LEAVE [E]</button>
   </div>
 </div>
 
@@ -795,6 +870,11 @@ const SEEDS = [
   { id:'bird_meat',   name:'Bird Meat',    biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'uncommon',  icon:'🍖', color:'#cc6622', flavor:{}, noPlant:true, shopExclude:true, noBuy:true, canBlend:true },
   { id:'blender_gem', name:'Blender Gem',  biome:null,        seedCost:0,   baseValue:0,  fruitYield:0, rarity:'legendary', icon:'💎', color:'#00d4ff', flavor:{}, noPlant:true, shopExclude:true, noBuy:true },
   { id:'durian',      name:'Durian',       biome:'JUNGLE',    seedCost:0,   baseValue:30, fruitYield:1, rarity:'legendary', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><ellipse cx="10" cy="12" rx="5.5" ry="7" fill="#b8a020"/><ellipse cx="8" cy="9" rx="1.8" ry="1.3" fill="#d4c040" opacity="0.5"/><polygon points="10,1 8.5,5 11.5,5" fill="#6a5c10"/><polygon points="3,7 5.5,10 6,7.5" fill="#6a5c10"/><polygon points="17,7 14.5,10 14,7.5" fill="#6a5c10"/><polygon points="1,14 4,13 3.5,16" fill="#6a5c10"/><polygon points="19,14 16,13 16.5,16" fill="#6a5c10"/><polygon points="10,20 8.5,16 11.5,16" fill="#6a5c10"/></svg>', color:'#b8a020', flavor:{sweet:5,sour:3,tropical:8,creamy:9,refreshing:1}, shopExclude:true },
+  { id:'pumpkin',      name:'Pumpkin',      biome:'HALLOWLANDS', seedCost: 65, baseValue:12, fruitYield:1, rarity:'uncommon',  icon:'🎃', color:'#e86300', halloweenShop:true, shopExclude:true, flavor:{sweet:6,sour:0,tropical:1,creamy:4,refreshing:2} },
+  { id:'ghost_shroom', name:'Ghost Shroom', biome:'HALLOWLANDS', seedCost:110, baseValue:15, fruitYield:2, rarity:'rare',      icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><path d="M7.5,12.5 L7.5,16.5 Q8,19 9,17 Q10,19.5 11,17 Q12,19 12.5,16.5 L12.5,12.5 Z" fill="#d0d0e4"/><ellipse cx="10" cy="12.5" rx="6" ry="1.2" fill="#b0b0c8"/><path d="M4,12.5 Q3.5,5.5 10,4.5 Q16.5,5.5 16,12.5 Z" fill="#e0e0f2"/><ellipse cx="9" cy="8" rx="2.8" ry="1.8" fill="#f4f4ff" opacity="0.55"/><circle cx="7" cy="10" r="1.1" fill="#c4c4da" opacity="0.75"/><circle cx="13" cy="9.5" r="1.1" fill="#c4c4da" opacity="0.75"/><circle cx="10.5" cy="11" r="0.7" fill="#c4c4da" opacity="0.75"/><circle cx="9" cy="14.8" r="0.75" fill="#3a3a5a"/><circle cx="11" cy="14.8" r="0.75" fill="#3a3a5a"/></svg>', color:'#ccccdd', halloweenShop:true, shopExclude:true, flavor:{sweet:1,sour:0,tropical:2,creamy:7,refreshing:3} },
+  { id:'candy_corn',   name:'Candy Corn',   biome:'HALLOWLANDS', seedCost: 45, baseValue: 6, fruitYield:4, rarity:'uncommon',  icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><path d="M4.5,17.5 Q4,16 6.5,13 L13.5,13 Q16,16 15.5,17.5 Z" fill="#ffd600"/><path d="M6.5,13 L13.5,13 L11.5,7.5 L8.5,7.5 Z" fill="#ff6f00"/><path d="M8.5,7.5 L11.5,7.5 L10,3.5 Z" fill="#f0ece0"/></svg>', color:'#ff8800', halloweenShop:true, shopExclude:true, flavor:{sweet:9,sour:1,tropical:0,creamy:3,refreshing:1} },
+  { id:'vampire_plum', name:'Vampire Plum', biome:'HALLOWLANDS', seedCost: 90, baseValue:26, fruitYield:3, rarity:'epic',      icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><circle cx="10" cy="11.5" r="7" fill="#4a0869"/><ellipse cx="8" cy="9" rx="2" ry="1.5" fill="#7b1fa2" opacity="0.5"/><ellipse cx="10" cy="4.5" rx="1" ry="2.5" fill="#1a5c1a"/><rect x="7.5" y="14" width="1.5" height="3" rx="0.5" fill="#f5f5f5"/><rect x="11" y="14" width="1.5" height="3" rx="0.5" fill="#f5f5f5"/><circle cx="8.25" cy="17.2" r="0.8" fill="#cc0000"/><circle cx="11.75" cy="17.2" r="0.8" fill="#cc0000"/></svg>', color:'#6a0dad', halloweenShop:true, shopExclude:true, flavor:{sweet:7,sour:8,tropical:3,creamy:5,refreshing:6} },
+  { id:'halloween_lucky_block', name:'Halloween Lucky Block', biome:null, seedCost:25, baseValue:0, fruitYield:0, rarity:'rare', icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="1em" height="1em" style="vertical-align:middle"><rect x="1.5" y="1.5" width="17" height="17" rx="2.5" fill="#e05800"/><rect x="1.5" y="1.5" width="17" height="17" rx="2.5" fill="none" stroke="#000000" stroke-width="1.5"/><rect x="2.5" y="2.5" width="4" height="4" fill="#ff9933" opacity="0.7"/><rect x="13.5" y="2.5" width="4" height="4" fill="#1a0a00" opacity="0.6"/><rect x="2.5" y="13.5" width="4" height="4" fill="#1a0a00" opacity="0.6"/><rect x="13.5" y="13.5" width="4" height="4" fill="#ff9933" opacity="0.4"/><text x="10" y="14.5" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="#000000">?</text></svg>', color:'#ff6600', halloweenShop:true, shopExclude:true, noPlant:true, shopDesc:'Spin for Halloween treats! [5]', buyCount:1 },
 ];
 
 const RARITY = {
@@ -1204,6 +1284,11 @@ const ITEM_SHOP_X = 0, ITEM_SHOP_Z = 0;
 const ITEM_BOY_X = ITEM_SHOP_X - 0.7, ITEM_BOY_Z = ITEM_SHOP_Z;
 let itemShopOpen = false, hoveredItemShop = false;
 let itemShopStock = {};
+let halloweenShopOpen = false, hoveredHalloweenShop = false;
+let halloweenShopStock = {};
+let halloweenShopTimerInterval = null;
+let candyCount = 0;
+let lastHalloweenRestockTime = 0;
 let lastItemRestockTime = 0;
 let itemShopTimerInterval = null;
 let itemShopMeshes = [];
@@ -1218,7 +1303,7 @@ let blenderGemActive = false;
 let blenderGemExpiry = 0;
 
 function itemShopItems() {
-  return SEEDS.filter(s => s.shopExclude && s.noPlant && !s.noBuy &&
+  return SEEDS.filter(s => s.shopExclude && s.noPlant && !s.noBuy && !s.halloweenShop &&
     (s.id === 'bullet_pack' ? rifleOwned  : s.id === 'rifle'      ? !rifleOwned  : true) &&
     (s.id === 'horn_chime'  ? hornOwned   : s.id === 'horn'       ? !hornOwned   : true));
 }
@@ -1289,6 +1374,106 @@ function closeItemShop() {
   itemShopTimerInterval = null;
   document.getElementById('item-shop-overlay').style.display = 'none';
   tryLock();
+}
+
+function halloweenShopItems() {
+  return SEEDS.filter(s => s.halloweenShop);
+}
+
+function restockHalloweenShop() {
+  lastHalloweenRestockTime = Date.now();
+  halloweenShopItems().forEach(s => {
+    const r = RARITY[s.rarity];
+    halloweenShopStock[s.id] = s.stockOverride !== undefined ? s.stockOverride : Math.floor(Math.random() * (r.stockMax - r.stockMin + 1)) + r.stockMin;
+  });
+  if (halloweenShopOpen) buildHalloweenShopUI();
+}
+setInterval(restockHalloweenShop, RESTOCK_INTERVAL);
+
+function halloweenRestockTimerText() {
+  const ms = RESTOCK_INTERVAL - (Date.now() - lastHalloweenRestockTime);
+  if (ms <= 0) return 'RESTOCKING...';
+  const s = Math.ceil(ms / 1000);
+  return `RESTOCK IN ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function openHalloweenShop() {
+  halloweenShopOpen = true;
+  document.exitPointerLock?.();
+  buildHalloweenShopUI();
+  document.getElementById('halloween-shop-overlay').style.display = 'flex';
+  if (audioCtx) audioCtx.resume();
+  halloweenShopTimerInterval = setInterval(() => {
+    const el = document.getElementById('halloween-restock-timer');
+    if (el) el.textContent = halloweenRestockTimerText();
+  }, 1000);
+}
+
+function closeHalloweenShop() {
+  halloweenShopOpen = false;
+  clearInterval(halloweenShopTimerInterval);
+  halloweenShopTimerInterval = null;
+  document.getElementById('halloween-shop-overlay').style.display = 'none';
+  tryLock();
+}
+
+function buildHalloweenShopUI() {
+  const grid = document.getElementById('halloween-shop-grid');
+  grid.innerHTML = '';
+  const timerEl = document.getElementById('halloween-restock-timer');
+  if (timerEl) timerEl.textContent = halloweenRestockTimerText();
+
+  halloweenShopItems().forEach(s => {
+    const id = s.id;
+    const stock = halloweenShopStock[id] || 0;
+    const owned = s.noPlant ? (harvestBag[id] || 0) : (inventory[id] || 0);
+    const outOfStock = stock === 0;
+    const usesCoins = id === 'pumpkin';
+    const canAfford = usesCoins ? coins >= s.seedCost : candyCount >= s.seedCost;
+    const cfg = RARITY[s.rarity];
+    const card = document.createElement('div');
+    card.className = 'hween-card' + (outOfStock ? ' out-of-stock' : '');
+    card.innerHTML = `
+      <div class="item-rarity" style="color:${cfg.color}">${cfg.label}</div>
+      <div class="item-icon">${s.icon}</div>
+      <div class="item-name">${s.name}</div>
+      <div class="item-desc">${s.shopDesc || (s.noPlant ? '' : 'Plant in HALLOWLANDS')}</div>
+      <div class="item-cost">${usesCoins ? '💰' : '🍬'} ${s.seedCost}</div>
+      <div class="item-stock">${outOfStock ? 'OUT OF STOCK' : stock + ' in stock'}</div>
+      <div class="item-owned">in bag: ${owned}</div>
+      <button class="hween-buy" ${canAfford && !outOfStock ? '' : 'disabled'}
+        onclick="buyHalloweenItem('${id}')">BUY</button>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function buyHalloweenItem(id) {
+  const s = SEEDS.find(x => x.id === id);
+  if (!s || !(halloweenShopStock[id] > 0)) return;
+  const usesCoins = id === 'pumpkin';
+  if (usesCoins) {
+    if (coins < s.seedCost) return;
+    spendCoins(s.seedCost);
+  } else {
+    if (candyCount < s.seedCost) return;
+    candyCount -= s.seedCost;
+    updateCandyHUD();
+  }
+  halloweenShopStock[id]--;
+  if (!s.noPlant) {
+    inventory[id] = (inventory[id] || 0) + (s.buyCount || 1);
+    refreshShopCards();
+  } else {
+    harvestBag[id] = (harvestBag[id] || 0) + (s.buyCount || 1);
+    updateHarvestHUD();
+  }
+  buildHalloweenShopUI();
+  saveGame();
+}
+
+function updateCandyHUD() {
+  document.getElementById('hud-halloween').textContent = '🍬 CANDY: ' + candyCount;
 }
 
 function playHornSound() {
@@ -1470,7 +1655,62 @@ function useLuckyBlock() {
 function closeLuckyBlock() {
   luckyBlockOpen = false;
   document.getElementById('lucky-block-overlay').style.display = 'none';
+  document.getElementById('lucky-block-panel').classList.remove('hw-mode');
   tryLock();
+}
+
+function useHalloweenLuckyBlock() {
+  if ((harvestBag.halloween_lucky_block || 0) < 1) return;
+  harvestBag.halloween_lucky_block--;
+  if (harvestBag.halloween_lucky_block <= 0) delete harvestBag.halloween_lucky_block;
+  luckyBlockOpen = true;
+  document.exitPointerLock?.();
+  document.getElementById('lucky-block-title').textContent = '🎃 HALLOWEEN LUCKY BLOCK';
+  document.getElementById('lucky-block-panel').classList.add('hw-mode');
+  document.getElementById('lucky-block-overlay').style.display = 'flex';
+  if (audioCtx) audioCtx.resume();
+  updateHarvestHUD();
+
+  const vpIcon = SEEDS.find(s => s.id === 'vampire_plum').icon;
+  const durianIcon = SEEDS.find(s => s.id === 'durian').icon;
+  const OUTCOMES = [
+    { weight:50, label:'2× Pumpkin Seeds 🎃',       pitch:523, wave:'sine',     give:() => { inventory.pumpkin      = (inventory.pumpkin      ||0)+2; } },
+    { weight:25, label:'Ghost Shroom Seed!',         pitch:659, wave:'triangle', give:() => { inventory.ghost_shroom = (inventory.ghost_shroom ||0)+1; } },
+    { weight:15, label:'Candy Corn Bush Seed!',      pitch:440, wave:'sine',     give:() => { inventory.candy_corn   = (inventory.candy_corn   ||0)+1; } },
+    { weight:5,  label:'Durian Seed! ' + durianIcon, pitch:196, wave:'sawtooth', give:() => { inventory.durian       = (inventory.durian       ||0)+1; } },
+    { weight:5,  label:'Vampire Plum Seed! ' + vpIcon, pitch:880, wave:'triangle', give:() => { inventory.vampire_plum = (inventory.vampire_plum||0)+1; } },
+  ];
+  const total = OUTCOMES.reduce((s, o) => s + o.weight, 0);
+  let r = Math.random() * total, acc = 0;
+  let result = OUTCOMES[OUTCOMES.length - 1];
+  for (const o of OUTCOMES) { acc += o.weight; if (r < acc) { result = o; break; } }
+
+  const reel = document.getElementById('lucky-block-reel');
+  const resultEl = document.getElementById('lucky-block-result');
+  const closeBtn = document.getElementById('lucky-block-close');
+  resultEl.innerHTML = '';
+  closeBtn.style.display = 'none';
+
+  const allLabels = OUTCOMES.map(o => o.label);
+  let spins = 0, delay = 50;
+  function spin() {
+    reel.innerHTML = allLabels[spins % OUTCOMES.length];
+    playTickSound();
+    spins++;
+    delay = Math.min(delay + 18, 400);
+    if (spins < 18 || delay < 400) { setTimeout(spin, delay); }
+    else {
+      reel.innerHTML = result.label;
+      resultEl.innerHTML = '✨ YOU GOT: ' + result.label;
+      closeBtn.style.display = 'block';
+      playLuckyResult(result);
+      result.give();
+      updateHarvestHUD();
+      refreshShopCards();
+      saveGame();
+    }
+  }
+  spin();
 }
 
 function activateBlenderGem() {
@@ -1965,6 +2205,32 @@ function buildFruitMeshes(seed, cx, cy, cz) {
       break;
     }
 
+    case 'candy_corn': {
+      const ccBase = cyl(0.14, 0.12, 0.22, 7);
+      ccBase.position.set(cx, cy - 0.04, cz);
+      ccBase.material = _fm(1.00, 0.84, 0.00);
+      const ccMid = cyl(0.11, 0.06, 0.12, 7);
+      ccMid.position.set(cx, cy + 0.085, cz);
+      ccMid.material = _fm(0.95, 0.44, 0.00);
+      const ccTip = cyl(0.10, 0.00, 0.06, 7);
+      ccTip.position.set(cx, cy + 0.19, cz);
+      ccTip.material = _fm(0.94, 0.91, 0.86);
+      meshes.push(ccBase, ccMid, ccTip);
+      break;
+    }
+
+    case 'pumpkin': {
+      const body = ico(0.34);
+      _stretchVerts(body, 1.20, 0.68, 1.20); // wider, flattened
+      body.position.set(cx, cy - 0.06, cz);
+      body.material = _fm(0.88, 0.38, 0.03, 0.12, 0.05, 0.01);
+      const stem = cyl(0.18, 0.02, 0.07, 4);
+      stem.position.set(cx, cy + 0.27, cz);
+      stem.material = _fm(0.12, 0.42, 0.06);
+      meshes.push(body, stem);
+      break;
+    }
+
     default: {
       const body = ico(0.24);
       body.position.set(cx, cy, cz);
@@ -2025,6 +2291,8 @@ function buildStageMesh(seed, x, y, z, stage) {
     pineapple:'pineapple',
     seaweed:'ocean', seagrape:'ocean',
     dragonfruit:'cactus',
+    pumpkin:'pumpkin_ground',
+    candy_corn:'candy_bush',
   }[seed.id] || 'stem';
 
   // ── seed ──
@@ -2115,6 +2383,34 @@ function buildStageMesh(seed, x, y, z, stage) {
         const canopy = BABYLON.MeshBuilder.CreateIcoSphere('pm', { radius:0.26, subdivisions:1, flat:true }, scene);
         canopy.position.set(x, y+0.50, z); canopy.material = grn(); parts.push(canopy);
         parts.push(...spreadFruits(seed, x, seed.id === 'strawberry' ? y+0.72 : y+0.56, z, 0.20));
+        break;
+      }
+
+      case 'candy_bush': {
+        for (let i = 0; i < 3; i++) {
+          const a = (i/3)*Math.PI*2;
+          const dir = new BABYLON.Vector3(Math.cos(a)*0.65, 0.76, Math.sin(a)*0.65).normalize();
+          const br = BABYLON.MeshBuilder.CreateCylinder('pm', { height:0.50, diameter:0.06, tessellation:4 }, scene);
+          br.position.set(x+dir.x*0.25, y+dir.y*0.25, z+dir.z*0.25);
+          br.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), dir);
+          br.convertToFlatShadedMesh(); br.material = brn(); parts.push(br);
+        }
+        const purpCanopy = BABYLON.MeshBuilder.CreateIcoSphere('pm', { radius:0.26, subdivisions:1, flat:true }, scene);
+        purpCanopy.position.set(x, y+0.50, z);
+        purpCanopy.material = pmat(0.42, 0.08, 0.52);
+        parts.push(purpCanopy);
+        parts.push(...spreadFruits(seed, x, y+0.62, z, 0.20));
+        break;
+      }
+
+      case 'pumpkin_ground': {
+        for (let i = 0; i < 6; i++) {
+          const a = (i/6)*Math.PI*2;
+          parts.push(dirLeaf(x, y, z, new BABYLON.Vector3(Math.cos(a)*0.82, 0.57, Math.sin(a)*0.82).normalize(), 0.55, 0.28, 0.02));
+        }
+        const pstem = BABYLON.MeshBuilder.CreateCylinder('pm', { height:0.16, diameter:0.06, tessellation:4 }, scene);
+        pstem.position.set(x, y+0.08, z); pstem.convertToFlatShadedMesh(); pstem.material = grn(); parts.push(pstem);
+        parts.push(...spreadFruits(seed, x, y+0.55, z, 0.22));
         break;
       }
 
@@ -2230,6 +2526,7 @@ function doPlant(seedId, x, y, z) {
   if (!seed || (inventory[seedId] || 0) < 1) return;
   if (plants.some(p => (p.x-x)**2 + (p.z-z)**2 < 1.8)) return;
   if ((x - ITEM_BOY_X)**2 + (z - ITEM_BOY_Z)**2 < 7) return;
+  if (x*x + (z+130)*(z+130) < 7) return;
   inventory[seedId]--;
   refreshShopCards();
   const mesh = buildStageMesh(seed, x, y, z, 'seed');
@@ -2261,7 +2558,7 @@ function updateHarvestHUD() {
 }
 
 function updateToolbar() {
-  ['horn', 'rifle', 'lucky_block', 'blender_gem'].forEach(id => {
+  ['horn', 'rifle', 'lucky_block', 'blender_gem', 'halloween_lucky_block'].forEach(id => {
     const count   = harvestBag[id] || 0;
     const slot    = document.getElementById('tb-' + id);
     const countEl = document.getElementById('tb-count-' + id);
@@ -2430,7 +2727,18 @@ function doBlend() {
   if (fruits.length < 2) return;
   const gemUsed = blenderGemActive && blendSelected[5] !== null;
   fruits.forEach(id => { harvestBag[id] = Math.max(0, (harvestBag[id] || 0) - 1); });
-  smoothies.push({ fruits, gemUsed });
+
+  const hwIds = new Set(SEEDS.filter(s => s.halloweenShop).map(s => s.id));
+  const isHalloweenBlend = fruits.every(id => hwIds.has(id));
+  if (isHalloweenBlend) {
+    const earned = fruits.reduce((sum, id) => sum + (SEEDS.find(s => s.id === id)?.baseValue || 0), 0);
+    candyCount += earned;
+    updateCandyHUD();
+    showNotif('🍬 +' + earned + ' candy!', '#ff8800');
+  } else {
+    smoothies.push({ fruits, gemUsed });
+  }
+
   blendSelected = [null, null, null, null, null, null];
   playBlendSound();
   saveGame();
@@ -2449,6 +2757,7 @@ const rng = makeRng(42);
 // ── terrain height ──
 const WATER_Y = -1.5;
 function getH(x, z) {
+  // main island
   const d = Math.sqrt(x * x + z * z);
   const f = Math.max(0, 1 - d / 48);
   const island = f * f * 9
@@ -2456,26 +2765,149 @@ function getH(x, z) {
     + Math.cos(z * 0.12) * 1.2 * f
     + Math.sin(x * 0.3 + z * 0.2) * 0.5 * f;
   const depth = -(1 - f) * (1 - f) * (1 - f) * 4;
-  return island + depth;
+
+  // halloween island — north at (0, -130), smaller and more jagged
+  const hx = x, hz = z + 130;
+  const hd = Math.sqrt(hx * hx + hz * hz);
+  const hf = Math.max(0, 1 - hd / 38);
+  const hIsland = hf * hf * 7
+    + Math.sin(hx * 0.35) * 2.2 * hf
+    + Math.cos(hz * 0.28) * 1.8 * hf
+    + Math.sin(hx * 0.7 + hz * 0.6) * 1.2 * hf
+    + Math.sin(hx * 1.4) * 0.6 * hf;
+  const hDepth = -(1 - hf) * (1 - hf) * (1 - hf) * 4;
+
+  return Math.max(island + depth, hIsland + hDepth);
 }
 
 // ── terrain color ──
-function terrainColor(h) {
-  if (h < WATER_Y - 0.5) return [1.00, 0.82, 0.22]; // deep ocean floor — sandy
-  if (h < WATER_Y)       return [1.00, 0.82, 0.22]; // shallow ocean floor — sandy
+function terrainColor(h, wx, wz) {
+  // halloween island zone — purple/dark soil
+  const _hd = Math.sqrt(wx * wx + (wz + 130) * (wz + 130));
+  if (_hd < 38) {
+    if (h < WATER_Y - 0.5) return [0.12, 0.11, 0.10];
+    if (h < WATER_Y)       return [0.14, 0.12, 0.11];
+    if (h < WATER_Y + 1.8) return [0.28, 0.24, 0.20]; // ashy dark sand
+    if (h < 3.5)           return [0.18, 0.16, 0.14]; // charcoal ash
+    if (h < 7.0)           return [0.13, 0.11, 0.10]; // near-black
+    return [0.20, 0.17, 0.15];                         // dark highlands
+  }
+  if (h < WATER_Y - 0.5) return [1.00, 0.82, 0.22];
+  if (h < WATER_Y)       return [1.00, 0.82, 0.22];
   if (h < WATER_Y + 1.8) return [1.00, 0.82, 0.22]; // bright golden sand
   if (h < 3.5)           return [0.08, 0.92, 0.18]; // vivid tropical grass
   if (h < 7.0)           return [0.05, 0.68, 0.14]; // deep jungle
   return [0.16, 0.46, 0.20];                         // highlands
 }
 
-function biomeLabel(h) {
+function biomeLabel(h, wx, wz) {
+  if (wx !== undefined && Math.sqrt(wx*wx + (wz+130)*(wz+130)) < 38) return 'HALLOWLANDS';
   if (h < WATER_Y)       return 'OCEAN';
   if (h < WATER_Y + 1.8) return 'BEACH';
   if (h < 3.5)           return 'GRASSLAND';
   if (h < 7.0)           return 'JUNGLE';
   return 'HIGHLANDS';
 }
+
+// HALLOWEEN EVENT ACTIVE — original map/atmosphere/vegetation saved below for revert.
+// To revert: restore each value listed in the ORIGINAL MAP block below.
+/*
+=== ORIGINAL MAP (tropical) ===
+
+--- scene (around "const scene = new BABYLON.Scene") ---
+scene.clearColor = new BABYLON.Color4(0.5, 0.7, 1.0, 1.0);
+scene.fogDensity = 0.012;
+scene.fogColor = new BABYLON.Color3(0.7, 0.85, 1.0);
+
+--- lights ---
+sun.intensity = 1.6;
+sun.diffuse = new BABYLON.Color3(1.0, 0.95, 0.80);
+ambient.intensity = 0.7;
+ambient.diffuse = new BABYLON.Color3(0.85, 0.95, 1.0);
+ambient.groundColor = new BABYLON.Color3(0.30, 0.65, 0.30);
+
+--- sky material ---
+skyMat.inclination = -0.3;
+skyMat.luminance = 1.0;
+skyMat.turbidity = 5;
+skyMat.rayleigh = 3;
+
+--- terrainColor() ---
+if (h < 3.5)  return [0.08, 0.92, 0.18]; // grass
+if (h < 7.0)  return [0.05, 0.68, 0.14]; // jungle
+return [0.16, 0.46, 0.20];               // highlands
+
+--- vegetation (inside spawnPlant / plant builder) ---
+grn()   = pmat(0.15, 0.62, 0.18)
+dkGrn() = pmat(0.10, 0.50, 0.14)
+tree canopy cm.diffuseColor = new BABYLON.Color3(0.08, 0.45, 0.12)
+lemon ltGrn diffuseColor    = new BABYLON.Color3(0.50, 0.80, 0.18)
+banana stem diffuseColor    = new BABYLON.Color3(0.06, 0.42, 0.12)
+
+--- palm trees (makePalmTemplate + loop) ---
+Trunk color: new BABYLON.Color3(0.55, 0.38, 0.18)
+Replace makePalmTemplate to use ribbon leaves (not branch cylinders).
+Return { trunk, leafTemplate, leafMat } and use leafTemplate.createInstance in the loop.
+Full original palm code:
+
+  function makePalmTemplate() {
+    const trunk = BABYLON.MeshBuilder.CreateCylinder('palmTrunk', {
+      height: 5, diameterTop: 0.18, diameterBottom: 0.35, tessellation: 7
+    }, scene);
+    trunk.material = (() => {
+      const m = new BABYLON.StandardMaterial('trunkMat', scene);
+      m.diffuseColor = new BABYLON.Color3(0.55, 0.38, 0.18);
+      m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+      return m;
+    })();
+    trunk.isVisible = false;
+    const leafMat = new BABYLON.StandardMaterial('leafMat', scene);
+    leafMat.diffuseColor = new BABYLON.Color3(0.15, 0.6, 0.2);
+    leafMat.specularColor = new BABYLON.Color3(0.05, 0.1, 0.05);
+    leafMat.backFaceCulling = false;
+    function makeLeafRibbon() {
+      const n = 10;
+      const path1 = [], path2 = [];
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const bend = t * t;
+        const width = 0.22 * Math.sin(Math.PI * t) + 0.04;
+        path1.push(new BABYLON.Vector3(-width, -bend * 1.8, t * 3.2));
+        path2.push(new BABYLON.Vector3( width, -bend * 1.8, t * 3.2));
+      }
+      const leaf = BABYLON.MeshBuilder.CreateRibbon('leaf', {
+        pathArray: [path1, path2],
+        sideOrientation: BABYLON.Mesh.DOUBLESIDE,
+        closePath: false
+      }, scene);
+      leaf.material = leafMat;
+      return leaf;
+    }
+    const leafTemplate = makeLeafRibbon();
+    leafTemplate.isVisible = false;
+    return { trunk, leafTemplate, leafMat };
+  }
+
+  const { trunk: trunkTemplate, leafTemplate } = makePalmTemplate();
+
+  // inside the palm loop, replace the BRANCHES block with:
+  const topX = px + lean.x * 2.5;
+  const topY = ground + 2.5 + lean.y * 2.5;
+  const topZ = pz + lean.z * 2.5;
+  const LEAVES = 7;
+  for (let i = 0; i < LEAVES; i++) {
+    const angle = (i / LEAVES) * Math.PI * 2;
+    const droop = 0.55 + rng() * 0.2;
+    const dir = new BABYLON.Vector3(Math.cos(angle), -droop, Math.sin(angle)).normalize();
+    const leaf = leafTemplate.createInstance('lf');
+    leaf.position.set(topX, topY, topZ);
+    const forward = new BABYLON.Vector3(0, 0, 1);
+    leaf.rotationQuaternion = quatFromTo(forward, dir);
+    shadowGen.addShadowCaster(leaf);
+  }
+
+=== END ORIGINAL MAP ===
+*/
 
 // ── init engine ──
 const canvas = document.getElementById('renderCanvas');
@@ -2523,8 +2955,8 @@ skyBox.material = skyMat;
 skyBox.infiniteDistance = true;
 
 // ── terrain ──
-const SEGS = 80;
-const SIZE = 120;
+const SEGS = 110;
+const SIZE = 340;
 function buildTerrain() {
   const positions = [], colors = [], indices = [], uvs = [];
   const step = SIZE / SEGS;
@@ -2536,7 +2968,7 @@ function buildTerrain() {
       const h  = getH(wx, wz);
       positions.push(wx, h, wz);
       uvs.push(x / SEGS, z / SEGS);
-      const [r, g, b] = terrainColor(h);
+      const [r, g, b] = terrainColor(h, wx, wz);
       colors.push(r, g, b, 1);
     }
   }
@@ -2604,15 +3036,40 @@ function buildBlenderModel(bx, bz) {
   lid.convertToFlatShadedMesh();
   lid.material = baseMat;
 
+  base._origMat = base.material; cup._origMat = cup.material; lid._origMat = lid.material;
   blenderMeshes.push(base, cup, lid);
 }
 const BLENDER_POSITIONS = [[30,0],[-30,0],[0,30],[0,-30]];
 BLENDER_POSITIONS.forEach(([bx, bz]) => buildBlenderModel(bx, bz));
 
+// ── halloween blender (same mechanic, halloween colors) ──
+{
+  const hwBaseMat = new BABYLON.StandardMaterial('hwBase', scene);
+  hwBaseMat.diffuseColor  = new BABYLON.Color3(0.28, 0.06, 0.36);
+  hwBaseMat.specularColor = new BABYLON.Color3(0.1, 0.0, 0.1);
+
+  const hwCupMat = new BABYLON.StandardMaterial('hwCup', scene);
+  hwCupMat.diffuseColor  = new BABYLON.Color3(0.70, 0.28, 0.02);
+  hwCupMat.specularColor = new BABYLON.Color3(0.3, 0.1, 0.0);
+  hwCupMat.specularPower = 64;
+  hwCupMat.alpha = 0.85;
+
+  const [bx, bz] = [-8, -127];
+  const by = getH(bx, bz);
+  const hwBase = BABYLON.MeshBuilder.CreateCylinder('hwBlBase', { height:0.22, diameterTop:0.70, diameterBottom:0.82, tessellation:6 }, scene);
+  hwBase.position.set(bx, by + 0.11, bz); hwBase.convertToFlatShadedMesh(); hwBase.material = hwBaseMat;
+  const hwCup  = BABYLON.MeshBuilder.CreateCylinder('hwBlCup',  { height:0.60, diameterBottom:0.54, diameterTop:0.66, tessellation:8 }, scene);
+  hwCup.position.set(bx, by + 0.52, bz);  hwCup.convertToFlatShadedMesh();  hwCup.material  = hwCupMat;
+  const hwLid  = BABYLON.MeshBuilder.CreateCylinder('hwBlLid',  { height:0.26, diameterBottom:0.66, diameterTop:0.06, tessellation:6 }, scene);
+  hwLid.position.set(bx, by + 0.95, bz);  hwLid.convertToFlatShadedMesh();  hwLid.material  = hwBaseMat;
+  hwBase._origMat = hwBase.material; hwCup._origMat = hwCup.material; hwLid._origMat = hwLid.material;
+  blenderMeshes.push(hwBase, hwCup, hwLid);
+}
+
 function setBlenderGemVisual(active) {
   blenderMeshes.forEach((m, i) => {
     const isCup = (i % 3) === 1;
-    m.material = active ? (isCup ? gemCupMat : gemBaseMat) : (isCup ? cupMat : baseMat);
+    m.material = active ? (isCup ? gemCupMat : gemBaseMat) : (m._origMat || (isCup ? cupMat : baseMat));
   });
 }
 
@@ -2838,13 +3295,11 @@ function makePalmTemplate() {
   })();
   trunk.isVisible = false;
 
-  // leaf template
   const leafMat = new BABYLON.StandardMaterial('leafMat', scene);
   leafMat.diffuseColor = new BABYLON.Color3(0.15, 0.6, 0.2);
   leafMat.specularColor = new BABYLON.Color3(0.05, 0.1, 0.05);
   leafMat.backFaceCulling = false;
 
-  // build one leaf ribbon
   function makeLeafRibbon() {
     const n = 10;
     const path1 = [], path2 = [];
@@ -2866,7 +3321,6 @@ function makePalmTemplate() {
 
   const leafTemplate = makeLeafRibbon();
   leafTemplate.isVisible = false;
-
   return { trunk, leafTemplate, leafMat };
 }
 
@@ -2917,6 +3371,189 @@ for (const [px, pz] of palmPositions) {
 
 
 
+
+// ── halloween island dead trees ──
+{
+  const trunkMat = new BABYLON.StandardMaterial('dtTrunk', scene);
+  trunkMat.diffuseColor = new BABYLON.Color3(0.20, 0.15, 0.12);
+  trunkMat.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+
+  const branchMat = new BABYLON.StandardMaterial('dtBranch', scene);
+  branchMat.diffuseColor = new BABYLON.Color3(0.24, 0.18, 0.14);
+  branchMat.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+
+  function spawnDeadTree(wx, wz) {
+    const wy = getH(wx, wz);
+    if (wy < WATER_Y + 0.5) return;
+
+    const treeH = 6.0 + Math.sin(wx * 5.1 + wz * 3.7) * 1.5;
+    const sink  = 1.2; // how far trunk goes underground
+    const trunk = BABYLON.MeshBuilder.CreateCylinder('dt', {
+      height: treeH, diameterBottom: 0.42, diameterTop: 0.14, tessellation: 6
+    }, scene);
+    trunk.position.set(wx, wy - sink + treeH * 0.5, wz);
+    trunk.rotation.z = Math.sin(wx * 3.3 + wz * 2.1) * 0.1;
+    trunk.material = trunkMat;
+    shadowGen.addShadowCaster(trunk);
+
+    const BRANCHES = 6;
+    for (let i = 0; i < BRANCHES; i++) {
+      const angle = (i / BRANCHES) * Math.PI * 2 + wx * 0.5;
+      const lift  = 0.5 + Math.abs(Math.sin(wx * 7.1 + i * 2.3)) * 0.35;
+      const dir   = new BABYLON.Vector3(Math.cos(angle), lift, Math.sin(angle)).normalize();
+
+      const t     = 0.55 + Math.abs(Math.sin(wz * 4.7 + i * 1.9)) * 0.45;
+      const bx    = wx;
+      const by    = wy - sink + treeH * t;
+      const bz    = wz;
+
+      const len1  = 1.1 + Math.abs(Math.sin(i * 3.7)) * 0.4;
+      const mid   = new BABYLON.Vector3(bx + dir.x*len1, by + dir.y*len1, bz + dir.z*len1);
+      const seg1  = BABYLON.MeshBuilder.CreateCylinder('db', {
+        height: len1, diameterBottom: 0.10, diameterTop: 0.055, tessellation: 4
+      }, scene);
+      seg1.position.set((bx+mid.x)/2, (by+mid.y)/2, (bz+mid.z)/2);
+      seg1.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), dir);
+      seg1.material = branchMat;
+      shadowGen.addShadowCaster(seg1);
+
+      const bendAmt = (Math.sin(wx * 9.1 + i * 4.3) - 0.5) * 0.7;
+      const perp    = new BABYLON.Vector3(-dir.z, 0, dir.x).normalize();
+      const dir2    = BABYLON.Vector3.TransformCoordinates(dir, BABYLON.Matrix.RotationAxis(perp, bendAmt)).normalize();
+      const len2    = 0.8 + Math.abs(Math.sin(i * 2.1)) * 0.3;
+      const tip     = new BABYLON.Vector3(mid.x + dir2.x*len2, mid.y + dir2.y*len2, mid.z + dir2.z*len2);
+      const seg2    = BABYLON.MeshBuilder.CreateCylinder('db2', {
+        height: len2, diameterBottom: 0.055, diameterTop: 0.012, tessellation: 4
+      }, scene);
+      seg2.position.set((mid.x+tip.x)/2, (mid.y+tip.y)/2, (mid.z+tip.z)/2);
+      seg2.rotationQuaternion = quatFromTo(BABYLON.Vector3.Up(), dir2);
+      seg2.material = branchMat;
+      shadowGen.addShadowCaster(seg2);
+    }
+  }
+
+  for (const [ox, oz] of [
+    [0,-125],[9,-123],[-8,-122],[16,-127],[-16,-128],
+    [21,-130],[-21,-131],[14,-138],[-13,-139],[7,-144],
+    [-6,-143],[19,-123],[-17,-135],[1,-147]
+  ]) spawnDeadTree(ox, oz);
+}
+
+// ── halloween horseman ──
+{
+  const hx = 0, hz = -130;
+  const py = getH(hx, hz);
+
+  function hhMat(r, g, b) {
+    const mt = new BABYLON.StandardMaterial('hhm', scene);
+    mt.diffuseColor = new BABYLON.Color3(r, g, b);
+    mt.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    return mt;
+  }
+  function hhBox(w, h, d) {
+    const b = BABYLON.MeshBuilder.CreateBox('hhb', {width:w, height:h, depth:d}, scene);
+    b.convertToFlatShadedMesh(); return b;
+  }
+  function hhCyl(h, d, t) {
+    const c = BABYLON.MeshBuilder.CreateCylinder('hhc', {height:h, diameter:d, tessellation:t||6}, scene);
+    c.convertToFlatShadedMesh(); return c;
+  }
+
+  // chest — purple body, orange lid
+  const chest = hhBox(1.04, 0.54, 0.64);
+  chest.position.set(hx, py + 0.27, hz);
+  chest.material = hhMat(0.45, 0.10, 0.60);
+
+  const lid = hhBox(1.08, 0.12, 0.68);
+  lid.position.set(hx, py + 0.60, hz);
+  lid.material = hhMat(0.88, 0.38, 0.04);
+
+  const clasp = hhBox(0.14, 0.10, 0.06);
+  clasp.position.set(hx, py + 0.61, hz + 0.35);
+  clasp.material = hhMat(0.88, 0.74, 0.20);
+
+  // dark torso
+  const torso = hhBox(0.44, 0.50, 0.28);
+  torso.position.set(hx, py + 0.91, hz - 0.04);
+  torso.material = hhMat(0.10, 0.08, 0.10);
+
+  // left arm — relaxed
+  const armL = hhBox(0.14, 0.38, 0.14);
+  armL.position.set(hx - 0.30, py + 0.88, hz - 0.04);
+  armL.rotation.z = 0.28;
+  armL.material = hhMat(0.10, 0.08, 0.10);
+
+  // right arm — raised, holding jack-o-lantern
+  const armR = hhBox(0.14, 0.38, 0.14);
+  armR.position.set(hx + 0.32, py + 1.06, hz - 0.04);
+  armR.rotation.z = -1.0;
+  armR.material = hhMat(0.10, 0.08, 0.10);
+
+  // thighs
+  const thighL = hhBox(0.17, 0.38, 0.17);
+  thighL.position.set(hx - 0.13, py + 0.73, hz + 0.19);
+  thighL.rotation.x = Math.PI / 2;
+  thighL.material = hhMat(0.08, 0.06, 0.08);
+
+  const thighR = hhBox(0.17, 0.38, 0.17);
+  thighR.position.set(hx + 0.13, py + 0.73, hz + 0.19);
+  thighR.rotation.x = Math.PI / 2;
+  thighR.material = hhMat(0.08, 0.06, 0.08);
+
+  // shins
+  const shinL = hhBox(0.15, 0.34, 0.15);
+  shinL.position.set(hx - 0.13, py + 0.56, hz + 0.38);
+  shinL.material = hhMat(0.08, 0.06, 0.08);
+
+  const shinR = hhBox(0.15, 0.34, 0.15);
+  shinR.position.set(hx + 0.13, py + 0.56, hz + 0.38);
+  shinR.material = hhMat(0.08, 0.06, 0.08);
+
+  // boots
+  const bootL = hhBox(0.19, 0.09, 0.24);
+  bootL.position.set(hx - 0.13, py + 0.40, hz + 0.42);
+  bootL.material = hhMat(0.09, 0.07, 0.07);
+
+  const bootR = hhBox(0.19, 0.09, 0.24);
+  bootR.position.set(hx + 0.13, py + 0.40, hz + 0.42);
+  bootR.material = hhMat(0.09, 0.07, 0.07);
+
+  // neck stump — no head
+  const neck = hhCyl(0.12, 0.18, 6);
+  neck.position.set(hx, py + 1.22, hz - 0.04);
+  neck.material = hhMat(0.55, 0.38, 0.28);
+
+  // jack-o-lantern held in raised right hand
+  const pumpkin = BABYLON.MeshBuilder.CreateSphere('hhp', {diameter: 0.38, segments: 6}, scene);
+  pumpkin.convertToFlatShadedMesh();
+  const pMat = new BABYLON.StandardMaterial('hhpMat', scene);
+  pMat.diffuseColor = new BABYLON.Color3(0.88, 0.38, 0.03);
+  pMat.emissiveColor = new BABYLON.Color3(0.22, 0.08, 0.00);
+  pumpkin.material = pMat;
+  pumpkin.position.set(hx + 0.56, py + 1.35, hz - 0.04);
+
+  // stem
+  const stem = hhCyl(0.12, 0.07, 4);
+  stem.position.set(hx + 0.56, py + 1.55, hz - 0.04);
+  const stemMat = new BABYLON.StandardMaterial('hhsMat', scene);
+  stemMat.diffuseColor = new BABYLON.Color3(0.15, 0.38, 0.08);
+  stemMat.specularColor = new BABYLON.Color3(0.02, 0.02, 0.02);
+  stem.material = stemMat;
+
+  // glowing eyes on front face of pumpkin (facing +Z toward approaching player)
+  const eyeGlow = new BABYLON.StandardMaterial('hheye', scene);
+  eyeGlow.diffuseColor = new BABYLON.Color3(1.00, 0.85, 0.00);
+  eyeGlow.emissiveColor = new BABYLON.Color3(0.80, 0.65, 0.00);
+  const eyeL = hhBox(0.07, 0.06, 0.04);
+  eyeL.position.set(hx + 0.46, py + 1.37, hz - 0.04 + 0.20);
+  eyeL.material = eyeGlow;
+  const eyeR = hhBox(0.07, 0.06, 0.04);
+  eyeR.position.set(hx + 0.66, py + 1.37, hz - 0.04 + 0.20);
+  eyeR.material = eyeGlow;
+
+  [chest, lid, clasp, torso, armL, armR, thighL, thighR, shinL, shinR, bootL, bootR, neck, pumpkin, stem, eyeL, eyeR].forEach(m => { m._isHalloweenShop = true; });
+}
+
 // ── birds ──
 const birdMat = new BABYLON.StandardMaterial('birdMat', scene);
 birdMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.15);
@@ -2963,21 +3600,13 @@ for (let i = 0; i < 16; i++) {
 }
 
 // ── music ──
-let audioStarted = false, audioCtx = null;
-function startAudio() {
-  if (audioStarted) return;
-  audioStarted = true;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    audioCtx = ctx;
-    const master = ctx.createGain();
+// HALLOWEEN EVENT ACTIVE — original tropical music saved below for easy revert.
+// To revert: replace the body of startAudio() with the ORIGINAL MUSIC block below.
+/*
+=== ORIGINAL MUSIC (tropical steel drum) ===
     master.gain.value = 0.38;
-    master.connect(ctx.destination);
-
     const BPM = 92;
     const B = 60 / BPM;
-
-    // Steel drum note: sine + metallic partial, percussive envelope
     function steel(freq, t, dur, vol = 0.32) {
       const g = ctx.createGain();
       g.gain.setValueAtTime(0, t);
@@ -2993,8 +3622,6 @@ function startAudio() {
         o.start(t); o.stop(t + dur + 0.6);
       });
     }
-
-    // Bass note: triangle, softer attack
     function bass(freq, t, dur) {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
@@ -3005,43 +3632,160 @@ function startAudio() {
       o.connect(g); g.connect(master);
       o.start(t); o.stop(t + dur + 0.1);
     }
-
-    // C major pentatonic: C D E G A
     const C3=130.81, G3=196.00;
     const C4=261.63, D4=293.66, E4=329.63, G4=392.00, A4=440.00;
     const C5=523.25, D5=587.33, E5=659.25, G5=784.00;
-
-    // 8-bar loop
     const LOOP = 8 * 4 * B;
     const mel = [
-      // bar 1-2: opening phrase
       [G4,0],[E4,1],[G4,1.5],[A4,2],[G4,3],
       [E4,4],[C4,4.5],[D4,5],[E4,6],[G4,7],
-      // bar 3-4: climb
       [A4,8],[C5,9],[A4,9.5],[G4,10],[E4,11],
       [D4,12],[E4,13],[G4,14],[A4,15],
-      // bar 5-6: high phrase
       [C5,16],[D5,17],[C5,17.5],[A4,18],[G4,19],
       [E5,20],[D5,21],[C5,22],[A4,23],
-      // bar 7-8: resolve
       [G4,24],[E4,24.5],[D4,25],[C4,26],[D4,27],
       [E4,28],[G4,29],[A4,30],[G4,31],
     ].map(([f,b,dur=0.85]) => [f, b*B, dur*B]);
-
     const bsq = [
       [C3,0],[C3,2],[G3,4],[G3,6],
       [C3,8],[C3,10],[G3,12],[G3,14],
       [C3,16],[C3,18],[G3,20],[G3,22],
       [C3,24],[C3,26],[G3,28],[G3,30],
     ].map(([f,b]) => [f, b*B, 1.6*B]);
-
     function scheduleLoop(t0) {
       mel.forEach(([f,off,dur]) => steel(f, t0+off, dur));
       bsq.forEach(([f,off,dur]) => bass(f, t0+off, dur));
       setTimeout(() => scheduleLoop(t0 + LOOP), (LOOP - 0.3) * 1000);
     }
-
     scheduleLoop(ctx.currentTime + 0.1);
+=== END ORIGINAL MUSIC ===
+*/
+let audioStarted = false, audioCtx = null;
+let normalMusicGain = null, halloweenMusicGain = null;
+let _startHalloweenAudio = null, _halloweenMusicStarted = false;
+
+function setHalloweenMusic(on) {
+  if (!normalMusicGain || !halloweenMusicGain) return;
+  if (on && !_halloweenMusicStarted) {
+    _halloweenMusicStarted = true;
+    if (_startHalloweenAudio) _startHalloweenAudio();
+  }
+  const t = audioCtx.currentTime;
+  normalMusicGain.gain.cancelScheduledValues(t);
+  normalMusicGain.gain.setValueAtTime(normalMusicGain.gain.value, t);
+  normalMusicGain.gain.linearRampToValueAtTime(on ? 0 : 1, t + 3.0);
+  halloweenMusicGain.gain.cancelScheduledValues(t);
+  halloweenMusicGain.gain.setValueAtTime(halloweenMusicGain.gain.value, t);
+  halloweenMusicGain.gain.linearRampToValueAtTime(on ? 1 : 0, t + 3.0);
+}
+
+function startAudio() {
+  if (audioStarted) return;
+  audioStarted = true;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx = ctx;
+    const master = ctx.createGain();
+    master.gain.value = 0.38;
+    master.connect(ctx.destination);
+
+    normalMusicGain = ctx.createGain();
+    normalMusicGain.gain.value = 1.0;
+    normalMusicGain.connect(master);
+
+    halloweenMusicGain = ctx.createGain();
+    halloweenMusicGain.gain.value = 0.0;
+    halloweenMusicGain.connect(master);
+
+    // ── normal music (tropical steel drum) ──
+    const BPM = 92, Bn = 60 / BPM;
+    function steel(freq, t, dur, vol = 0.32) {
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.008);
+      g.gain.setTargetAtTime(0.001, t + 0.04, dur * 0.28);
+      g.connect(normalMusicGain);
+      [1, 2.76, 5.4].forEach((ratio, i) => {
+        const o = ctx.createOscillator(); const og = ctx.createGain();
+        og.gain.value = i === 0 ? 1 : i === 1 ? 0.18 : 0.06;
+        o.type = 'sine'; o.frequency.value = freq * ratio;
+        o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + 0.6);
+      });
+    }
+    function steelBass(freq, t, dur) {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.22, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(normalMusicGain);
+      o.start(t); o.stop(t + dur + 0.1);
+    }
+    const C3=130.81,G3=196.00,C4=261.63,D4=293.66,E4=329.63,G4=392.00,A4=440.00,C5=523.25,D5=587.33,E5=659.25;
+    const NLOOP = 8 * 4 * Bn;
+    const nMel = [
+      [G4,0],[E4,1],[G4,1.5],[A4,2],[G4,3],[E4,4],[C4,4.5],[D4,5],[E4,6],[G4,7],
+      [A4,8],[C5,9],[A4,9.5],[G4,10],[E4,11],[D4,12],[E4,13],[G4,14],[A4,15],
+      [C5,16],[D5,17],[C5,17.5],[A4,18],[G4,19],[E5,20],[D5,21],[C5,22],[A4,23],
+      [G4,24],[E4,24.5],[D4,25],[C4,26],[D4,27],[E4,28],[G4,29],[A4,30],[G4,31],
+    ].map(([f,b,dur=0.85]) => [f, b*Bn, dur*Bn]);
+    const nBsq = [
+      [C3,0],[C3,2],[G3,4],[G3,6],[C3,8],[C3,10],[G3,12],[G3,14],
+      [C3,16],[C3,18],[G3,20],[G3,22],[C3,24],[C3,26],[G3,28],[G3,30],
+    ].map(([f,b]) => [f, b*Bn, 1.6*Bn]);
+    function scheduleNormal(t0) {
+      nMel.forEach(([f,off,dur]) => steel(f, t0+off, dur));
+      nBsq.forEach(([f,off,dur]) => steelBass(f, t0+off, dur));
+      setTimeout(() => scheduleNormal(t0 + NLOOP), (NLOOP - 0.3) * 1000);
+    }
+    scheduleNormal(ctx.currentTime + 0.1);
+
+    // ── halloween music (spooky organ) ──
+    const echo = ctx.createDelay(1.0); echo.delayTime.value = 0.38;
+    const echoFB = ctx.createGain(); echoFB.gain.value = 0.35;
+    const echoOut = ctx.createGain(); echoOut.gain.value = 0.28;
+    echo.connect(echoFB); echoFB.connect(echo);
+    echo.connect(echoOut); echoOut.connect(halloweenMusicGain);
+    function wireH(node) { node.connect(halloweenMusicGain); node.connect(echo); }
+
+    function organ(freq, t, dur, vol = 0.15) {
+      if (!freq) return;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.15);
+      g.gain.setValueAtTime(vol, Math.max(t + 0.15, t + dur - 0.25));
+      g.gain.linearRampToValueAtTime(0, t + dur);
+      wireH(g);
+      [[1,1],[2,0.22],[0.5,0.15]].forEach(([r,amp]) => {
+        const o = ctx.createOscillator(); const og = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = freq * r; og.gain.value = amp;
+        o.connect(og); og.connect(g); o.start(t); o.stop(t + dur + 0.4);
+      });
+    }
+    function drone(freq, vol = 0.035) {
+      const g = ctx.createGain(); g.gain.value = vol;
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+      const lfo = ctx.createOscillator(); const lfoG = ctx.createGain();
+      lfo.frequency.value = 0.18; lfoG.gain.value = 0.25;
+      lfo.connect(lfoG); lfoG.connect(g.gain); o.connect(g); wireH(g);
+      o.start(); lfo.start();
+    }
+    drone(55); drone(110);
+    const Bh = 60 / 56;
+    const hMel = [
+      [440,1.5],[392,0.5],[349.23,0.5],[311.13,0.5],[329.63,1],[0,0.5],
+      [293.66,0.5],[329.63,0.5],[349.23,1],[311.13,0.5],[293.66,0.5],[261.63,2],
+      [0,0.5],[246.94,0.5],[261.63,0.5],[293.66,0.5],[311.13,1],[349.23,0.5],[415.30,0.5],
+      [440,2],[0,0.5],[329.63,0.5],[349.23,0.5],[311.13,0.5],[293.66,1],
+      [440,0.5],[523.25,0.5],[440,0.5],[415.30,0.5],[440,2.5],[0,2],
+    ];
+    const hBass = [[110,0],[110,5],[73.42,10],[82.41,14],[110,19]];
+    const HLOOP = hMel.reduce((s,[,b]) => s+b, 0) * Bh;
+    function scheduleHalloween(t0) {
+      let t = t0;
+      for (const [freq,beats] of hMel) { organ(freq, t, beats*Bh*0.88); t += beats*Bh; }
+      hBass.forEach(([f,beat]) => organ(f, t0+beat*Bh, 2*Bh, 0.14));
+      setTimeout(() => scheduleHalloween(t0 + HLOOP), (HLOOP - 0.5) * 1000);
+    }
+    _startHalloweenAudio = () => scheduleHalloween(audioCtx.currentTime + 0.2);
+
   } catch(e) {}
 }
 
@@ -3159,6 +3903,7 @@ window.addEventListener('keydown', e => {
     if (traderOpen) { closeTrader(); }
     else if (blendOpen) { closeBlend(); }
     else if (itemShopOpen) { closeItemShop(); }
+    else if (halloweenShopOpen) { closeHalloweenShop(); }
     else if (luckyBlockOpen) { closeLuckyBlock(); }
     else if (shopOpen) { closeShop(); }
     else { openShop(); }
@@ -3166,13 +3911,15 @@ window.addEventListener('keydown', e => {
 
   if (e.code === 'KeyE' && traderOpen) { closeTrader(); return; }
   if (e.code === 'KeyE' && itemShopOpen) { closeItemShop(); return; }
+  if (e.code === 'KeyE' && halloweenShopOpen) { closeHalloweenShop(); return; }
   if (e.code === 'KeyE' && luckyBlockOpen) { closeLuckyBlock(); return; }
 
-  const _tbGuard = locked && !shopOpen && !itemShopOpen && !traderOpen && !blendOpen && !luckyBlockOpen && !plantSelectOpen;
+  const _tbGuard = locked && !shopOpen && !itemShopOpen && !halloweenShopOpen && !traderOpen && !blendOpen && !luckyBlockOpen && !plantSelectOpen;
   if (e.code === 'Digit1' && _tbGuard) { useHorn(); return; }
   if (e.code === 'Digit2' && _tbGuard) { toggleRifle(); return; }
-  if (e.code === 'Digit3' && _tbGuard) { useLuckyBlock(); return; }
+  if (e.code === 'Digit3' && _tbGuard) { document.getElementById('lucky-block-title').textContent = "⭐ LOGAN'S LUCKY BLOCK"; useLuckyBlock(); return; }
   if (e.code === 'Digit4' && _tbGuard) { activateBlenderGem(); return; }
+  if (e.code === 'Digit5' && _tbGuard) { useHalloweenLuckyBlock(); return; }
 
   if (e.code === 'KeyE' && locked && !shopOpen) {
     if (destroyTarget) {
@@ -3181,6 +3928,8 @@ window.addEventListener('keydown', e => {
       closePlantSelect();
     } else if (hoveredItemShop) {
       openItemShop();
+    } else if (hoveredHalloweenShop) {
+      openHalloweenShop();
     } else if (hoveredTrader) {
       openTrader();
     } else if (hoveredBlender) {
@@ -3259,8 +4008,8 @@ canvas.addEventListener('mousedown', e => {
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === canvas;
   if (!locked) {
-    if (audioCtx && !shopOpen && !blendOpen && !traderOpen && !itemShopOpen && !luckyBlockOpen) audioCtx.suspend();
-    if (!shopOpen && !blendOpen && !traderOpen && !itemShopOpen) overlay.style.display = 'flex';
+    if (audioCtx && !shopOpen && !blendOpen && !traderOpen && !itemShopOpen && !halloweenShopOpen && !luckyBlockOpen) audioCtx.suspend();
+    if (!shopOpen && !blendOpen && !traderOpen && !itemShopOpen && !halloweenShopOpen) overlay.style.display = 'flex';
     if (destroyTarget) { destroyTarget = null; destroyConfirmEl.style.display = 'none'; }
   }
 });
@@ -3322,23 +4071,7 @@ const hudPos   = document.getElementById('hud-pos');
 const hudFps   = document.getElementById('hud-fps');
 const sprintInd = document.getElementById('sprint-ind');
 
-// ── halloween countdown ──
-const halloweenTarget = new Date('2026-10-02T00:00:00').getTime();
-const hudHalloween = document.getElementById('hud-halloween');
-function updateHalloweenCountdown() {
-  const ms = halloweenTarget - Date.now();
-  if (ms <= 0) {
-    hudHalloween.textContent = '🎃 COMING OUT LATER TODAY...';
-    return;
-  }
-  const days = Math.floor(ms / 86400000);
-  const hrs  = Math.floor((ms % 86400000) / 3600000);
-  const mins = Math.floor((ms % 3600000)  / 60000);
-  const secs = Math.floor((ms % 60000)    / 1000);
-  hudHalloween.textContent = `🎃 HALLOWEEN UPDATE IN: ${days}d ${hrs}h ${mins}m ${secs}s`;
-}
-updateHalloweenCountdown();
-setInterval(updateHalloweenCountdown, 1000);
+updateCandyHUD();
 const compassCtx = document.getElementById('compassCanvas').getContext('2d');
 
 let fpsCounter = 0, fpsTime = 0, fpsDisplay = 0;
@@ -3397,7 +4130,7 @@ scene.registerBeforeRender(() => {
     }
     // clamp to island
     const d = Math.sqrt(nx * nx + nz * nz);
-    if (d > 56) { nx *= 56 / d; nz *= 56 / d; }
+    if (d > 168) { nx *= 168 / d; nz *= 168 / d; }
     const groundH = getH(nx, nz);
     camera.position.x = nx;
     camera.position.z = nz;
@@ -3434,15 +4167,20 @@ scene.registerBeforeRender(() => {
     plantTooltipEl.style.display = 'none';
     blenderPromptEl.style.display = 'none';
     document.getElementById('item-shop-prompt').style.display = 'none';
+    document.getElementById('halloween-shop-prompt').style.display = 'none';
     pickResult = null;
     hoveredPlant = null;
     hoveredBlender = false;
     hoveredItemShop = false;
+    hoveredHalloweenShop = false;
 
     if (pr.hit && pr.pickedPoint && BABYLON.Vector3.Distance(camera.position, pr.pickedPoint) < 12) {
       if (pr.pickedMesh._isItemShop && BABYLON.Vector3.Distance(camera.position, pr.pickedPoint) < 8) {
         hoveredItemShop = true;
         document.getElementById('item-shop-prompt').style.display = 'block';
+      } else if (pr.pickedMesh._isHalloweenShop && BABYLON.Vector3.Distance(camera.position, pr.pickedPoint) < 8) {
+        hoveredHalloweenShop = true;
+        document.getElementById('halloween-shop-prompt').style.display = 'block';
       } else if (blenderMeshes.includes(pr.pickedMesh)) {
         hoveredBlender = true;
         blenderPromptEl.style.display = 'block';
@@ -3483,14 +4221,13 @@ scene.registerBeforeRender(() => {
         } else {
           // hovering terrain — show plant prompt
           const hp = pr.pickedPoint;
-          const biome = biomeLabel(getH(hp.x, hp.z));
+          const biome = biomeLabel(getH(hp.x, hp.z), hp.x, hp.z);
           plantCandidates = seedsForBiome(biome);
-          if (plantCandidates.length > 0) {
-            pickResult = { point: hp, biome, candidates: plantCandidates };
-            plantPromptBiome.textContent = biome;
-            plantPromptSeeds.innerHTML = plantCandidates.map(s => s.icon + ' ' + s.name).join('   ');
-            plantPromptEl.style.display = 'block';
-          }
+          pickResult = { point: hp, biome, candidates: plantCandidates };
+          plantPromptBiome.textContent = biome;
+          plantPromptBiome.style.color = biome === 'HALLOWLANDS' ? '#ff7700' : '';
+          plantPromptSeeds.innerHTML = plantCandidates.map(s => s.icon + ' ' + s.name).join('   ');
+          plantPromptEl.style.display = 'block';
         }
       }
     }
@@ -3499,10 +4236,12 @@ scene.registerBeforeRender(() => {
     hoveredPlant = null;
     hoveredBlender = false;
     hoveredItemShop = false;
+    hoveredHalloweenShop = false;
     plantPromptEl.style.display = 'none';
     plantTooltipEl.style.display = 'none';
     blenderPromptEl.style.display = 'none';
     document.getElementById('item-shop-prompt').style.display = 'none';
+    document.getElementById('halloween-shop-prompt').style.display = 'none';
   }
 
   // birds
@@ -3552,7 +4291,9 @@ scene.registerBeforeRender(() => {
 
   // HUD
   const h = getH(camera.position.x, camera.position.z);
-  hudBiome.textContent = 'BIOME: ' + biomeLabel(h);
+  const _biomeLabel = biomeLabel(h, camera.position.x, camera.position.z);
+  hudBiome.textContent = 'BIOME: ' + _biomeLabel;
+  hudBiome.style.color = _biomeLabel === 'HALLOWLANDS' ? '#ff7700' : '';
   hudPos.textContent   = 'POS: ' + Math.round(camera.position.x) + ', ' + Math.round(camera.position.z);
   hudFps.textContent   = 'FPS: ' + fpsDisplay;
 
@@ -3577,6 +4318,24 @@ scene.registerBeforeRender(() => {
   compassCtx.font = '8px monospace';
   compassCtx.textAlign = 'center';
   compassCtx.fillText('N', 30, 10);
+
+  // ── halloween zone blend ──
+  const _dx = camera.position.x, _dz = camera.position.z + 130;
+  const _inH = Math.sqrt(_dx*_dx + _dz*_dz) < 55;
+  if (_inH !== scene._inHalloweenZone) { scene._inHalloweenZone = _inH; setHalloweenMusic(_inH); }
+  scene._hBlend = Math.min(1, Math.max(0, (scene._hBlend || 0) + (_inH ? 1 : -1) * dt * 0.4));
+  const bl = scene._hBlend;
+  const lp = (a, b) => a + (b - a) * bl;
+  scene.clearColor.r = lp(0.5, 0.08); scene.clearColor.g = lp(0.7, 0.04); scene.clearColor.b = lp(1.0, 0.15);
+  scene.fogDensity = lp(0.012, 0.025);
+  scene.fogColor.set(lp(0.7,0.15), lp(0.85,0.08), lp(1.0,0.25));
+  sun.intensity = lp(1.6, 0.85);
+  sun.diffuse.set(lp(1.0,0.7), lp(0.95,0.7), lp(0.80,0.95));
+  ambient.intensity = lp(0.7, 0.75);
+  ambient.diffuse.set(lp(0.85,0.35), lp(0.95,0.25), lp(1.0,0.55));
+  ambient.groundColor.set(lp(0.30,0.08), lp(0.65,0.05), lp(0.30,0.12));
+  skyMat.inclination = lp(-0.3, 0.42); skyMat.luminance = lp(1.0, 0.6);
+  skyMat.turbidity = lp(5, 10); skyMat.rayleigh = lp(3, 2);
 });
 
 // ── save system ──
@@ -3584,6 +4343,7 @@ function saveGame() {
   if (localStorage.getItem('polyisland-no-save')) return;
   const state = {
     coins,
+    candyCount,
     inventory: {...inventory},
     harvestBag: {...harvestBag},
     smoothies: smoothies.map(s => ({...s})),
@@ -3607,6 +4367,7 @@ function loadGame() {
   try { state = JSON.parse(raw); }
   catch(e) { console.warn('Save parse failed', e); return; }
   coins = state.coins ?? 10;
+  candyCount = state.candyCount ?? 0;
   Object.assign(inventory,  state.inventory  || {});
   Object.assign(harvestBag, state.harvestBag || {});
   smoothies.push(...(state.smoothies || []));
@@ -3625,6 +4386,7 @@ function loadGame() {
     } catch(e) { console.warn('Plant load failed', p.seedId, e); }
   }
   document.getElementById('hud-coins').textContent = '💰 ' + coins;
+  updateCandyHUD();
   updateHarvestHUD();
 }
 
@@ -3928,6 +4690,7 @@ buildRifleModel();
 
 restockShop();
 restockItemShop();
+restockHalloweenShop();
 _shopReady = true;
 loadGame();
 // clear any plants too close to the item shop boy

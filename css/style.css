@@ -108,8 +108,10 @@ header {
 .game-card.math-drive:hover      { border-color: #ff9f00; box-shadow: 0 0 24px rgba(255,159,0,0.4); }
 .game-card.city-racer:hover      { border-color: #00d4ff; box-shadow: 0 0 24px rgba(0,212,255,0.4); }
 .game-card.sea-of-phantoms:hover { border-color: #00b4d8; box-shadow: 0 0 24px rgba(0,180,216,0.4); }
+.game-card.city-driver:hover     { border-color: #f1c40f; box-shadow: 0 0 24px rgba(241,196,15,0.4); }
 .game-card.last-stand:hover      { border-color: #00f5ff; box-shadow: 0 0 24px rgba(0,245,255,0.4); }
 .game-card.poly-island:hover     { border-color: #52b788; box-shadow: 0 0 24px rgba(82,183,136,0.4); }
+.game-card.meme-madness:hover    { border-color: #c855ff; box-shadow: 0 0 24px rgba(200,85,255,0.4); }
 
 /* ── UPDATE BADGE ── */
 .update-badge {
@@ -123,6 +125,17 @@ header {
   0%, 100% { background: #52b788; }
   50% { background: #74c69d; }
 }
+.halloween-badge {
+  background: #e05800; color: #000;
+  font-family: 'Press Start 2P', monospace; font-size: 8px;
+  padding: 4px 10px; text-align: center;
+  letter-spacing: 1px; border-radius: 4px 4px 0 0;
+  animation: halloween-pulse 2s ease-in-out infinite;
+}
+@keyframes halloween-pulse {
+  0%, 100% { background: #e05800; }
+  50% { background: #f57020; }
+}
 
 /* ── CARD ICON ── */
 .card-icon {
@@ -135,10 +148,12 @@ header {
 
 .about-us        .card-icon { background: linear-gradient(135deg, #1a001a, #0d0020); }
 .math-drive      .card-icon { background: linear-gradient(135deg, #0a0800, #1a0f00); }
+.city-driver     .card-icon { background: linear-gradient(135deg, #0a0800, #1a1200); }
 .city-racer      .card-icon { background: linear-gradient(135deg, #00080a, #001a20); }
 .sea-of-phantoms .card-icon { background: linear-gradient(135deg, #000d1a, #001e38); }
 .last-stand      .card-icon { background: linear-gradient(135deg, #000d1a, #001428); }
 .poly-island     .card-icon { background: linear-gradient(135deg, #001a0d, #003320); }
+.meme-madness    .card-icon { background: linear-gradient(135deg, #0d001a, #180030); }
 
 .card-icon svg {
   width: 110px;
@@ -162,10 +177,12 @@ header {
 
 .about-us        .card-title { color: #ff00c8; }
 .math-drive      .card-title { color: #ff9f00; }
+.city-driver     .card-title { color: #f1c40f; }
 .city-racer      .card-title { color: #00d4ff; }
 .sea-of-phantoms .card-title { color: #00b4d8; }
 .last-stand      .card-title { color: #00f5ff; }
 .poly-island     .card-title { color: #52b788; }
+.meme-madness    .card-title { color: #c855ff; }
 
 .card-desc {
   font-size: 0.45rem;
@@ -187,10 +204,12 @@ header {
 
 .about-us        .play-btn { background: #ff00c8; }
 .math-drive      .play-btn { background: #ff9f00; }
+.city-driver     .play-btn { background: #f1c40f; color: #000; }
 .city-racer      .play-btn { background: #00d4ff; }
 .sea-of-phantoms .play-btn { background: #00b4d8; }
 .last-stand      .play-btn { background: #00f5ff; }
 .poly-island     .play-btn { background: #52b788; }
+.meme-madness    .play-btn { background: #c855ff; }
 
 .game-card:hover .play-btn {
   filter: brightness(1.15);

@@ -131,6 +131,7 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
   background:rgba(8,16,40,0.99);border:3px solid rgba(241,196,15,0.5);
   box-shadow:0 0 60px rgba(241,196,15,0.15),0 0 120px rgba(241,196,15,0.05);
   border-radius:18px;padding:32px 36px;max-width:680px;width:95%;
+  overflow-y:auto;max-height:88vh;
 }
 #shop-box h2{
   font-size:22px;font-weight:700;letter-spacing:4px;text-transform:uppercase;
@@ -204,6 +205,9 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
 .sop-btn{width:60px;height:60px;background:rgba(0,0,0,0.65);border:2px solid rgba(241,196,15,0.4);
   border-radius:10px;color:#f1c40f;font-size:24px;display:flex;align-items:center;justify-content:center;
   user-select:none;-webkit-user-select:none;touch-action:none;}
+#hud.hhalloween{background:rgba(10,2,18,0.98);border-bottom-color:rgba(255,102,0,0.55);}
+#hud.hhalloween .hl{color:rgba(255,120,0,0.9);}
+#hud.hhalloween .ad:not(.ae){background:#ff6600;box-shadow:0 0 6px rgba(255,102,0,0.9);}
 </style>
 </head>
 <body>
@@ -222,12 +226,17 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
 <a id="back-home" href="../index.html">&#8592; HOME</a>
 <div id="g">
   <div id="hud">
-    <div class="hb"><div class="hl">Wave</div><div class="hv" id="hw">1</div></div>
+    <div class="hb"><div class="hl" id="wave-label">Wave</div><div class="hv" id="hw">1</div></div>
     <div class="hb"><div class="hl">Hull</div><div id="hpbar"><div id="hpfill"></div></div></div>
     <div class="hb"><div class="hl" id="ammo-label">Cannonballs</div><div id="ammorow"></div></div>
-    <div class="hb"><div class="hl">Gold</div><div class="hv" id="hg">0</div></div>
+    <div class="hb" style="flex-direction:row;align-items:center;gap:6px;"><svg width="26" height="26" viewBox="0 0 26 26" style="flex-shrink:0"><defs><radialGradient id="hg-g" cx="30%" cy="25%" r="75%"><stop offset="0%" stop-color="#fffde0"/><stop offset="22%" stop-color="#ffe033"/><stop offset="62%" stop-color="#ffa500"/><stop offset="100%" stop-color="#8b4500"/></radialGradient><linearGradient id="hg-sh" x1="0%" y1="0%" x2="60%" y2="100%"><stop offset="0%" stop-color="rgba(255,255,255,0.38)"/><stop offset="45%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(0,0,0,0.22)"/></linearGradient></defs><ellipse cx="14" cy="22.5" rx="9" ry="2.5" fill="rgba(0,0,0,0.28)"/><circle cx="13" cy="13" r="11" fill="url(#hg-g)" stroke="#7a3e00" stroke-width="1.5"/><circle cx="13" cy="13" r="11" fill="url(#hg-sh)"/><path d="M5.5,8 A9,9 0 0,1 18,5.5" stroke="rgba(255,255,210,0.75)" stroke-width="1.5" fill="none"/><circle cx="13" cy="13" r="8.5" fill="none" stroke="rgba(120,60,0,0.28)" stroke-width="1"/><ellipse cx="9" cy="8" rx="5" ry="3" fill="rgba(255,255,255,0.48)" transform="rotate(-25 9 8)"/><ellipse cx="8" cy="7" rx="2" ry="1.2" fill="rgba(255,255,255,0.92)" transform="rotate(-25 8 7)"/></svg><div class="hv" id="hg">0</div></div>
+    <div class="hb" id="candy-hb" style="display:none;flex-direction:row;align-items:center;gap:6px;"><svg width="20" height="26" viewBox="0 0 20 26" style="flex-shrink:0"><defs><clipPath id="cc-cp"><path d="M10,1 C14,1 19,16 19,21 Q19,25 10,25 Q1,25 1,21 C1,16 6,1 10,1Z"/></clipPath></defs><rect x="0" y="1" width="20" height="10" fill="#ffd700" clip-path="url(#cc-cp)"/><rect x="0" y="11" width="20" height="9" fill="#ff7800" clip-path="url(#cc-cp)"/><rect x="0" y="20" width="20" height="6" fill="#f0ede0" clip-path="url(#cc-cp)"/><path d="M10,1 C14,1 19,16 19,21 Q19,25 10,25 Q1,25 1,21 C1,16 6,1 10,1Z" fill="none" stroke="#b85500" stroke-width="1.5"/><ellipse cx="8" cy="9" rx="2" ry="3.5" fill="rgba(255,255,255,0.5)" transform="rotate(-15 8 9)"/></svg><div class="hv" id="hcandy">0</div></div>
+    <div class="hb" id="weapon-hb" style="display:none"><div class="hl">Weapon</div><div class="hv" id="hweapon" style="font-size:12px">🪤 Trap</div></div>
+    <div class="hb" id="broom-hb" style="display:none"><div class="hl" id="hbroom-label">Broom [E]</div><div class="hv" id="hbroom" style="font-size:11px">🧹 READY</div></div>
     <div class="hb"><div class="hl">Phantoms</div><div class="hv" id="hph">0</div></div>
     <button id="shop-btn" onclick="openShop()">⚓ Shop</button>
+    <button id="halloween-shop-btn" style="display:none;padding:6px 14px;border-radius:7px;border:1px solid rgba(255,102,0,0.5);background:rgba(255,102,0,0.15);color:#ff6600;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;" onclick="openHalloweenShop()">🎃 Candy Shop</button>
+    <button id="admin-boss-btn" style="display:none;padding:6px 14px;border-radius:7px;border:1px solid rgba(255,50,50,0.5);background:rgba(255,0,0,0.15);color:#ff4444;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;" onclick="adminSkipBoss()">⚡ Skip→Boss</button>
   </div>
 
   <div id="shop">
@@ -236,6 +245,11 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
       <p class="sub">Spend your gold to unlock new sailors</p>
       <div id="shop-gold-display">Gold: 0</div>
       <div id="char-grid"></div>
+      <div id="candy-convert-section" style="margin:16px 0 8px;display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:11px;color:rgba(255,180,100,0.45);text-align:center;line-height:1.6;font-family:'Gentium Basic',Georgia,serif;">🍬 Convert Candy → Gold &nbsp;(10 candy = 8 gold)</div>
+        <button onclick="convertCandy()" style="display:block;width:100%;padding:9px;border-radius:8px;border:1px solid rgba(255,102,0,0.3);background:rgba(255,102,0,0.12);color:#ff8800;font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">Convert 10 🍬 → 8 ⚓ Gold</button>
+        <div id="candy-convert-info" style="font-size:10px;color:rgba(255,180,100,0.45);text-align:center;min-height:14px;font-family:'Gentium Basic',Georgia,serif;"></div>
+      </div>
       <div id="sop-save-section">
         <div id="sop-save-info">💾 Auto-saves when you leave. Use save codes to move to another device or as a backup.</div>
         <button id="sop-export-btn" onclick="sopExport()">📋 Export Save Code</button>
@@ -244,7 +258,26 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
         <button id="sop-import-btn" onclick="sopImport()">📂 Import Save Code</button>
         <div id="sop-status"></div>
       </div>
+      <button id="shop-switch-btn" style="display:none;margin:0 auto 10px;padding:10px 36px;border-radius:8px;border:1px solid rgba(255,102,0,0.4);background:rgba(255,102,0,0.14);color:#ff6600;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;" onclick="switchToHalloweenShop()">🎃 Candy Shop</button>
+      <button id="crew-mode-btn" onclick="switchMode()" style="display:block;margin:0 auto 10px;padding:10px 36px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(180,210,255,0.7);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;"></button>
       <button id="shop-close" onclick="closeShop()">Back to Sea</button>
+    </div>
+  </div>
+
+  <!-- Halloween Candy Shop -->
+  <div id="hwshop" style="position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,2,14,0.97);z-index:20;">
+    <div style="background:rgba(18,4,28,0.99);border:3px solid rgba(255,102,0,0.5);box-shadow:0 0 60px rgba(255,102,0,0.15),0 0 120px rgba(255,102,0,0.05);border-radius:18px;padding:32px 36px;max-width:640px;width:95%;overflow-y:auto;max-height:88vh;">
+      <h2 style="font-size:22px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#ff6600;text-shadow:0 0 16px rgba(255,102,0,0.45);font-family:'Gentium Basic',Georgia,serif;margin-bottom:4px;text-align:center;">🎃 Candy Shop</h2>
+      <p style="font-size:12px;color:rgba(255,180,100,0.45);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:22px;font-family:'Gentium Basic',Georgia,serif;">Spend candy on exclusive Halloween characters</p>
+      <div id="hwshop-candy" style="font-size:13px;color:#ff8800;font-weight:700;text-align:center;margin-bottom:18px;font-family:'Gentium Basic',Georgia,serif;letter-spacing:.05em;"></div>
+      <div id="hwchar-grid" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:22px;"></div>
+      <div style="text-align:center;margin-bottom:18px;">
+        <div id="hw-heal-info" style="font-size:12px;color:rgba(255,180,100,0.6);margin-bottom:8px;font-family:'Gentium Basic',Georgia,serif;letter-spacing:.05em;"></div>
+        <button onclick="buyHealth()" style="padding:9px 28px;border-radius:8px;border:1px solid rgba(255,80,80,0.5);background:rgba(255,50,50,0.18);color:#ff8888;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">❤️ Heal +20 HP — 5🍬</button>
+      </div>
+      <button onclick="switchToCrewShop()" style="display:block;margin:0 auto 10px;padding:10px 36px;border-radius:8px;border:1px solid rgba(241,196,15,0.4);background:rgba(241,196,15,0.12);color:#f1c40f;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">⚓ Crew Shop</button>
+      <button onclick="switchMode()" style="display:block;margin:0 auto 10px;padding:10px 36px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:rgba(180,210,255,0.7);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">⛵ Normal Mode</button>
+      <button onclick="closeHalloweenShop()" style="display:block;margin:0 auto;padding:10px 36px;border-radius:8px;border:none;background:#ff6600;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">Back to Night</button>
     </div>
   </div>
 
@@ -270,6 +303,7 @@ body{background:#0a0a12;margin:0;overflow:hidden;font-family:'Gentium Basic',Geo
         </div>
         <div id="finalscore"></div>
         <button id="btn">Set Sail</button>
+        <button id="halloween-btn" style="padding:11px 32px;border-radius:8px;border:none;background:#ff6600;color:#fff;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .15s;font-family:'Gentium Basic',Georgia,serif;">🎃 Halloween Mode</button>
       </div>
     </div>
   </div>
@@ -356,6 +390,136 @@ const BOSS=[
   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,
 ];
 
+// ── Halloween Sprite Colors ──────────────────────────────────────────────────
+const PST=px(0x447700),PO=px(0xff6600),PO2=px(0xff8800),PO3=px(0xcc4400),POK=px(0x221100),PJ=px(0x080400);
+const RPC=px(0x141414),RPC2=px(0x252525),RPHD=px(0x080808),RPOK=px(0x040404),REYE=px(0xdd0000),REYE2=px(0x880000);
+const WGA=px(0xffffff),WGB=px(0xeeeeee),WGK2=px(0x555555),WEYE=px(0x0a0a0a),WEYE2=px(0x222222);
+const SKB=px(0xd8c8a0),SKB2=px(0xc0a878),SKB3=px(0xa08850),WCEYE=px(0x080808);
+const WCHT=px(0x080812),WCHT2=px(0x141428),WCGLD=px(0xb88020),WCC=px(0x181828),WCC2=px(0x252538);
+const RD=px(0xcc2222),RD2=px(0xee4444);
+const BWK=px(0x080808),BWK2=px(0x161616),BWK3=px(0x242424),BWK4=px(0x040404);
+const GRS=px(0x44aa44),GRS2=px(0x2d8833),GRM=px(0x1a3a1a);
+
+// Spooky Scout — dark coat, pale green skin, orange hat + accents
+const SSC1=px(0x181820),SSC2=px(0x222230),SSC3=px(0x2a2a3a);
+const SSHAT=px(0x441100),SSHAT2=px(0x6a2200),SSHAT3=px(0xcc5500);
+const SSSK=px(0xb8d090),SSSK2=px(0xa0b878),SSHR=px(0x303820),SSHR2=px(0x404830);
+const SSRD=px(0xff6600),SSGD=px(0x884400),SSMU=px(0x506040),SSPK=px(0x100808);
+const SPOOKY_SCOUT=[
+  T,     T,     SSHAT3,SSHAT2,SSHAT, T,     T,     T,     T,     T,     T,     T,
+  T,     SSPK,  SSC1,  SSC2,  SSC3,  SSC2,  SSC1,  SSPK,  T,     T,     T,     T,
+  SSPK,  SSC2,  SSC3,  SSC1,  SSC2,  SSC3,  SSC2,  SSC3,  SSPK,  T,     T,     T,
+  SSPK,  SSC3,  SSC1,  SSHR,  SSSK,  SSSK,  SSSK,  SSC1,  SSC3,  SSPK,  T,     T,
+  SSPK,  SSC2,  SSHR2, SSSK,  SSSK2, SSMU,  SSSK2, SSSK,  SSHR2, SSC2,  SSPK,  T,
+  SSPK,  SSC1,  SSHR,  SSSK,  SSMU,  SSSK,  SSSK,  SSMU,  SSSK,  SSHR,  SSC1,  SSPK,
+  T,     SSPK,  SSHR2, SSC1,  SSC2,  SSC1,  SSC1,  SSC2,  SSC1,  SSHR2, SSPK,  T,
+  T,     SSPK,  SSC2,  SSC1,  SSGD,  SSRD,  SSRD,  SSGD,  SSC1,  SSC2,  SSPK,  T,
+  T,     T,     SSPK,  SSC1,  SSC2,  SSC1,  SSC1,  SSC2,  SSC1,  SSPK,  T,     T,
+  T,     T,     SSPK,  SSRD,  SSRD,  SSGD,  SSGD,  SSRD,  SSRD,  SSPK,  T,     T,
+  T,     T,     T,     SSPK,  SSC2,  SSC1,  SSC1,  SSC2,  SSPK,  T,     T,     T,
+  T,     T,     T,     T,     SSPK,  SSPK,  SSPK,  SSPK,  T,     T,     T,     T,
+];
+
+// Withered Pumpkin Boss — neon green giant pumpkin ghost with eye patch
+const WPO=px(0x003300),WPM=px(0x115511),WPB=px(0x33ff44),WPS=px(0x22bb33),WPJ=px(0x000800),WPEP=px(0x442200),WPW=px(0x88ff99);
+const WITHERED_PUMPKIN=[
+  T,    T,    T,    WPO,  WPO,  WPO,  WPO,  WPO,  T,    T,    T,    T,
+  T,    T,    WPO,  WPM,  WPB,  WPS,  WPB,  WPM,  WPO,  T,    T,    T,
+  T,    WPO,  WPB,  WPS,  WPJ,  WPS,  WPEP, WPEP, WPS,  WPB,  WPO,  T,
+  WPO,  WPM,  WPS,  WPB,  WPJ,  WPB,  WPEP, WPEP, WPB,  WPS,  WPM,  WPO,
+  WPO,  WPB,  WPS,  WPB,  WPS,  WPB,  WPB,  WPS,  WPB,  WPS,  WPB,  WPO,
+  WPO,  WPS,  WPB,  WPJ,  WPB,  WPJ,  WPJ,  WPB,  WPJ,  WPB,  WPS,  WPO,
+  WPO,  WPB,  WPS,  WPB,  WPJ,  WPB,  WPB,  WPJ,  WPB,  WPS,  WPB,  WPO,
+  WPO,  WPM,  WPB,  WPS,  WPB,  WPM,  WPM,  WPB,  WPS,  WPB,  WPM,  WPO,
+  T,    WPO,  WPM,  WPO,  WPB,  WPO,  WPO,  WPB,  WPO,  WPM,  WPO,  T,
+  T,    T,    WPW,  T,    WPW,  T,    T,    WPW,  T,    WPW,  T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+];
+
+// Vampire — dark suit, pale face, red eyes, high pointed collar/cape
+
+// Headless Horseman — no head, dark coat, arm raised holding pumpkin
+const HHC1=px(0x181210),HHC2=px(0x221a14),HHPK=px(0xff6600),HHPK2=px(0xcc4400),HHPKJ=px(0x001000),HHSK=px(0xd0b090),HHBT=px(0x0c0808),HHGLOW=px(0xff9900);
+const HEADLESS_HORSEMAN=[
+  T,     T,     T,     T,     HHGLOW,HHGLOW,HHPK,  HHPK2, HHPK,  HHGLOW,T,     T,
+  T,     T,     T,     HHC1,  HHGLOW,HHPK2, HHPK,  HHPKJ, HHPK,  HHPK2, HHGLOW,T,
+  T,     HHC1,  HHC2,  HHC1,  HHSK,  HHPK,  HHPKJ, HHPK,  HHPKJ, HHPK,  HHC2,  T,
+  HHC1,  HHC2,  HHC1,  HHC2,  HHSK,  HHSK,  HHC1,  HHC2,  HHC1,  HHC1,  HHC2,  HHC1,
+  HHC2,  HHC1,  HHC2,  HHSK,  HHC2,  HHC1,  HHC2,  HHC1,  HHSK,  HHC2,  HHC1,  HHC2,
+  HHC1,  HHC2,  HHC1,  HHC2,  HHSK,  HHC1,  HHC2,  HHSK,  HHC1,  HHC2,  HHC1,  HHC2,
+  HHC2,  HHC1,  HHC2,  HHC1,  HHC2,  HHC1,  HHC1,  HHC2,  HHC1,  HHC2,  HHC1,  HHC2,
+  HHC1,  HHC2,  HHC1,  HHC2,  HHC1,  T,     T,     HHC1,  HHC2,  HHC1,  HHC2,  HHC1,
+  T,     HHBT,  HHC1,  HHC2,  T,     T,     T,     T,     HHC2,  HHC1,  HHBT,  T,
+  T,     T,     HHBT,  HHC1,  T,     T,     T,     T,     HHC1,  HHBT,  T,     T,
+  T,     T,     T,     T,     T,     T,     T,     T,     T,     T,     T,     T,
+  T,     T,     T,     T,     T,     T,     T,     T,     T,     T,     T,     T,
+];
+
+// Pumpkin Phantom — orange ghost with carved jack-o-lantern face
+const PUMPKIN_PHANTOM=[
+  T,   T,   T,   POK, POK, POK, POK, POK, T,   T,   T,   T,
+  T,   T,   POK, PO3, PO,  PO2, PO,  PO3, POK, T,   T,   T,
+  T,   POK, PO,  PO2, PJ,  PO2, PO2, PJ,  PO2, PO,  POK, T,
+  POK, PO3, PO2, PO,  PJ,  PO,  PO,  PJ,  PO,  PO2, PO3, POK,
+  POK, PO,  PO2, PO,  PO2, PO,  PO,  PO2, PO,  PO2, PO,  POK,
+  POK, PO2, PO,  PJ,  PO,  PJ,  PJ,  PO,  PJ,  PO,  PO2, POK,
+  POK, PO,  PO2, PO,  PJ,  PO,  PO,  PJ,  PO,  PO2, PO,  POK,
+  POK, PO3, PO,  PO2, PO,  PO3, PO3, PO,  PO2, PO,  PO3, POK,
+  T,   POK, PO3, POK, PO,  POK, POK, PO,  POK, PO3, POK, T,
+  T,   T,   POK, T,   POK, T,   T,   POK, T,   POK, T,   T,
+  T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,
+  T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,   T,
+];
+
+// Grim Reaper — hooded dark ghost, blood-red eyes, throws scythes
+const GRIM_REAPER=[
+  T,    T,    T,    RPOK, RPHD, RPHD, RPHD, RPOK, T,    T,    T,    T,
+  T,    T,    RPOK, RPHD, RPC,  RPC2, RPC,  RPHD, RPOK, T,    T,    T,
+  T,    RPOK, RPC,  RPC2, REYE, RPC2, RPC2, REYE, RPC2, RPC,  RPOK, T,
+  RPOK, RPC2, RPC,  REYE2,REYE, RPC,  RPC,  REYE, REYE2,RPC,  RPC2, RPOK,
+  RPOK, RPC2, RPC,  RPC2, RPC,  RPC2, RPC2, RPC,  RPC2, RPC,  RPC2, RPOK,
+  RPOK, RPC,  RPC2, RPC,  RPC2, RPC,  RPC,  RPC2, RPC,  RPC2, RPC,  RPOK,
+  RPOK, RPC2, RPC,  RPC2, RPC,  RPC2, RPC2, RPC,  RPC2, RPC,  RPC2, RPOK,
+  RPOK, RPC,  RPC2, RPC,  RPC2, RPC,  RPC,  RPC2, RPC,  RPC2, RPC,  RPOK,
+  T,    RPOK, RPC,  RPOK, RPC2, RPOK, RPOK, RPC2, RPOK, RPC,  RPOK, T,
+  T,    T,    RPOK, T,    RPOK, T,    T,    RPOK, T,    RPOK, T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+];
+
+// Pure White Ghost — classic Halloween ghost, black eyes
+const WHITE_GHOST=[
+  T,    T,    T,    WGK2, WGK2, WGK2, WGK2, WGK2, T,    T,    T,    T,
+  T,    T,    WGK2, WGA,  WGA,  WGA,  WGA,  WGA,  WGK2, T,    T,    T,
+  T,    WGK2, WGB,  WGA,  WEYE, WGA,  WGA,  WEYE, WGA,  WGB,  WGK2, T,
+  WGK2, WGA,  WGA,  WGB,  WEYE2,WGB,  WGB,  WEYE2,WGB,  WGA,  WGA,  WGK2,
+  WGK2, WGB,  WGA,  WGB,  WGA,  WGB,  WGB,  WGA,  WGB,  WGA,  WGB,  WGK2,
+  WGK2, WGA,  WGB,  WGA,  WGB,  WGA,  WGA,  WGB,  WGA,  WGB,  WGA,  WGK2,
+  WGK2, WGB,  WGA,  WGB,  WGA,  WGB,  WGB,  WGA,  WGB,  WGA,  WGB,  WGK2,
+  WGK2, WGA,  WGB,  WGA,  WGB,  WGA,  WGA,  WGB,  WGA,  WGB,  WGA,  WGK2,
+  T,    WGK2, WGA,  WGK2, WGB,  WGK2, WGK2, WGB,  WGK2, WGA,  WGK2, T,
+  T,    T,    WGK2, T,    WGK2, T,    T,    WGK2, T,    WGK2, T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+];
+
+// Withered Captain — CAP_C reskin: same silhouette, rotted coat + bone skull
+const WITHER_CAP=[
+  T,     T,     WCHT2, WCC2,  WCC,   WCC2,  WCHT2, T,     T,     T,     T,     T,
+  T,     WCC2,  WCC,   WCHT2, WCC2,  WCHT2, WCC,   WCC2,  T,     T,     T,     T,
+  WCC2,  WCHT2, WCC,   SKB,   SKB,   SKB,   SKB,   WCC,   WCHT2, T,     T,     T,
+  WCC,   WCC2,  SKB,   SKB2,  WCEYE, SKB2,  SKB,   SKB2,  WCC2,  WCC,   T,     T,
+  WCHT2, SKB,   SKB2,  WCEYE, SKB,   SKB,   WCEYE, SKB2,  SKB,   WCHT2, T,     T,
+  T,     WCC2,  WCHT2, WCC,   WCC2,  WCHT2, WCC,   WCC2,  WCHT2, WCC,   T,     T,
+  T,     WCC,   WCC2,  WCGLD, WCHT2, RD,    RD,    WCHT2, WCGLD, WCC2,  WCC,   T,
+  T,     WCHT2, WCC,   WCC2,  WCGLD, WCC,   WCC,   WCGLD, WCC2,  WCC,   WCHT2, T,
+  T,     T,     WCC2,  WCHT2, WCC,   WCC2,  WCC2,  WCC,   WCHT2, WCC2,  T,     T,
+  T,     T,     WCC,   RD,    RD2,   WCHT2, WCHT2, RD2,   RD,    WCC,   T,     T,
+  T,     T,     T,     WCHT2, WCC2,  WCC,   WCC,   WCC2,  WCHT2, T,     T,     T,
+  T,     T,     T,     T,     WCC,   WCC2,  WCC2,  WCC,   T,     T,     T,     T,
+];
+
 function buildSprite(data,w,h,scale){
   const off=document.createElement('canvas');
   off.width=w*scale;off.height=h*scale;
@@ -375,16 +539,20 @@ function buildSprite(data,w,h,scale){
   c.putImageData(img,0,0);return off;
 }
 
-const pirateSprite =buildSprite(PIRATE,PIR_W,PIR_H,PSC);
-const phantomSprite=buildSprite(PHANT,PHANT_W,PHANT_H,PSC);
-const bossSprite   =buildSprite(BOSS,BOSS_W,BOSS_H,PSC);
+const pirateSprite        =buildSprite(PIRATE,PIR_W,PIR_H,PSC);
+const phantomSprite       =buildSprite(PHANT,PHANT_W,PHANT_H,PSC);
+const bossSprite          =buildSprite(BOSS,BOSS_W,BOSS_H,PSC);
+const pumpkinPhantomSprite=buildSprite(PUMPKIN_PHANTOM,12,12,PSC);
+const grimReaperSprite    =buildSprite(GRIM_REAPER,12,12,PSC);
+const whiteGhostSprite    =buildSprite(WHITE_GHOST,12,12,PSC);
+const witherCapSprite     =buildSprite(WITHER_CAP,12,12,PSC);
+const witherPumpkinSprite =buildSprite(WITHERED_PUMPKIN,12,12,PSC*2);
 
 // ── Character roster ──────────────────────────────────────────────────────
 // Each char has: name, title, cost, stat description, pixel sprite data, sprite built from color arrays
 const WR=px(0xffffff),WR2=px(0xdddddd); // white/grey for witch
 const GR=px(0x228822),GR2=px(0x33aa33),GR3=px(0x44cc44); // greens for ranger
 const NV=px(0x222266),NV2=px(0x3333aa),NV3=px(0x4444cc); // navy for captain
-const RD=px(0xcc2222),RD2=px(0xee4444); // reds
 const SL=px(0xaaaaaa),SL2=px(0x888888),SL3=px(0xcccccc); // silver for knight
 
 // Captain sprite (dark navy coat, bicorne hat)
@@ -418,6 +586,22 @@ const WIT_C=[
   T,   T,   WI,  WI4, WI2, WI,  WI,  WI2, WI4, WI,  T,   T,
   T,   T,   T,   WI2, WI3, WI2, WI2, WI3, WI2, T,   T,   T,
   T,   T,   T,   T,   WI,  WI2, WI2, WI,  T,   T,   T,   T,
+];
+
+// Wicked Witch — black outfit, green skin, broom handle
+const WICKED_WITCH=[
+  T,    T,    T,    BWK4, BWK,  T,    T,    T,    T,    T,    T,    T,
+  T,    T,    BWK4, BWK,  BWK2, BWK4, T,    T,    T,    T,    T,    T,
+  T,    BWK4, BWK,  BWK2, BWK3, BWK2, BWK4, T,    T,    T,    T,    T,
+  BWK4, BWK2, GRS,  GRS,  GRS,  GRS,  BWK2, BWK4, T,    T,    T,    T,
+  BWK,  BWK3, GRS2, GRM,  GRS,  GRM,  GRS2, BWK3, BWK,  T,    T,    T,
+  T,    BWK2, BWK3, BWK,  BWK2, BWK3, BWK,  BWK2, BWK3, T,    T,    T,
+  T,    BWK,  BWK3, BWK2, GD2,  BWK,  BWK2, BWK3, BWK,  T,    T,    T,
+  HR,   HR2,  HR,   BWK4, BWK,  BWK2, BWK,  BWK4, HR,   HR2,  HR,   T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
+  T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,    T,
 ];
 
 // Knight sprite (silver armour, helmet)
@@ -498,6 +682,45 @@ const CHARACTERS=[
 let selectedChar='scout';
 let charSprites={};
 
+const HALLOWEEN_CHARS=[
+  {
+    id:'spookyscout',name:'Spooky Scout',title:'The Cursed',
+    cost:0,owned:true,
+    speed:2.6,maxHp:100,maxAmmo:8,reloadMult:1.0,
+    weapon:'cannon',weaponLabel:'💀 Cannon',
+    desc:'Balanced starter. Standard cannon, fast movement.',
+    data:SPOOKY_SCOUT,color:'#ff6600'
+  },
+  {
+    id:'withercaptain',name:'Withered Captain',title:'The Damned',
+    cost:0,owned:true,
+    speed:2.0,maxHp:130,maxAmmo:3,reloadMult:0.9,
+    weapon:'trap',weaponLabel:'🪤 Bear Trap',
+    desc:'Place cursed traps [1]. Switch to dagger [2]. Traps stick and poison phantoms.',
+    data:WITHER_CAP,color:'#a08850'
+  },
+  {
+    id:'wickedwitch',name:'Wicked Witch',title:'The Airborne',
+    cost:25,owned:false,
+    speed:1.8,maxHp:90,maxAmmo:1,reloadMult:1.2,
+    weapon:'orb',weaponLabel:'🔮 Energy Orb',
+    desc:'Press E to broom dash — floats over water, 3s speed burst, crushes phantoms.',
+    data:WICKED_WITCH,color:'#882299'
+  },
+  {
+    id:'headlesshorseman',name:'Headless Horseman',title:'The Rider',
+    cost:50,owned:false,
+    speed:3.4,maxHp:110,maxAmmo:4,reloadMult:0.9,
+    weapon:'pumpkin_bomb',weaponLabel:'🎃 Pumpkin Bomb',
+    desc:'Throw explosive pumpkins — burst on impact, AOE damages all nearby phantoms.',
+    data:HEADLESS_HORSEMAN,color:'#ff6600'
+  },
+];
+let halloweenSelectedChar='spookyscout';
+let halloweenCharSprites={};
+function buildHalloweenCharSprites(){HALLOWEEN_CHARS.forEach(ch=>{halloweenCharSprites[ch.id]=buildSprite(ch.data,12,12,PSC);});}
+function getActiveHalloweenChar(){return HALLOWEEN_CHARS.find(c=>c.id===halloweenSelectedChar);}
+
 // Build all character sprites
 function buildCharSprites(){
   CHARACTERS.forEach(ch=>{
@@ -505,12 +728,40 @@ function buildCharSprites(){
   });
 }
 
-function getActiveChar(){return CHARACTERS.find(c=>c.id===selectedChar);}
+function getActiveChar(){
+  if(halloweenMode)return getActiveHalloweenChar();
+  return CHARACTERS.find(c=>c.id===selectedChar);
+}
 
 function openShop(){
   if(gs==='playing'){gs='shop';cancelAnimationFrame(raf);}
   renderShopGrid();
   $('shop-gold-display').textContent='Gold available: '+(gold||0);
+  const info=$('candy-convert-info');
+  if(info)info.textContent='You have '+(persistentCandy||0)+' candy 🍬';
+  const sb=$('shop-switch-btn');if(sb)sb.style.display=halloweenMode?'block':'none';
+  const mb=$('crew-mode-btn');if(mb)mb.textContent=halloweenMode?'⛵ Normal Mode':'🎃 Halloween Mode';
+  $('shop').style.display='flex';
+}
+function switchMode(){
+  $('shop').style.display='none';
+  $('hwshop').style.display='none';
+  if(halloweenMode){startGame();}else{startHalloween();}
+}
+function switchToHalloweenShop(){
+  $('shop').style.display='none';
+  renderHalloweenShopGrid();
+  $('hwshop-candy').textContent='Candy: '+(persistentCandy||0)+' 🍬';
+  $('hwshop').style.display='flex';
+}
+function switchToCrewShop(){
+  $('hwshop').style.display='none';
+  renderShopGrid();
+  $('shop-gold-display').textContent='Gold available: '+(gold||0);
+  const info=$('candy-convert-info');
+  if(info)info.textContent='You have '+(persistentCandy||0)+' candy 🍬';
+  const sb=$('shop-switch-btn');if(sb)sb.style.display='block';
+  const mb=$('crew-mode-btn');if(mb)mb.textContent=halloweenMode?'⛵ Normal Mode':'🎃 Halloween Mode';
   $('shop').style.display='flex';
 }
 
@@ -608,6 +859,7 @@ function isOnPier(wx,wy){
 }
 
 let pierCanvas=null;
+let halloweenPierCanvas=null;
 function buildPierCanvas(){
   const pw=PIER_W_TILES*TILE,ph=PIER_H_TILES*TILE;
   const off=document.createElement('canvas');off.width=pw;off.height=ph;
@@ -660,9 +912,100 @@ function buildPierCanvas(){
   pierCanvas=off;
 }
 
-let gs='menu',ship,phantoms,balls,particles,wave,gold,hp,maxHp,ammo,maxAmmo,reloadT,keys,mouse,spawnQ,spawnT,spawnI,waveTotal,raf,lastT,camX,camY,worldBg;
+function buildHalloweenPierCanvas(){
+  const pw=PIER_W_TILES*TILE,ph=PIER_H_TILES*TILE;
+  const off=document.createElement('canvas');off.width=pw;off.height=ph;
+  const c=off.getContext('2d');
+  const stoneCols=['#3a3a3e','#444448','#484850','#383840','#404044'];
+  const edgeCols=['#1e1e22','#242428','#1c1c20'];
+  for(let ty=0;ty<PIER_H_TILES;ty++){
+    for(let tx=0;tx<PIER_W_TILES;tx++){
+      const val=PIER_MAP[ty][tx];
+      const x=tx*TILE,y=ty*TILE;
+      if(val===2){
+        for(let py=0;py<TILE;py++)for(let px2=0;px2<TILE;px2++){
+          const ci=(px2+py)%3;c.fillStyle=edgeCols[ci];c.fillRect(x+px2,y+py,1,1);
+        }
+      } else {
+        for(let py=0;py<TILE;py++)for(let px2=0;px2<TILE;px2++){
+          c.fillStyle=stoneCols[(px2*5+py*7+tx*3+ty*11)%5];c.fillRect(x+px2,y+py,1,1);
+        }
+        c.fillStyle='rgba(0,0,0,0.3)';
+        c.fillRect(x,y,TILE,1);c.fillRect(x,y,1,TILE);
+        if((tx*3+ty*7)%5===0){c.fillStyle='rgba(0,0,0,0.2)';c.fillRect(x+3,y+2,1,8);}
+        if((tx*7+ty*3)%5===0){c.fillStyle='rgba(0,0,0,0.2)';c.fillRect(x+2,y+6,10,1);}
+      }
+    }
+  }
+  [[2,2],[13,2],[2,13],[13,13]].forEach(([tx,ty])=>{
+    const x=tx*TILE,y=ty*TILE;
+    c.fillStyle='#3a3a44';c.fillRect(x+1,y+9,14,6);
+    c.fillStyle='#4a4a58';c.fillRect(x+3,y+3,10,8);
+    c.fillRect(x+5,y+1,6,3);c.fillRect(x+4,y+2,8,2);
+    c.fillStyle='#252532';c.fillRect(x+5,y+6,6,1);c.fillRect(x+6,y+8,4,1);
+  });
+  const cpx=pw/2-9,cpy=ph/2-8;
+  c.fillStyle='#558800';c.fillRect(cpx+8,cpy,2,3);
+  c.fillStyle='#cc4400';c.fillRect(cpx+3,cpy+3,12,2);
+  c.fillStyle='#ff6600';c.fillRect(cpx+1,cpy+5,16,6);
+  c.fillStyle='#cc4400';c.fillRect(cpx+3,cpy+11,12,2);
+  c.fillStyle='rgba(0,0,0,0.25)';c.fillRect(cpx+6,cpy+3,1,10);c.fillRect(cpx+11,cpy+3,1,10);
+  c.fillStyle='#080400';
+  c.fillRect(cpx+3,cpy+6,3,2);c.fillRect(cpx+12,cpy+6,3,2);
+  c.fillRect(cpx+4,cpy+9,2,2);c.fillRect(cpx+7,cpy+10,4,1);c.fillRect(cpx+12,cpy+9,2,2);
+  halloweenPierCanvas=off;
+}
+
+function initHalloweenBg(){
+  halloweenWorldBg=document.createElement('canvas');
+  halloweenWorldBg.width=WORLD;halloweenWorldBg.height=WORLD;
+  const c=halloweenWorldBg.getContext('2d');
+  const TSIZE=8;
+  const waterPalette=[
+    [0x04,0x0c,0x06],[0x05,0x0e,0x08],[0x06,0x10,0x08],
+    [0x04,0x0a,0x05],[0x07,0x0e,0x06],[0x05,0x0c,0x07],
+    [0x06,0x0d,0x08],[0x04,0x0b,0x06]
+  ];
+  const foamPalette=[
+    [0x08,0x14,0x0a],[0x0a,0x16,0x0c],[0x09,0x12,0x0a],
+    [0x0b,0x14,0x0b],[0x08,0x10,0x09]
+  ];
+  let _s=9999;
+  function rn(){_s=(_s*1664525+1013904223)>>>0;return _s/4294967296;}
+  for(let ty=0;ty<WORLD/TSIZE;ty++){
+    for(let tx=0;tx<WORLD/TSIZE;tx++){
+      const n=rn();
+      const isFoam=n<0.05;
+      const col=isFoam?foamPalette[Math.floor(rn()*foamPalette.length)]:waterPalette[Math.floor(n*waterPalette.length)];
+      c.fillStyle=`rgb(${col[0]},${col[1]},${col[2]})`;
+      c.fillRect(tx*TSIZE,ty*TSIZE,TSIZE,TSIZE);
+      if(n>0.90){
+        const hc=foamPalette[Math.floor(rn()*foamPalette.length)];
+        c.fillStyle=`rgba(${hc[0]+10},${hc[1]+10},${hc[2]+8},0.5)`;
+        c.fillRect(tx*TSIZE+1,ty*TSIZE+1,2,2);
+      }
+    }
+  }
+  buildHalloweenPierCanvas();
+  c.drawImage(halloweenPierCanvas,PIER_ORIGIN_X,PIER_ORIGIN_Y);
+}
+
+let gs='menu',ship,phantoms,balls,particles,wave,gold,hp,maxHp,ammo,maxAmmo,reloadT,keys,mouse,spawnQ,spawnT,spawnI,waveTotal,raf,lastT,camX,camY,worldBg,halloweenWorldBg;
 let cutlassSwing={active:false,t:0,dur:18,angle:0};
-let persistentGold=0; // survives death
+let persistentGold=0;
+let halloweenMode=false;
+let persistentCandy=0;
+let candy=0;
+let traps=[];
+let reaperScythes=[];
+let activeWeapon='trap';
+let dagCooldown=0;
+let broomDash={active:false,t:0,cooldown:0};
+let waterTimer={t:0,forced:false,forceT:0};
+let stranded=false;
+let bossActive=false;let boss=null;let bossProjectiles=[];let bossScythes=[];
+let dodgeActive=false;let dodgeT=0;let dodgeCooldown=0;
+const ARENA_R=240;
 
 function $(id){return document.getElementById(id)}
 
@@ -742,17 +1085,215 @@ function buildWaveStrips(){
 function initGame(){
   const ch=getActiveChar();
   ship={x:WORLD/2,y:WORLD/2,angle:0,r:5};
-  phantoms=[];balls=[];particles=[];
-  wave=1;gold=persistentGold; // carry over gold from previous runs
+  phantoms=[];balls=[];particles=[];traps=[];reaperScythes=[];
+  wave=1;gold=persistentGold;candy=persistentCandy;
   maxHp=ch.maxHp;hp=ch.maxHp;
   maxAmmo=ch.maxAmmo;ammo=ch.maxAmmo;reloadT=0;
+  dagCooldown=0;activeWeapon='trap';broomDash={active:false,t:0,cooldown:0};waterTimer={t:0,forced:false,forceT:0};stranded=false;
+  bossActive=false;boss=null;bossProjectiles=[];bossScythes=[];dodgeActive=false;dodgeT=0;dodgeCooldown=0;
+
   spawnQ=0;spawnT=0;spawnI=90;waveTotal=8;
   keys={};mouse={x:W/2,y:H/2,wx:WORLD/2,wy:WORLD/2};
   camX=WORLD/2;camY=WORLD/2;
   updateHUD();renderAmmo();
 }
 
+function candyDrop(p){
+  if(p.type==='elderpumpkin')return 10;
+  if(p.type==='reaper')return 4;
+  if(p.type==='pumpkin')return 2;
+  return 1;
+}
+
+function pumpkinExplode(x,y){
+  spawnParts(x,y,'rgba(255,120,0,0.9)',20);spawnParts(x,y,'rgba(255,200,0,0.7)',10);
+  const explR=65;
+  for(let j=phantoms.length-1;j>=0;j--){
+    const p=phantoms[j];
+    if(Math.hypot(p.x-x,p.y-y)<explR){
+      p.hp-=3;spawnParts(p.x,p.y,'rgba(255,100,0,0.9)',6);
+      if(p.hp<=0){
+        if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}
+        spawnParts(p.x,p.y,'rgba(241,196,15,0.9)',14);phantoms.splice(j,1);updateHUD();
+      }
+    }
+  }
+  if(bossActive&&boss&&Math.hypot(boss.x-x,boss.y-y)<explR){
+    boss.hp-=3;spawnParts(boss.x,boss.y,'rgba(255,120,0,0.9)',10);
+  }
+}
+
+function startBossFight(){
+  bossActive=true;
+  boss={x:WORLD/2,y:340,hp:60,maxHp:60,phase2:false,laserAngle:0,attackT:200,scytheT:300,miniT:260,bobT:0,rageT:0};
+  bossProjectiles=[];bossScythes=[];dodgeActive=false;dodgeT=0;dodgeCooldown=0;
+  phantoms=[];ship.x=WORLD/2;ship.y=480;camX=WORLD/2;camY=410;
+  showWave('🎃 THE WITHERED PUMPKIN AWAKENS!');
+}
+
+function endBossFight(){
+  bossActive=false;boss=null;bossProjectiles=[];bossScythes=[];
+  candy+=40;persistentCandy=candy;
+  ship.x=700;ship.y=700;camX=700;camY=700;
+  cancelAnimationFrame(raf);gs='dead';
+  const ov=$('ov');ov.style.display='flex';
+  ov.innerHTML=`
+    <div class="modal-box" style="border:3px solid rgba(0,255,80,0.5);background:rgba(4,14,4,0.99);box-shadow:0 0 60px rgba(0,255,80,0.18),0 0 120px rgba(0,255,80,0.07);gap:14px;padding:36px 44px;border-radius:16px;display:flex;flex-direction:column;align-items:center;">
+      <canvas id="ms2" width="64" height="64" style="image-rendering:pixelated;width:56px;height:56px"></canvas>
+      <h1 style="font-size:28px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#33ff66;text-shadow:0 0 24px rgba(0,255,80,0.8);font-family:'Gentium Basic',Georgia,serif;">YOU WON!</h1>
+      <p style="font-size:14px;color:rgba(180,255,200,0.85);letter-spacing:.05em;font-family:'Gentium Basic',Georgia,serif;">You beat the Withered Pumpkin!</p>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(0,255,80,0.15);border-radius:10px;padding:12px 24px;width:100%;text-align:center;">
+        <p style="font-size:11px;color:rgba(255,180,100,0.6);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;font-family:'Gentium Basic',Georgia,serif;">Candy Earned</p>
+        <p style="font-size:20px;font-weight:700;color:#ff8800;font-family:'Gentium Basic',Georgia,serif;">🍬 +40 candy</p>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:4px;">
+        <button id="btn-finish" style="padding:11px 24px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.07);color:rgba(200,220,255,0.8);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">Finish</button>
+        <button id="btn-infinite" style="padding:11px 24px;border-radius:8px;border:none;background:#33ff66;color:#04140a;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">Continue →∞</button>
+      </div>
+    </div>`;
+  const sch=halloweenCharSprites[halloweenSelectedChar]||charSprites['scout'];
+  const c2=document.getElementById('ms2').getContext('2d');c2.imageSmoothingEnabled=false;c2.drawImage(sch,4,4,56,56);
+  $('btn-finish').onclick=startHalloween;
+  $('btn-infinite').onclick=continueInfinite;
+}
+function continueInfinite(){
+  $('ov').style.display='none';gs='playing';
+  wave=14;waveTotal=8+14*2;spawnQ=0;spawnT=0;spawnI=Math.max(32,90-14*7);
+  ammo=maxAmmo;updateHUD();renderAmmo();
+  lastT=performance.now();loop(lastT);
+  showWave('🎃 Night 14 — Infinite Nightmare!');
+}
+
+function updateBoss(){
+  const s=ship;
+  boss.bobT+=0.025;
+  if(!boss.phase2&&boss.hp<=30){boss.phase2=true;boss.rageT=90;spawnParts(boss.x,boss.y,'rgba(0,255,100,0.9)',30);}
+  if(boss.rageT>0)boss.rageT--;
+  boss.laserAngle+=boss.phase2?0.016:0.010;
+  if(!dodgeActive){
+    const numArms=boss.phase2?4:3,laserLen=ARENA_R*0.9;
+    for(let i=0;i<numArms;i++){
+      const a=boss.laserAngle+i*(Math.PI*2/numArms);
+      const ex=boss.x+Math.cos(a)*laserLen,ey=boss.y+Math.sin(a)*laserLen;
+      const dx=ex-boss.x,dy=ey-boss.y,dlen=dx*dx+dy*dy;
+      const t2=Math.max(0,Math.min(1,((s.x-boss.x)*dx+(s.y-boss.y)*dy)/dlen));
+      if(Math.hypot(boss.x+t2*dx-s.x,boss.y+t2*dy-s.y)<18){hp=Math.max(0,hp-5);flashDmg();spawnParts(s.x,s.y,'rgba(0,220,60,0.9)',8);if(hp<=0){endGame();return;}break;}
+    }
+  }
+  if(dodgeT>0){dodgeT--;if(dodgeT<=0)dodgeActive=false;}
+  if(dodgeCooldown>0)dodgeCooldown--;
+  boss.attackT--;
+  if(boss.attackT<=0){
+    boss.attackT=boss.phase2?140:200;
+    const numOrbs=boss.phase2?5:3,baseAng=Math.atan2(s.y-boss.y,s.x-boss.x);
+    for(let i=0;i<numOrbs;i++){const a=baseAng+(i-(numOrbs-1)/2)*0.45;bossProjectiles.push({x:boss.x,y:boss.y,vx:Math.cos(a)*1.8,vy:Math.sin(a)*1.8,life:230});}
+  }
+  boss.scytheT--;
+  if(boss.scytheT<=0){
+    boss.scytheT=boss.phase2?180:280;
+    for(let i=0;i<6;i++){const a=i*(Math.PI/3)+boss.laserAngle;bossScythes.push({x:boss.x,y:boss.y,vx:Math.cos(a)*1.8,vy:Math.sin(a)*1.8,angle:a,spin:0.25,life:260});}
+  }
+  boss.miniT--;
+  if(boss.miniT<=0){
+    boss.miniT=boss.phase2?150:260;
+    const n=boss.phase2?3:2;
+    for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,d=70+Math.random()*90;phantoms.push({x:boss.x+Math.cos(a)*d,y:boss.y+Math.sin(a)*d,hp:1,maxHp:1,speed:1.2,type:'pumpkin',isBoss:false,swayT:Math.random()*100,bobT:Math.random()*100,reaperT:0});}
+  }
+  for(let i=bossProjectiles.length-1;i>=0;i--){
+    const bp=bossProjectiles[i];bp.x+=bp.vx;bp.y+=bp.vy;bp.life--;
+    if(bp.life<=0){bossProjectiles.splice(i,1);continue;}
+    if(!dodgeActive&&Math.hypot(bp.x-s.x,bp.y-s.y)<14){hp=Math.max(0,hp-4);flashDmg();spawnParts(bp.x,bp.y,'rgba(0,220,60,0.9)',8);bossProjectiles.splice(i,1);if(hp<=0){endGame();return;}}
+  }
+  for(let i=bossScythes.length-1;i>=0;i--){
+    const bs=bossScythes[i];bs.x+=bs.vx;bs.y+=bs.vy;bs.angle+=bs.spin;bs.life--;
+    if(bs.life<=0){bossScythes.splice(i,1);continue;}
+    if(!dodgeActive&&Math.hypot(bs.x-s.x,bs.y-s.y)<18){hp=Math.max(0,hp-7);flashDmg();spawnParts(bs.x,bs.y,'rgba(0,180,40,0.9)',10);bossScythes.splice(i,1);if(hp<=0){endGame();return;}}
+  }
+  for(let i=balls.length-1;i>=0;i--){
+    const b=balls[i];
+    if(Math.hypot(b.x-boss.x,b.y-boss.y)<26){
+      if(b.weapon==='pumpkin_bomb'){pumpkinExplode(b.x,b.y);balls.splice(i,1);if(boss&&boss.hp<=0){endBossFight();return;}continue;}
+      boss.hp-=b.weapon==='musket'?4:1;spawnParts(b.x,b.y,'rgba(0,255,80,0.9)',8);balls.splice(i,1);
+      if(boss.hp<=0){endBossFight();return;}
+    }
+  }
+}
+
+function drawBossArena(){
+  const sc=w2s(boss.x,boss.y),r=ARENA_R*ZOOM;
+  ctx.save();
+  ctx.globalAlpha=0.88;ctx.fillStyle='#010c02';
+  ctx.beginPath();ctx.arc(sc.x,sc.y,r,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.75;ctx.strokeStyle='#22ff44';ctx.lineWidth=3;
+  ctx.beginPath();ctx.arc(sc.x,sc.y,r,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=0.15;ctx.strokeStyle='#22ff44';ctx.lineWidth=12;
+  ctx.beginPath();ctx.arc(sc.x,sc.y,r,0,Math.PI*2);ctx.stroke();
+  ctx.restore();
+}
+
+function drawBoss(t){
+  const sc=w2s(boss.x,boss.y),bob=Math.sin(t*0.003+boss.bobT)*5,sw=12*PSC*2,sh=12*PSC*2;
+  ctx.save();ctx.translate(sc.x,sc.y+bob);
+  if(boss.rageT>0){ctx.globalAlpha=0.55*(boss.rageT/90)*Math.abs(Math.sin(boss.rageT*0.4));ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(0,0,sw*0.55,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=0.18+0.08*Math.sin(t*0.004+boss.bobT);ctx.fillStyle='#22ff44';ctx.beginPath();ctx.arc(0,0,sw*0.55,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.95;ctx.imageSmoothingEnabled=false;ctx.drawImage(witherPumpkinSprite,-sw/2,-sh/2,sw,sh);
+  ctx.restore();
+}
+
+function drawBossLasers(t){
+  const sc=w2s(boss.x,boss.y),numArms=boss.phase2?4:3,laserLen=ARENA_R*0.9*ZOOM;
+  ctx.save();
+  for(let i=0;i<numArms;i++){
+    const a=boss.laserAngle+i*(Math.PI*2/numArms),ex=sc.x+Math.cos(a)*laserLen,ey=sc.y+Math.sin(a)*laserLen;
+    ctx.globalAlpha=0.12+0.06*Math.sin(t*0.008+i);ctx.strokeStyle='#44ff44';ctx.lineWidth=18;
+    ctx.beginPath();ctx.moveTo(sc.x,sc.y);ctx.lineTo(ex,ey);ctx.stroke();
+    ctx.globalAlpha=0.9;ctx.strokeStyle='#ccffcc';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(sc.x,sc.y);ctx.lineTo(ex,ey);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBossProjectile(bp){
+  const sc=w2s(bp.x,bp.y);
+  ctx.save();ctx.globalAlpha=0.9;ctx.fillStyle='#22ff44';ctx.beginPath();ctx.arc(sc.x,sc.y,7,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.28;ctx.fillStyle='#88ff88';ctx.beginPath();ctx.arc(sc.x,sc.y,11,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function drawBossScythe(bs){
+  const sc=w2s(bs.x,bs.y);
+  ctx.save();ctx.translate(sc.x,sc.y);ctx.rotate(bs.angle);
+  ctx.globalAlpha=0.95;ctx.strokeStyle='#22ff44';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(14,0);ctx.stroke();
+  ctx.globalAlpha=0.75;ctx.strokeStyle='#88ffaa';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(0,0,10,0,Math.PI);ctx.stroke();
+  ctx.restore();
+}
+
+function drawBossHealthBar(){
+  const bw=Math.min(380,W*0.48),bx=(W-bw)/2,by=18;
+  ctx.fillStyle='rgba(0,0,0,0.72)';ctx.fillRect(bx-2,by-2,bw+4,20);
+  const frac=Math.max(0,boss.hp/boss.maxHp);
+  ctx.fillStyle=boss.phase2?'#ff5500':'#22ff44';ctx.fillRect(bx,by,bw*frac,16);
+  ctx.strokeStyle=boss.phase2?'#ff8800':'#44ffaa';ctx.lineWidth=1.5;ctx.strokeRect(bx,by,bw,16);
+  ctx.fillStyle='#ffffff';ctx.font='bold 10px monospace';ctx.textAlign='center';
+  ctx.fillText('☠ The Withered Pumpkin'+(boss.phase2?' ★ENRAGED':''),W/2,by+12);
+  const dcFrac=dodgeCooldown>0?1-dodgeCooldown/180:1;
+  ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(bx,by+22,bw,10);
+  ctx.fillStyle=dodgeCooldown>0?'#4488cc':'#44ff88';ctx.fillRect(bx,by+22,bw*dcFrac,10);
+  ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='8px monospace';ctx.textAlign='center';
+  ctx.fillText(dodgeCooldown>0?'DODGE recharging...':'SPACE: DODGE ready',W/2,by+30);
+  ctx.textAlign='left';
+}
+
+function drawDodgeFlash(){
+  if(!dodgeActive)return;
+  ctx.save();ctx.globalAlpha=0.22*(dodgeT/40);ctx.fillStyle='#aaffcc';ctx.fillRect(0,0,W,H);ctx.restore();
+}
+
 function spawnPhantom(){
+  if(bossActive)return;
+  if(halloweenMode){spawnHalloweenPhantom();return;}
   const angle=Math.random()*Math.PI*2,dist=500+Math.random()*160;
   const x=Math.max(30,Math.min(WORLD-30,WORLD/2+Math.cos(angle)*dist));
   const y=Math.max(30,Math.min(WORLD-30,WORLD/2+Math.sin(angle)*dist));
@@ -760,6 +1301,25 @@ function spawnPhantom(){
   const spd=0.5+wave*0.09+Math.random()*0.2;
   const mhp=isBoss?3+Math.floor(wave/2):1;
   phantoms.push({x,y,hp:mhp,maxHp:mhp,speed:spd,isBoss,swayT:Math.random()*100,bobT:Math.random()*100});
+}
+
+function spawnHalloweenPhantom(){
+  const angle=Math.random()*Math.PI*2,dist=500+Math.random()*160;
+  const x=Math.max(30,Math.min(WORLD-30,WORLD/2+Math.cos(angle)*dist));
+  const y=Math.max(30,Math.min(WORLD-30,WORLD/2+Math.sin(angle)*dist));
+  const roll=Math.random();
+  let type,spd,mhp;
+  if(roll<0.08+wave*0.01){
+    type='elderpumpkin';spd=0.28+wave*0.04+Math.random()*0.1;mhp=8+Math.floor(wave/3);
+  } else if(roll<0.35){
+    type='reaper';spd=0.28+wave*0.05+Math.random()*0.08;mhp=1;
+  } else if(roll<0.65){
+    type='pumpkin';spd=0.55+wave*0.09+Math.random()*0.2;mhp=1;
+  } else {
+    type='whiteghost';spd=0.45+wave*0.08+Math.random()*0.15;mhp=1;
+  }
+  const isBoss=type==='elderpumpkin';
+  phantoms.push({x,y,hp:mhp,maxHp:mhp,speed:spd,type,isBoss,swayT:Math.random()*100,bobT:Math.random()*100,reaperT:0});
 }
 
 function w2s(wx,wy){return{x:(wx-camX)*ZOOM+W/2,y:(wy-camY)*ZOOM+H/2};}
@@ -771,7 +1331,7 @@ function drawWorld(t){
   ctx.save();
   ctx.scale(ZOOM,ZOOM);
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(worldBg,-ox,-oy);
+  ctx.drawImage(halloweenMode?halloweenWorldBg:worldBg,-ox,-oy);
 
   // Animated pixel wave strips
   if(waveOffscreens.length){
@@ -792,7 +1352,7 @@ function drawWorld(t){
 
   const px2=PIER_ORIGIN_X-ox, py2=PIER_ORIGIN_Y-oy;
   const pw=PIER_W_TILES*TILE, ph=PIER_H_TILES*TILE;
-  ctx.save();ctx.globalAlpha=0.18;ctx.strokeStyle='#f1c40f';ctx.lineWidth=3/ZOOM;
+  ctx.save();ctx.globalAlpha=0.18;ctx.strokeStyle=halloweenMode?'#aa4400':'#f1c40f';ctx.lineWidth=3/ZOOM;
   ctx.strokeRect(px2,py2,pw,ph);ctx.restore();
 
   ctx.restore(); // end zoom scale
@@ -881,11 +1441,17 @@ function drawPirate(){
   const ch=getActiveChar();
   const s=ship;const sc=w2s(s.x,s.y);
   const pw=PIR_W*PSC,ph=PIR_H*PSC;
-  const spr=charSprites[ch.id]||charSprites['scout'];
+  let spr=halloweenCharSprites[ch.id]||charSprites[ch.id]||charSprites['scout'];
 
   // Draw cutlass behind player when not swinging, in front when swinging
   if(ch.weapon==='cutlass'&&!cutlassSwing.active) drawCutlass(sc);
 
+  if(broomDash.active){
+    const pulse=0.55+0.25*Math.sin(Date.now()*0.025);
+    ctx.save();ctx.globalAlpha=pulse;ctx.fillStyle='#44cc44';
+    ctx.beginPath();ctx.arc(sc.x,sc.y,pw*0.7,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  }
   ctx.save();ctx.translate(sc.x,sc.y);ctx.rotate(s.angle);
   ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(1,ph*0.28,pw*0.38,ph*0.12,0,0,Math.PI*2);ctx.fill();
   ctx.imageSmoothingEnabled=false;
@@ -904,24 +1470,57 @@ function drawPhantomSprite(p,t){
   const sc=w2s(p.x,p.y);
   if(sc.x<-60||sc.x>W+60||sc.y<-60||sc.y>H+60)return;
   const bob=Math.sin(t*0.003+p.bobT)*3;
-  const s2=p.isBoss?1.5:1;
+  const s2=(p.type==='elderpumpkin'||p.isBoss)?1.5:1;
   const pw=PHANT_W*PSC*s2,ph=PHANT_H*PSC*s2;
+
+  let spr=phantomSprite;
+  if(p.type==='pumpkin')spr=pumpkinPhantomSprite;
+  else if(p.type==='reaper')spr=grimReaperSprite;
+  else if(p.type==='whiteghost')spr=whiteGhostSprite;
+  else if(p.type==='elderpumpkin')spr=pumpkinPhantomSprite;
+  else if(p.isBoss)spr=bossSprite;
+
+  if(p.type==='whiteghost'&&p.phased&&p.trail){
+    for(let ti=p.trail.length-1;ti>=0;ti--){
+      const tsc=w2s(p.trail[ti].x,p.trail[ti].y);
+      const ta=(1-ti/p.trail.length)*0.22;
+      const tr2=PHANT_W*PSC*(1-ti/p.trail.length)*0.38;
+      ctx.save();ctx.globalAlpha=ta;ctx.fillStyle='#ccccff';
+      ctx.beginPath();ctx.arc(tsc.x,tsc.y,Math.max(2,tr2),0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+  }
   ctx.save();ctx.translate(sc.x,sc.y+bob);
-  ctx.globalAlpha=p.isBoss?0.92:0.82;
+  ctx.globalAlpha=(p.type==='whiteghost'&&p.phased)?0.22:(p.isBoss||p.type==='elderpumpkin')?0.92:0.82;
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(p.isBoss?bossSprite:phantomSprite,-pw/2,-ph/2,pw,ph);
-  // Orb slow visual — purple overlay pulse
+  ctx.drawImage(spr,-pw/2,-ph/2,pw,ph);
+
+  if(p.type==='pumpkin'||p.type==='elderpumpkin'){
+    ctx.globalAlpha=0.14+0.07*Math.sin(t*0.004+p.bobT);
+    ctx.fillStyle='#ff6600';ctx.beginPath();ctx.arc(0,0,pw*0.55,0,Math.PI*2);ctx.fill();
+  }
+  if(p.type==='reaper'){
+    ctx.globalAlpha=0.10+0.05*Math.sin(t*0.003+p.bobT);
+    ctx.fillStyle='#880000';ctx.beginPath();ctx.arc(0,0,pw*0.5,0,Math.PI*2);ctx.fill();
+  }
+  if(p.type==='whiteghost'){
+    ctx.globalAlpha=0.12+0.06*Math.sin(t*0.0025+p.bobT);
+    ctx.fillStyle='#aaaaff';ctx.beginPath();ctx.arc(0,0,pw*0.5,0,Math.PI*2);ctx.fill();
+  }
   if(p._slowT>0){
     ctx.globalAlpha=0.28+0.12*Math.sin(Date.now()*0.015);
-    ctx.fillStyle='#cc44ff';
-    ctx.beginPath();ctx.arc(0,0,pw*0.55,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=halloweenMode?'#44cc44':'#cc44ff';ctx.beginPath();ctx.arc(0,0,pw*0.55,0,Math.PI*2);ctx.fill();
+  }
+  if(p.stuck>0){
+    ctx.globalAlpha=0.28+0.10*Math.sin(Date.now()*0.012);
+    ctx.fillStyle='#44aa44';ctx.beginPath();ctx.arc(0,0,pw*0.55,0,Math.PI*2);ctx.fill();
   }
   ctx.restore();
   if(p.hp<p.maxHp){
     const bw=pw;
     ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(sc.x-bw/2,sc.y-ph/2-7,bw,4);
-    ctx.fillStyle=p.isBoss?'#cc44ff':'#3498db';
-    ctx.fillRect(sc.x-bw/2,sc.y-ph/2-7,bw*(p.hp/p.maxHp),4);
+    const hpCol=p.type==='elderpumpkin'?'#ff6600':p.type==='reaper'?'#cc0000':p.isBoss?'#cc44ff':'#3498db';
+    ctx.fillStyle=hpCol;ctx.fillRect(sc.x-bw/2,sc.y-ph/2-7,bw*(p.hp/p.maxHp),4);
   }
 }
 
@@ -935,12 +1534,13 @@ function drawBall(b){
     ctx.fillStyle='rgba(255,200,80,0.4)';
     ctx.fillRect(sc.x-8,sc.y-1,6,2);
   } else if(b.weapon==='orb'){
-    // Glowing purple orb
+    const oc=halloweenMode?'#44cc44':'#cc44ff';
+    const og=halloweenMode?'#88ee88':'#ee88ff';
     ctx.globalAlpha=0.85;
-    ctx.fillStyle='#cc44ff';
+    ctx.fillStyle=oc;
     ctx.beginPath();ctx.arc(sc.x,sc.y,6,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=0.3;
-    ctx.fillStyle='#ee88ff';
+    ctx.fillStyle=og;
     ctx.beginPath();ctx.arc(sc.x,sc.y,10,0,Math.PI*2);ctx.fill();
   } else if(b.weapon==='flintlock'){
     // Small fast green-tinted bullet
@@ -948,6 +1548,12 @@ function drawBall(b){
     ctx.fillRect(sc.x-2,sc.y-2,5,5);
     ctx.fillStyle='rgba(80,255,120,0.35)';
     ctx.fillRect(sc.x-4,sc.y-4,8,8);
+  } else if(b.weapon==='pumpkin_bomb'){
+    ctx.fillStyle='#ff6600';ctx.beginPath();ctx.arc(sc.x,sc.y,7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#441100';
+    ctx.fillRect(sc.x-3,sc.y-1,2,2);ctx.fillRect(sc.x+1,sc.y-1,2,2);
+    ctx.fillRect(sc.x-2,sc.y+1,5,1);
+    ctx.globalAlpha=0.3;ctx.fillStyle='#ff4400';ctx.beginPath();ctx.arc(sc.x,sc.y,11,0,Math.PI*2);ctx.fill();
   } else {
     // Default cannonball
     ctx.fillStyle='#f1c40f';ctx.fillRect(sc.x-3,sc.y-3,6,6);
@@ -960,6 +1566,69 @@ function drawParticle(p){
   const sc=w2s(p.x,p.y);
   ctx.save();ctx.globalAlpha=p.life*0.9;ctx.fillStyle=p.col;
   ctx.fillRect(sc.x-p.r*p.life/2,sc.y-p.r*p.life/2,p.r*p.life,p.r*p.life);
+  ctx.restore();
+}
+
+function drawReaperScythe(rs){
+  const sc=w2s(rs.x,rs.y);
+  if(sc.x<-40||sc.x>W+40||sc.y<-40||sc.y>H+40)return;
+  ctx.save();ctx.translate(sc.x,sc.y);ctx.rotate(rs.angle);
+  ctx.globalAlpha=Math.min(1,rs.life/20);
+  ctx.strokeStyle='#5a3a18';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(8,0);ctx.stroke();
+  ctx.strokeStyle='#cccccc';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(8,-2,10,Math.PI*0.7,Math.PI*1.9);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.55)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(8,-2,8,Math.PI*0.8,Math.PI*1.8);ctx.stroke();
+  ctx.restore();
+}
+
+function drawTrap(tr){
+  const sc=w2s(tr.x,tr.y);
+  ctx.save();ctx.translate(sc.x,sc.y);
+  ctx.globalAlpha=0.22+0.08*Math.sin(Date.now()*0.006);
+  ctx.fillStyle='#44cc44';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.strokeStyle='#448833';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(0,1,7,Math.PI,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.arc(0,-1,7,0,Math.PI);ctx.stroke();
+  ctx.fillStyle='#66aa44';ctx.fillRect(-1.5,-4,3,8);
+  ctx.restore();
+}
+
+function drawHalloweenFog(t){
+  const grad=ctx.createRadialGradient(W/2,H/2,W*0.22,W/2,H/2,W*0.72);
+  grad.addColorStop(0,'rgba(0,0,0,0)');
+  grad.addColorStop(0.55,'rgba(25,8,40,0.12)');
+  grad.addColorStop(1,'rgba(15,4,28,0.52)');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=0.07+0.03*Math.sin(t*0.0007);
+  ctx.fillStyle='rgba(60,20,80,0.6)';
+  ctx.fillRect(0,0,W,28);ctx.fillRect(0,H-28,W,28);
+  ctx.fillRect(0,0,28,H);ctx.fillRect(W-28,0,28,H);
+  ctx.globalAlpha=1;
+}
+
+function drawStrandedWarning(t){
+  const pulse=0.3+0.12*Math.sin(t*0.005);
+  ctx.save();ctx.globalAlpha=pulse;
+  const ew=55;
+  const gL=ctx.createLinearGradient(0,0,ew,0);gL.addColorStop(0,'rgba(20,220,80,0.8)');gL.addColorStop(1,'rgba(20,220,80,0)');
+  ctx.fillStyle=gL;ctx.fillRect(0,0,ew,H);
+  const gR=ctx.createLinearGradient(W,0,W-ew,0);gR.addColorStop(0,'rgba(20,220,80,0.8)');gR.addColorStop(1,'rgba(20,220,80,0)');
+  ctx.fillStyle=gR;ctx.fillRect(W-ew,0,ew,H);
+  const gT=ctx.createLinearGradient(0,0,0,ew);gT.addColorStop(0,'rgba(20,220,80,0.8)');gT.addColorStop(1,'rgba(20,220,80,0)');
+  ctx.fillStyle=gT;ctx.fillRect(0,0,W,ew);
+  const gB=ctx.createLinearGradient(0,H,0,H-ew);gB.addColorStop(0,'rgba(20,220,80,0.8)');gB.addColorStop(1,'rgba(20,220,80,0)');
+  ctx.fillStyle=gB;ctx.fillRect(0,H-ew,W,ew);
+  ctx.restore();
+  ctx.save();
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='bold 17px "Gentium Basic",Georgia,serif';
+  ctx.globalAlpha=0.65+0.35*Math.sin(t*0.009);
+  ctx.shadowColor='#00ff55';ctx.shadowBlur=14;
+  ctx.fillStyle='#55ff88';
+  ctx.fillText('⚠  RETURN TO PIER  ⚠',W/2,22);
   ctx.restore();
 }
 
@@ -979,16 +1648,41 @@ function spawnParts(x,y,col,n){
 }
 
 function fire(){
-  if(ammo<=0)return;
+  if(stranded)return;
   const ch=getActiveChar();
+
+
+
+  // Dagger — short-range melee, no ammo, cooldown-gated
+  if(ch.weapon==='trap'&&activeWeapon==='dagger'){
+    if(dagCooldown>0)return;
+    dagCooldown=30;
+    const dx2=mouse.wx-ship.x,dy2=mouse.wy-ship.y;
+    const aimAng=Math.atan2(dy2,dx2),dagR=24,arc=Math.PI*0.8;
+    for(let i=phantoms.length-1;i>=0;i--){
+      const p=phantoms[i];
+      if(p.type==='whiteghost'&&p.phased)continue;
+      if(Math.hypot(p.x-ship.x,p.y-ship.y)>dagR)continue;
+      const a=Math.atan2(p.y-ship.y,p.x-ship.x);
+      let da=a-aimAng;while(da<-Math.PI)da+=Math.PI*2;while(da>Math.PI)da-=Math.PI*2;
+      if(Math.abs(da)>arc/2)continue;
+      p.hp--;spawnParts(p.x,p.y,'rgba(180,180,60,0.9)',5);
+      if(p.hp<=0){
+        if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}
+        spawnParts(p.x,p.y,'rgba(255,200,0,0.9)',12);phantoms.splice(i,1);updateHUD();
+      }
+    }
+    spawnParts(ship.x+Math.cos(aimAng)*14,ship.y+Math.sin(aimAng)*14,'rgba(200,180,40,0.7)',4);
+    return;
+  }
+
+  if(ammo<=0)return;
   const dx=mouse.wx-ship.x,dy=mouse.wy-ship.y,len=Math.hypot(dx,dy)||1;
 
   if(ch.weapon==='cutlass'){
-    // Melee sweep — instant AoE arc around player, no projectile
     const sweepR=38;
     const aimAng=Math.atan2(dy,dx);
     const sweepArc=Math.PI*0.9;
-    // Trigger visual swing
     cutlassSwing={active:true,t:0,dur:18,angle:aimAng};
     for(let i=phantoms.length-1;i>=0;i--){
       const p=phantoms[i];
@@ -997,14 +1691,21 @@ function fire(){
       const ang=Math.atan2(p.y-ship.y,p.x-ship.x);
       let da=ang-aimAng; while(da<-Math.PI)da+=Math.PI*2; while(da>Math.PI)da-=Math.PI*2;
       if(Math.abs(da)>sweepArc/2)continue;
-      p.hp-=3; // cutlass hits hard
+      p.hp-=3;
       spawnParts(p.x,p.y,'rgba(200,180,80,0.95)',10);
-      if(p.hp<=0){gold+=p.isBoss?12:3;spawnParts(p.x,p.y,'rgba(241,196,15,0.9)',14);phantoms.splice(i,1);}
+      if(p.hp<=0){
+        if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}
+        spawnParts(p.x,p.y,'rgba(241,196,15,0.9)',14);phantoms.splice(i,1);updateHUD();
+      }
     }
-    // Visual sweep particle burst from player outward
-    const aimSc=w2s(ship.x+Math.cos(aimAng)*30,ship.y+Math.sin(aimAng)*30);
     spawnParts(ship.x+Math.cos(aimAng)*20,ship.y+Math.sin(aimAng)*20,'rgba(220,200,60,0.85)',8);
-    ammo=0; // uses the 1 charge
+    ammo=0;
+  } else if(ch.weapon==='trap'){
+    if(!isOnPier(mouse.wx,mouse.wy))return;
+    if(traps.some(tr=>Math.hypot(tr.x-mouse.wx,tr.y-mouse.wy)<22))return;
+    traps.push({x:mouse.wx,y:mouse.wy});
+  } else if(ch.weapon==='pumpkin_bomb'){
+    balls.push({x:ship.x,y:ship.y,vx:(dx/len)*8,vy:(dy/len)*8,life:52,weapon:'pumpkin_bomb'});
   } else {
     const spd=ch.weapon==='musket'?18:ch.weapon==='flintlock'?13:11;
     balls.push({
@@ -1029,11 +1730,18 @@ function showWave(txt){
 }
 function renderAmmo(){
   const ch=getActiveChar();
-  const labels={cannon:'Cannonballs',musket:'Musket Shots',orb:'Energy Orbs',flintlock:'Rounds',cutlass:'Cutlass'};
-  const colors={cannon:'#f1c40f',musket:'#ffaa40',orb:'#cc44ff',flintlock:'#80ff99',cutlass:'#c8c8c8'};
+  const labels={cannon:'Cannonballs',musket:'Musket Shots',orb:'Energy Orbs',flintlock:'Rounds',cutlass:'Cutlass',trap:activeWeapon==='dagger'?'🗡️ Dagger  [2]':'🪤 Traps  [1/2]',pumpkin_bomb:'🎃 Pumpkin Bombs'};
+  const colors={cannon:'#f1c40f',musket:'#ffaa40',orb:halloweenMode?'#44cc44':'#cc44ff',flintlock:'#80ff99',cutlass:'#c8c8c8',trap:'#66cc44',bite:'#cc2222',pumpkin_bomb:'#ff6600'};
   $('ammo-label').textContent=labels[ch.weapon]||'Ammo';
+  $('ammo-label').style.color=(ch.weapon==='orb'&&halloweenMode)?'rgba(68,204,68,0.9)':'';
   const col=colors[ch.weapon]||'#f1c40f';
   const row=$('ammorow');row.innerHTML='';
+  if(ch.weapon==='trap'&&activeWeapon==='dagger'){
+    const d=document.createElement('div');
+    d.className='ad'+(dagCooldown>0?' ae':'');
+    if(dagCooldown<=0)d.style.cssText='background:#88cc44;box-shadow:0 0 6px #88cc4499;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;';
+    d.textContent='🗡️';row.appendChild(d);return;
+  }
   for(let i=0;i<maxAmmo;i++){
     const d=document.createElement('div');
     d.className='ad'+(i>=ammo?' ae':'');
@@ -1042,7 +1750,28 @@ function renderAmmo(){
   }
 }
 function updateHUD(){
-  persistentGold=gold; // keep persistent gold in sync
+  persistentGold=gold;
+  if(halloweenMode){persistentCandy=candy;$('hcandy').textContent=candy;$('candy-hb').style.display='';}
+  else{$('candy-hb').style.display='none';}
+  const ch=getActiveChar();
+  const showWeapon=halloweenMode&&ch&&ch.weapon==='trap';
+  $('weapon-hb').style.display=showWeapon?'':'none';
+  if(showWeapon)$('hweapon').textContent=activeWeapon==='dagger'?'🗡️ Dagger':'🪤 Trap';
+  const showBroom=halloweenMode&&ch&&ch.id==='wickedwitch';
+  $('broom-hb').style.display=showBroom?'':'none';
+  if(showBroom){
+    {
+      if($('hbroom-label'))$('hbroom-label').textContent='Broom [E]';
+      if(broomDash.active){$('hbroom').textContent='⚡ '+Math.ceil(broomDash.t/60)+'s';}
+      else if(broomDash.cooldown>0){$('hbroom').textContent='🧹 '+Math.ceil(broomDash.cooldown/60)+'s';}
+      else{$('hbroom').textContent='🧹 READY';}
+    }
+  }
+  $('hud').classList.toggle('hhalloween',halloweenMode);
+  $('wave-label').textContent=halloweenMode?'🎃 Night':'Wave';
+  $('shop-btn').style.display=halloweenMode?'none':'';
+  $('halloween-shop-btn').style.display=halloweenMode?'':'none';
+  $('admin-boss-btn').style.display=halloweenMode?'':'none';
   $('hw').textContent=wave;$('hg').textContent=gold;$('hph').textContent=phantoms.length;
   const pct=Math.max(0,hp/maxHp*100);
   $('hpfill').style.width=pct+'%';
@@ -1050,6 +1779,13 @@ function updateHUD(){
 }
 
 function tryMove(nx,ny){
+  if(bossActive){
+    const dx=nx-boss.x,dy=ny-boss.y,dist=Math.hypot(dx,dy);
+    if(dist>ARENA_R-14){const a=Math.atan2(dy,dx);return{x:boss.x+Math.cos(a)*(ARENA_R-14),y:boss.y+Math.sin(a)*(ARENA_R-14)};}
+    return{x:nx,y:ny};
+  }
+  const ch=getActiveChar();
+  if(ch&&ch.id==='wickedwitch'&&(broomDash.active||stranded))return{x:Math.max(20,Math.min(WORLD-20,nx)),y:Math.max(20,Math.min(WORLD-20,ny))};
   if(isOnPier(nx,ny))return{x:nx,y:ny};
   if(isOnPier(nx,ship.y))return{x:nx,y:ship.y};
   if(isOnPier(ship.x,ny))return{x:ship.x,y:ny};
@@ -1060,7 +1796,7 @@ function update(t){
   if(gs!=='playing')return;
   const s=ship;
   s.angle=Math.atan2(mouse.wy-s.y,mouse.wx-s.x)-Math.PI/2;
-  const spd=getActiveChar().speed;
+  const spd=getActiveChar().speed*(broomDash.active?2.2:stranded?2.0:1);
   const mvx=(keys['a']||keys['arrowleft']?-1:0)+(keys['d']||keys['arrowright']?1:0);
   const mvy=(keys['w']||keys['arrowup']?-1:0)+(keys['s']||keys['arrowdown']?1:0);
   const mv=mvx&&mvy?0.707:1;
@@ -1075,48 +1811,117 @@ function update(t){
   reloadT=Math.max(0,reloadT-1);
   const baseReload=Math.round(46*getActiveChar().reloadMult);
   if(reloadT===0&&ammo<maxAmmo){ammo=Math.min(maxAmmo,ammo+1);reloadT=baseReload;renderAmmo();}
-  if(spawnQ<waveTotal){spawnT++;if(spawnT>=spawnI){spawnT=0;spawnPhantom();spawnQ++;}}
+  if(dagCooldown>0)dagCooldown--;
+  if(broomDash.active){broomDash.t--;if(broomDash.t<=0){broomDash.active=false;broomDash.cooldown=300;if(getActiveChar()&&getActiveChar().id==='wickedwitch'&&!isOnPier(ship.x,ship.y))stranded=true;}}
+  if(broomDash.cooldown>0)broomDash.cooldown--;
+  if(stranded&&isOnPier(ship.x,ship.y))stranded=false;
+
+  if(!bossActive&&spawnQ<waveTotal){spawnT++;if(spawnT>=spawnI){spawnT=0;spawnPhantom();spawnQ++;}}
   for(let i=phantoms.length-1;i>=0;i--){
     const p=phantoms[i];p.swayT+=0.025;
-    // Tick orb slow
+    if(p.type==='whiteghost'){
+      p.ghostPhaseT=(p.ghostPhaseT||0)+1;
+      p.phased=p.ghostPhaseT%300<90;
+      if(!p.trail)p.trail=[];
+      p.trail.unshift({x:p.x,y:p.y});
+      if(p.trail.length>8)p.trail.pop();
+    }
     if(p._slowT>0){
       p._slowT--;
       if(p._slowT===0&&p._baseSpeed){p.speed=p._baseSpeed;p._baseSpeed=null;}
     }
-    const ang=Math.atan2(s.y-p.y,s.x-p.x)+Math.sin(p.swayT)*0.28;
-    p.x+=Math.cos(ang)*p.speed;p.y+=Math.sin(ang)*p.speed;
+    // Bear trap: stuck + poison tick
+    if(p.stuck>0){
+      p.stuck--;
+      p._poisonT=(p._poisonT||0)+1;
+      if(p._poisonT%50===0){
+        p.hp--;spawnParts(p.x,p.y,'rgba(80,200,80,0.8)',4);
+        if(p.hp<=0){
+          if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}
+          spawnParts(p.x,p.y,'rgba(255,200,0,0.9)',14);phantoms.splice(i,1);updateHUD();continue;
+        }
+      }
+      if(p.stuck===0){p.speed=p._trapBaseSpeed||p.speed;p._poisonT=0;}
+    } else {
+      const ang=Math.atan2(s.y-p.y,s.x-p.x)+Math.sin(p.swayT)*0.28;
+      const ms=(p.type==='whiteghost'&&p.phased)?p.speed*2.5:p.speed;
+      p.x+=Math.cos(ang)*ms;p.y+=Math.sin(ang)*ms;
+    }
+    // Reaper scythe throw
+    if(p.type==='reaper'){
+      p.reaperT=(p.reaperT||0)+1;
+      const throwI=Math.max(150,360-wave*18);
+      if(p.reaperT>=throwI){
+        p.reaperT=0;
+        const rdx=s.x-p.x,rdy=s.y-p.y,rlen=Math.hypot(rdx,rdy)||1;
+        reaperScythes.push({x:p.x,y:p.y,vx:(rdx/rlen)*5.5,vy:(rdy/rlen)*5.5,angle:0,life:200});
+      }
+    }
     if(Math.hypot(p.x-s.x,p.y-s.y)<s.r+14){
-      hp=Math.max(0,hp-(p.isBoss?8:4));
+      if(p.type==='whiteghost'&&p.phased)continue;
+      if(broomDash.active&&getActiveChar().id==='wickedwitch'){
+        p.hp-=1;spawnParts(p.x,p.y,'rgba(80,204,80,0.9)',6);
+        const kba=Math.atan2(p.y-s.y,p.x-s.x);p.x+=Math.cos(kba)*22;p.y+=Math.sin(kba)*22;
+        if(p.hp<=0){if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}spawnParts(p.x,p.y,'rgba(255,200,0,0.9)',12);phantoms.splice(i,1);updateHUD();}
+        continue;
+      }
+      const dmg=p.type==='elderpumpkin'?10:p.isBoss?8:p.type==='reaper'?6:4;
+      hp=Math.max(0,hp-dmg);
       spawnParts(p.x,p.y,'rgba(231,76,60,0.9)',6);flashDmg();
       phantoms.splice(i,1);
       if(hp<=0){endGame();return;}
     }
   }
+  // Trap trigger checks
+  if(halloweenMode&&traps.length){
+    for(let i=phantoms.length-1;i>=0;i--){
+      const p=phantoms[i];if(p.stuck>0)continue;
+      for(let j=traps.length-1;j>=0;j--){
+        if(Math.hypot(p.x-traps[j].x,p.y-traps[j].y)<14){
+          p.stuck=180;p._trapBaseSpeed=p.speed;p.speed=0;p._poisonT=0;
+          spawnParts(traps[j].x,traps[j].y,'rgba(80,200,80,0.95)',10);
+          traps.splice(j,1);break;
+        }
+      }
+    }
+  }
+  // Reaper scythe movement + player collision
+  if(halloweenMode){
+    for(let i=reaperScythes.length-1;i>=0;i--){
+      const rs=reaperScythes[i];
+      rs.x+=rs.vx;rs.y+=rs.vy;rs.angle+=0.25;rs.life--;
+      if(rs.life<=0){reaperScythes.splice(i,1);continue;}
+      if(Math.hypot(rs.x-s.x,rs.y-s.y)<16){
+        hp=Math.max(0,hp-8);flashDmg();
+        spawnParts(rs.x,rs.y,'rgba(180,0,0,0.9)',8);
+        reaperScythes.splice(i,1);
+        if(hp<=0){endGame();return;}
+      }
+    }
+  }
   for(let i=balls.length-1;i>=0;i--){
     const b=balls[i];b.x+=b.vx;b.y+=b.vy;b.life--;
-    if(b.life<=0){balls.splice(i,1);continue;}
+    if(b.life<=0){if(b.weapon==='pumpkin_bomb'){pumpkinExplode(b.x,b.y);balls.splice(i,1);if(bossActive&&boss&&boss.hp<=0){endBossFight();return;}continue;}balls.splice(i,1);continue;}
     for(let j=phantoms.length-1;j>=0;j--){
-      const p=phantoms[j];const r=p.isBoss?11:7;
+      const p=phantoms[j];
+      if(p.type==='whiteghost'&&p.phased)continue;
+      const r=(p.isBoss||p.type==='elderpumpkin')?11:7;
       if(Math.hypot(b.x-p.x,b.y-p.y)<r+5){
-        // Weapon-specific effects
+        if(b.weapon==='pumpkin_bomb'){pumpkinExplode(b.x,b.y);balls.splice(i,1);if(bossActive&&boss&&boss.hp<=0){endBossFight();return;}break;}
         if(b.weapon==='musket'){
-          p.hp-=4; // musket deals 4x damage (punches through)
-          spawnParts(b.x,b.y,'rgba(255,180,60,0.95)',12);
+          p.hp-=4;spawnParts(b.x,b.y,'rgba(255,180,60,0.95)',12);
         } else if(b.weapon==='orb'){
-          p.hp--;
-          // Slow effect — halve speed temporarily
-          p._slowT=180; // frames of slow
-          p._baseSpeed=p._baseSpeed||p.speed;
-          p.speed=p._baseSpeed*0.35;
+          p.hp--;p._slowT=180;p._baseSpeed=p._baseSpeed||p.speed;p.speed=p._baseSpeed*0.35;
           spawnParts(b.x,b.y,'rgba(180,80,255,0.9)',10);
         } else if(b.weapon==='flintlock'){
-          p.hp--;
-          spawnParts(b.x,b.y,'rgba(80,220,120,0.9)',6);
+          p.hp--;spawnParts(b.x,b.y,'rgba(80,220,120,0.9)',6);
         } else {
-          p.hp--;
-          spawnParts(b.x,b.y,p.isBoss?'rgba(200,80,255,0.9)':'rgba(52,152,219,0.9)',8);
+          p.hp--;spawnParts(b.x,b.y,(p.isBoss||p.type==='elderpumpkin')?'rgba(200,80,255,0.9)':'rgba(52,152,219,0.9)',8);
         }
-        if(p.hp<=0){gold+=p.isBoss?12:3;spawnParts(p.x,p.y,'rgba(241,196,15,0.9)',14);phantoms.splice(j,1);}
+        if(p.hp<=0){
+          if(halloweenMode){candy+=candyDrop(p);persistentCandy=candy;}else{gold+=p.isBoss?12:3;}
+          spawnParts(p.x,p.y,'rgba(241,196,15,0.9)',14);phantoms.splice(j,1);updateHUD();
+        }
         balls.splice(i,1);break;
       }
     }
@@ -1125,12 +1930,15 @@ function update(t){
     const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.06;p.life-=0.024;
     if(p.life<=0)particles.splice(i,1);
   }
-  if(spawnQ>=waveTotal&&phantoms.length===0){
-    wave++;waveTotal=8+wave*2;spawnQ=0;spawnT=0;
-    spawnI=Math.max(32,90-wave*7);gold+=wave*5;
+  if(!bossActive&&spawnQ>=waveTotal&&phantoms.length===0){
+    wave++;
+    if(halloweenMode&&wave===13){startBossFight();}
+    else{waveTotal=8+wave*2;spawnQ=0;spawnT=0;spawnI=Math.max(32,90-wave*7);
+    if(halloweenMode){candy+=wave*3;persistentCandy=candy;}else{gold+=wave*5;}
     if(wave%3===0&&maxAmmo<14)maxAmmo++;
-    ammo=maxAmmo;showWave(`Wave ${wave}!`);renderAmmo();
+    ammo=maxAmmo;showWave(halloweenMode?`🎃 Night ${wave}!`:`Wave ${wave}!`);renderAmmo();}
   }
+  if(bossActive)updateBoss();
   if(cutlassSwing.active){
     cutlassSwing.t++;
     if(cutlassSwing.t>=cutlassSwing.dur)cutlassSwing.active=false;
@@ -1141,10 +1949,16 @@ function update(t){
 function draw(t){
   ctx.clearRect(0,0,W,H);
   drawWorld(t);
+  if(bossActive)drawBossArena();
+  if(halloweenMode)traps.forEach(tr=>drawTrap(tr));
   phantoms.forEach(p=>drawPhantomSprite(p,t));
   balls.forEach(b=>drawBall(b));
+  if(halloweenMode)reaperScythes.forEach(rs=>drawReaperScythe(rs));
   particles.forEach(p=>drawParticle(p));
   drawPirate(t);
+  if(bossActive){drawBossLasers(t);bossProjectiles.forEach(bp=>drawBossProjectile(bp));bossScythes.forEach(bs=>drawBossScythe(bs));drawBoss(t);drawBossHealthBar();drawDodgeFlash();}
+  if(halloweenMode)drawHalloweenFog(t);
+  if(stranded)drawStrandedWarning(t);
   drawCursor();
 }
 
@@ -1155,7 +1969,7 @@ function loop(now){
 
 function endGame(){
   gs='dead';cancelAnimationFrame(raf);
-  persistentGold=gold; // ensure saved
+  persistentGold=gold;persistentCandy=candy;
   const ov=$('ov');ov.style.display='flex';
   ov.innerHTML=`
     <div class="modal-box" style="border:3px solid rgba(231,76,60,0.7);background:rgba(8,16,40,0.98);box-shadow:0 0 60px rgba(231,76,60,0.22),0 0 120px rgba(231,76,60,0.07);gap:14px;padding:36px 44px;border-radius:16px;display:flex;flex-direction:column;align-items:center;">
@@ -1172,14 +1986,82 @@ function endGame(){
       </div>
       <button id="btn" style="padding:11px 32px;border-radius:8px;border:none;background:#f1c40f;color:#0a0a12;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Gentium Basic',Georgia,serif;">Sail Again</button>
     </div>`;
-  const sch=charSprites[selectedChar]||charSprites['scout'];
+  const sch=halloweenMode?(halloweenCharSprites[halloweenSelectedChar]||charSprites['scout']):(charSprites[selectedChar]||charSprites['scout']);
   const c2=document.getElementById('ms2').getContext('2d');c2.imageSmoothingEnabled=false;c2.drawImage(sch,4,4,56,56);
-  $('btn').onclick=startGame;
+  $('btn').onclick=halloweenMode?startHalloween:startGame;
 }
 
 function startGame(){
+  halloweenMode=false;
   gs='playing';initGame();$('ov').style.display='none';
   showWave('Wave 1 — Weigh anchor!');lastT=performance.now();loop(lastT);
+}
+
+function startHalloween(){
+  halloweenMode=true;activeWeapon='trap';
+  gs='playing';initGame();$('ov').style.display='none';
+  showWave('🎃 Night 1 — Survive the dark!');lastT=performance.now();loop(lastT);
+}
+
+function openHalloweenShop(){
+  if(gs==='playing'){gs='shop';cancelAnimationFrame(raf);}
+  renderHalloweenShopGrid();
+  $('hwshop-candy').textContent='Candy: '+(persistentCandy||0)+' 🍬';
+  $('hwshop').style.display='flex';
+}
+function closeHalloweenShop(){
+  $('hwshop').style.display='none';
+  if(gs==='shop'){gs='playing';lastT=performance.now();loop(lastT);}
+}
+function adminSkipBoss(){
+  if(gs!=='playing'||!halloweenMode||bossActive)return;
+  phantoms=[];wave=13;candy=Math.max(candy,50);persistentCandy=candy;
+  startBossFight();updateHUD();
+}
+function buyHealth(){
+  const info=$('hw-heal-info');
+  if(persistentCandy<5){info.textContent='Need 5 candy!';info.style.color='#e74c3c';return;}
+  if(hp>=maxHp){info.textContent='Already at full HP!';info.style.color='#e74c3c';return;}
+  persistentCandy-=5;candy=persistentCandy;
+  hp=Math.min(maxHp,hp+20);
+  updateHUD();
+  $('hwshop-candy').textContent='Candy: '+persistentCandy+' 🍬';
+  info.textContent='❤️ Healed! HP: '+hp+'/'+maxHp;info.style.color='#2ecc71';
+}
+function renderHalloweenShopGrid(){
+  const grid=$('hwchar-grid');grid.innerHTML='';
+  HALLOWEEN_CHARS.forEach(ch=>{
+    const card=document.createElement('div');
+    const isSel=ch.id===halloweenSelectedChar,isOwned=ch.owned;
+    card.className='char-card'+(isSel?' selected':isOwned?' owned':ch.cost>(persistentCandy||0)?' locked':'');
+    const sc2=document.createElement('canvas');sc2.width=36;sc2.height=36;sc2.style.imageRendering='pixelated';
+    const sc2ctx=sc2.getContext('2d');sc2ctx.imageSmoothingEnabled=false;
+    if(halloweenCharSprites[ch.id])sc2ctx.drawImage(halloweenCharSprites[ch.id],0,0,36,36);
+    const nm=document.createElement('div');nm.className='cn';nm.textContent=ch.name;
+    const tt=document.createElement('div');tt.className='ct2';tt.textContent=ch.title;
+    const ds=document.createElement('div');ds.className='cs';ds.innerHTML=`❤️ ${ch.maxHp} &nbsp; ⚡ ${ch.speed.toFixed(1)}<br>${ch.weaponLabel}`;
+    const btn=document.createElement('button');btn.className='cp';
+    if(isSel){btn.textContent='Active';btn.className+=' cp-active';}
+    else if(isOwned){btn.textContent='Select';btn.className+=' cp-select';btn.onclick=()=>{halloweenSelectedChar=ch.id;renderHalloweenShopGrid();};}
+    else if(ch.cost===0){btn.textContent='Free';btn.className+=' cp-select';btn.onclick=()=>{ch.owned=true;halloweenSelectedChar=ch.id;renderHalloweenShopGrid();};}
+    else{
+      const can=(persistentCandy||0)>=ch.cost;
+      btn.textContent=can?`Buy — ${ch.cost}🍬`:`${ch.cost}🍬`;
+      btn.className+=can?' cp-buy':' cp-locked';
+      if(can)btn.onclick=()=>{if((persistentCandy||0)<ch.cost)return;persistentCandy-=ch.cost;updateHUD();ch.owned=true;halloweenSelectedChar=ch.id;$('hwshop-candy').textContent='Candy: '+persistentCandy+' 🍬';renderHalloweenShopGrid();};
+    }
+    card.appendChild(sc2);card.appendChild(nm);card.appendChild(tt);card.appendChild(ds);card.appendChild(btn);
+    grid.appendChild(card);
+  });
+}
+
+function convertCandy(){
+  const info=$('candy-convert-info');
+  if(persistentCandy<10){info.textContent='Need at least 10 candy!';info.style.color='#e74c3c';return;}
+  persistentCandy-=10;persistentGold+=8;candy=persistentCandy;gold=persistentGold;
+  updateHUD();
+  $('shop-gold-display').textContent='Gold available: '+persistentGold;
+  info.textContent='✅ Converted! '+persistentCandy+' candy left.';info.style.color='#2ecc71';
 }
 
 canvas.addEventListener('mousemove',e=>{
@@ -1191,6 +2073,12 @@ canvas.addEventListener('click',()=>{if(gs==='playing')fire();});
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('keydown',e=>{
   keys[e.key.toLowerCase()]=true;
+  if(e.key==='1'&&halloweenMode&&getActiveChar()&&getActiveChar().weapon==='trap'){activeWeapon='trap';updateHUD();renderAmmo();}
+  if(e.key==='2'&&halloweenMode&&getActiveChar()&&getActiveChar().weapon==='trap'){activeWeapon='dagger';updateHUD();renderAmmo();}
+  if(e.key.toLowerCase()==='e'&&gs==='playing'&&halloweenMode&&getActiveChar()&&getActiveChar().id==='wickedwitch'){
+    if(!stranded&&!broomDash.active&&broomDash.cooldown===0){broomDash.active=true;broomDash.t=300;}
+  }
+  if(e.key===' '&&gs==='playing'&&bossActive&&!dodgeActive&&dodgeCooldown===0){dodgeActive=true;dodgeT=40;dodgeCooldown=180;}
   if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase()))e.preventDefault();
 });
 document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
@@ -1225,12 +2113,16 @@ const SOP_SALT='sop_k7rNx2p';
 function sopHash(s){let h=0;for(let i=0;i<s.length;i++)h=(Math.imul(31,h)+s.charCodeAt(i))|0;return(h>>>0).toString(36);}
 function sopBuildPayload(){
   const owned=CHARACTERS.filter(c=>c.owned).map(c=>c.id);
-  return JSON.stringify({gold:persistentGold,char:selectedChar,owned,v:1});
+  const hwOwned=HALLOWEEN_CHARS.filter(c=>c.owned).map(c=>c.id);
+  return JSON.stringify({gold:persistentGold,char:selectedChar,owned,candy:persistentCandy,hwChar:halloweenSelectedChar,hwOwned,v:2});
 }
 function sopApplyPayload(p){
   persistentGold=p.gold||0;
   selectedChar=p.char||'scout';
+  persistentCandy=p.candy||0;
+  halloweenSelectedChar=p.hwChar||'spookyscout';
   if(Array.isArray(p.owned))p.owned.forEach(id=>{const c=CHARACTERS.find(x=>x.id===id);if(c)c.owned=true;});
+  if(Array.isArray(p.hwOwned))p.hwOwned.forEach(id=>{const c=HALLOWEEN_CHARS.find(x=>x.id===id);if(c)c.owned=true;});
   $('shop-gold-display').textContent='Gold available: '+persistentGold;
 }
 function sopAutoSave(){
@@ -1271,13 +2163,14 @@ window.addEventListener('beforeunload',sopAutoSave);
 
 sopAutoLoad();
 $('btn').onclick=startGame;
-// Defer so the flex layout has painted and offsetWidth/Height are real
+$('halloween-btn').onclick=startHalloween;
 requestAnimationFrame(()=>{
   buildCharSprites();
+  buildHalloweenCharSprites();
   resize();
   initBg();
+  initHalloweenBg();
   buildWaveStrips();
-  // Draw menu sprite now that charSprites exist
   const mc=document.getElementById('menuSprite');
   if(mc){const c=mc.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(charSprites['scout'],4,4,56,56);}
 });
