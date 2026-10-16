@@ -667,12 +667,14 @@ function skyDome(radius, top, mid, bottom) {
 
 /** Image-based lighting for glossy toy materials, generated from a tiny procedural studio scene. */
 function makeEnvMap(r) {
-  const pm = new THREE.PMREMGenerator(r), sc = new THREE.Scene();
-  sc.add(skyDome(50, 0x3a5a80, 0x6e7280, 0x5a4458));
-  const panel = (x, y, z, s, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(2.2), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); sc.add(m); };
-  panel(0, 40, 10, 30, 0xffffff); panel(30, 15, -20, 14, 0xfff2dd); panel(-30, 12, 20, 12, 0xddeeff);
-  const rt = pm.fromScene(sc, 0.03); pm.dispose();
-  return rt.texture;
+  try {
+    const pm = new THREE.PMREMGenerator(r), sc = new THREE.Scene();
+    sc.add(skyDome(50, 0x3a5a80, 0x6e7280, 0x5a4458));
+    const panel = (x, y, z, s, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(2.2), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); sc.add(m); };
+    panel(0, 40, 10, 30, 0xffffff); panel(30, 15, -20, 14, 0xfff2dd); panel(-30, 12, 20, 12, 0xddeeff);
+    const rt = pm.fromScene(sc, 0.03); pm.dispose();
+    return rt.texture;
+  } catch (e) { console.warn('EnvMap generation failed', e); return null; }
 }
 
 /* ------------------------------------------------------------ 5. PARTICLES */
@@ -1016,7 +1018,7 @@ function makePortraits() {
     }
     sc.environment.dispose();
   } catch (e) { console.warn('Portrait render failed', e); }
-  if (r2) { r2.dispose(); try { r2.forceContextLoss(); } catch (e) { /* ignore */ } }
+  if (r2) { r2.dispose(); }
   return out;
 }
 
@@ -2007,12 +2009,12 @@ function drawSpeedLines(amount) {
 
 /* ------------------------------------------------------------ 13. MENUS / APP */
 let renderer, camera, stage = null, showcase = null, composer = null, renderPass = null, bloomPass = null, PORTRAITS = {};
-const App = { state: 'boot', charIdx: 0, trackIdx: 0, cls: 1, laps: 3, fx: POST_OK ? 1 : 0, camH: 0, camSnap: false, autopilot: false, slowT: 0, slowT2: 0 };
+const App = { state: 'boot', charIdx: 0, trackIdx: 0, cls: 1, laps: 3, fx: 0, camH: 0, camSnap: false, autopilot: false, slowT: 0, slowT2: 0 };
 const camPos = new V3(), camLook = new V3(), tmpA = new V3(), tmpB = new V3();
 
 function initRenderer() {
-  renderer = new THREE.WebGLRenderer({ canvas: $('game'), antialias: true, powerPreference: 'high-performance' });
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer = new THREE.WebGLRenderer({ canvas: $('game'), antialias: true });
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   App.env = ENV.map = makeEnvMap(renderer);
   for (const k in SHARED_MATS) { SHARED_MATS[k].envMap = App.env; SHARED_MATS[k].envMapIntensity = 0.5; SHARED_MATS[k].needsUpdate = true; }
