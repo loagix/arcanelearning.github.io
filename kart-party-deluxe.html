@@ -687,8 +687,23 @@ function skyDome(radius, top, mid, bottom) {
   return m;
 }
 
-/** Image-based lighting for glossy toy materials, generated from a tiny procedural studio scene. */
-function makeEnvMap() { return null; }
+/** Image-based lighting for glossy toy materials, generated from a tiny procedural sky gradient. */
+function makeEnvMap(r) {
+  try {
+    const gen = new THREE.PMREMGenerator(r);
+    gen.compileEquirectangularShader();
+    const cv = document.createElement('canvas'); cv.width = 4; cv.height = 2;
+    const ctx = cv.getContext('2d');
+    const grd = ctx.createLinearGradient(0, 0, 0, 2);
+    grd.addColorStop(0, '#6fa8dc'); grd.addColorStop(1, '#d5e8f5');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, 4, 2);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.mapping = THREE.EquirectangularReflectionMapping;
+    const envMap = gen.fromEquirectangular(tex).texture;
+    tex.dispose(); gen.dispose(); r.setRenderTarget(null);
+    return envMap;
+  } catch(e) { console.warn('makeEnvMap failed', e); return null; }
+}
 
 /* ------------------------------------------------------------ 5. PARTICLES */
 const PVERT = `attribute vec3 pcolor; attribute float psize; attribute float palpha; uniform float uScale; varying vec3 vC; varying float vA;
@@ -1014,12 +1029,14 @@ function disposeObject(o) { o.traverse((c) => { if (c.geometry && !c.geometry.us
 /** Pre-renders a head-and-shoulders portrait of every racer for the menus. */
 function makePortraits() {
   const out = {};
-  let r2;
+  let r2, sc;
   try {
     const cv = document.createElement('canvas'); cv.width = cv.height = 192;
     r2 = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true, preserveDrawingBuffer: true });
     r2.setSize(192, 192, false);
-    const sc = new THREE.Scene();
+    r2.outputColorSpace = THREE.LinearSRGBColorSpace;
+    sc = new THREE.Scene();
+    sc.environment = makeEnvMap(r2);
     sc.add(new THREE.HemisphereLight(0xffffff, 0x8899cc, 0.45));
     const key = new THREE.DirectionalLight(0xffffff, 0.8); key.position.set(2, 4, 5); sc.add(key);
     const cam = new THREE.PerspectiveCamera(26, 1, 0.1, 50); cam.position.set(0.55, 2.35, 2.25); cam.lookAt(0, 2.02, -0.4);
@@ -1030,7 +1047,7 @@ function makePortraits() {
       sc.remove(k.group); disposeObject(k.group);
     }
   } catch (e) { console.warn('Portrait render failed', e); }
-  if (r2) { r2.dispose(); }
+  if (r2) { if (sc && sc.environment) sc.environment.dispose(); r2.dispose(); }
   return out;
 }
 
@@ -1105,6 +1122,7 @@ function sceneryShores(w) {
   const dome = skyDome(1700, 0x4aa8ff, 0xeaf7ff, 0xbfe3ff); dome.position.set(c.x, 0, c.z); S.add(dome);
   S.fog = new THREE.Fog(0xdcefff, 260, 1100);
   S.add(new THREE.HemisphereLight(0xffffff, 0x8cc070, 0.42));
+  S.environment = ENV_MAP;
   const sun = new THREE.DirectionalLight(0xfff3dc, 1.05); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(60, 120, 50);
 
   // Island: grass core → sandy beach → shore sloping into the sea
@@ -1244,6 +1262,7 @@ function scenerySkyway(w) {
   w.anim.push((dt) => { neb.rotation.y += dt * 0.004; });
   S.fog = new THREE.Fog(0x2a0f50, 500, 1500);
   S.add(new THREE.HemisphereLight(0xc0c8ff, 0x50287a, 0.6));
+  S.environment = ENV_MAP;
   const sun = new THREE.DirectionalLight(0xffffff, 0.75); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(-50, 120, 60);
 
   // Rainbow road + underside + glowing edges
@@ -1373,6 +1392,7 @@ function createShowcase() {
   S.add(skyDome(600, 0x5ab0ff, 0xbfe0ff, 0xffd8ee));
   S.fog = new THREE.Fog(0xd4e8ff, 140, 560);
   S.add(new THREE.HemisphereLight(0xffffff, 0xc8a8ff, 0.32));
+  S.environment = ENV_MAP;
   const sun = new THREE.DirectionalLight(0xffffff, 0.72); sun.position.set(14, 30, 18); setupSun(sun, 22); S.add(sun);
   const B = new Builder(), white = toy(0xf4f2ff, { roughness: 0.35 }), pink = toy(0xff7ab8, { roughness: 0.45 });
   B.add(new THREE.CylinderGeometry(15.4, 14, 1.8, 96), white, 0, -0.9, 0);
@@ -2020,7 +2040,7 @@ function drawSpeedLines(amount) {
 }
 
 /* ------------------------------------------------------------ 13. MENUS / APP */
-let renderer, camera, stage = null, showcase = null, composer = null, renderPass = null, bloomPass = null, PORTRAITS = {};
+let renderer, camera, stage = null, showcase = null, composer = null, renderPass = null, bloomPass = null, PORTRAITS = {}, ENV_MAP = null;
 const App = { state: 'boot', charIdx: 0, trackIdx: 0, cls: 1, laps: 3, fx: 0, camH: 0, camSnap: false, autopilot: false, slowT: 0, slowT2: 0 };
 const camPos = new V3(), camLook = new V3(), tmpA = new V3(), tmpB = new V3();
 
@@ -2029,6 +2049,8 @@ function initRenderer() {
   renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
   renderer.shadowMap.enabled = false;
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  ENV_MAP = makeEnvMap(renderer);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
     try {
