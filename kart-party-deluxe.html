@@ -2040,12 +2040,11 @@ const camPos = new V3(), camLook = new V3(), tmpA = new V3(), tmpB = new V3();
 
 function initRenderer() {
   const gameCanvas = $('game');
-  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, precision: 'mediump', failIfMajorPerformanceCaveat: false });
+  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, alpha: true, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
   renderer.shadowMap.enabled = false;
   renderer.outputEncoding = THREE.LinearEncoding;
   ENV_MAP = makeEnvMap(renderer);
-  renderer.setClearColor(0xff4400, 1);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
     try {
