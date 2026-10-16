@@ -1384,6 +1384,7 @@ function ringTex() {
 function createShowcase() {
   const s = { scene: new THREE.Scene(), isShowcase: true, time: 0, mode: 'title', ringKarts: [], center: null, bloom: { s: 0.22, r: 0.4, t: 0.97 }, camPos: new V3(0, 18, 30), camLook: new V3(0, 1, 0) };
   const S = s.scene;
+  S.background = new THREE.Color(0xff4400);
   S.add(skyDome(600, 0x5ab0ff, 0xbfe0ff, 0xffd8ee));
   S.fog = new THREE.Fog(0xd4e8ff, 140, 560);
   S.add(new THREE.AmbientLight(0xffffff, 0.6));
