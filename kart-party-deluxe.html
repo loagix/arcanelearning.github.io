@@ -659,7 +659,7 @@ function skyDome(radius, top, mid, bottom) {
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { top: { value: new THREE.Color(top) }, mid: { value: new THREE.Color(mid) }, bottom: { value: new THREE.Color(bottom) } },
     vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: 'uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; varying vec3 vP; void main(){ float h = vP.y; vec3 c = h > 0.0 ? mix(mid, top, pow(h, 0.6)) : mix(mid, bottom, pow(-h, 0.5)); gl_FragColor = vec4(c, 1.0);\n#include <encodings_fragment>\n}',
+    fragmentShader: 'uniform vec3 top; uniform vec3 mid; uniform vec3 bottom; varying vec3 vP; void main(){ float h = vP.y; vec3 c = h > 0.0 ? mix(mid, top, pow(h, 0.6)) : mix(mid, bottom, pow(-h, 0.5)); gl_FragColor = vec4(c, 1.0); }',
   });
   const m = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 16), mat); m.renderOrder = -10; m.frustumCulled = false;
   return m;
@@ -792,18 +792,18 @@ const SHARED_MATS = {
   dark: new THREE.MeshStandardMaterial({ color: 0x2b2e3a, roughness: 0.55, metalness: 0.25 }),
   rubber: new THREE.MeshStandardMaterial({ color: 0x1c1c22, roughness: 0.92 }),
   chrome: new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.12 }),
-  white: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3, clearcoat: 0.8, clearcoatRoughness: 0.2 }),
-  black: new THREE.MeshPhysicalMaterial({ color: 0x0e0e16, roughness: 0.15, clearcoat: 1, clearcoatRoughness: 0.05 }),
+  white: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }),
+  black: new THREE.MeshStandardMaterial({ color: 0x0e0e16, roughness: 0.15 }),
   blush: new THREE.MeshStandardMaterial({ color: 0xff8fb0, roughness: 0.7, transparent: true, opacity: 0.75 }),
   pink: new THREE.MeshStandardMaterial({ color: 0xff9ec0, roughness: 0.55 }),
-  orange: new THREE.MeshPhysicalMaterial({ color: 0xffa21e, roughness: 0.35, clearcoat: 0.6 }),
-  lens: new THREE.MeshPhysicalMaterial({ color: 0x6fd8ff, roughness: 0.05, metalness: 0.2, clearcoat: 1, transparent: true, opacity: 0.85 }),
-  wing: new THREE.MeshPhysicalMaterial({ color: 0xdff6ff, roughness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide }),
-  red: new THREE.MeshPhysicalMaterial({ color: 0xe8304a, roughness: 0.4, clearcoat: 0.5 }),
+  orange: new THREE.MeshStandardMaterial({ color: 0xffa21e, roughness: 0.35 }),
+  lens: new THREE.MeshStandardMaterial({ color: 0x6fd8ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
+  wing: new THREE.MeshStandardMaterial({ color: 0xdff6ff, roughness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide }),
+  red: new THREE.MeshStandardMaterial({ color: 0xe8304a, roughness: 0.4 }),
 };
 for (const k in SHARED_MATS) SHARED_MATS[k].userData.shared = true;
 const ENV = { map: null };
-const toy = (color, o = {}) => new THREE.MeshPhysicalMaterial(Object.assign({ envMap: ENV.map, color, roughness: 0.3, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.12, envMapIntensity: 0.5 }, o));
+const toy = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ envMap: ENV.map, color, roughness: 0.3, metalness: 0.0, envMapIntensity: 0.5 }, o));
 const MAT_CACHE = new Map();
 function kartMaterials(ch) {
   if (MAT_CACHE.has(ch.id)) return MAT_CACHE.get(ch.id);
@@ -1315,7 +1315,7 @@ function buildTrackProps(w) {
 
   // Item boxes: rows of 4 across the road
   const qt = TEX.question();
-  w.boxMat = new THREE.MeshPhysicalMaterial({ map: qt, transparent: true, opacity: 0.88, emissive: 0x6633aa, emissiveIntensity: 0.45, roughness: 0.15, clearcoat: 1 });
+  w.boxMat = new THREE.MeshStandardMaterial({ map: qt, transparent: true, opacity: 0.88, emissive: 0x6633aa, emissiveIntensity: 0.45, roughness: 0.15 });
   const boxGeo = roundedBox(1.9, 1.9, 1.9, 0.35, 3);
   for (const f of T.def.boxes) {
     const i = Math.floor(f * N);
