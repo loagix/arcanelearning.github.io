@@ -1880,7 +1880,7 @@ function updateWorld(w, dt) {
     for (const k of K) {
       if (k.isPlayer) continue;
       const dx = k.pos.x - px, dz = k.pos.z - pz, near = dx * dx + dz * dz < 60 * 60;
-      k.group.traverse((o) => { if (o.isMesh) o.castShadow = near; });
+      k.mesh.traverse((o) => { if (o.isMesh) o.castShadow = near; });
     }
   }
   w.shake = Math.max(0, w.shake - dt);
