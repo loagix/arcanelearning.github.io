@@ -247,7 +247,7 @@ body.racing #muteBtn{display:none}
 <button id="muteBtn" title="Mute (M)">🔊</button>
 
 <!-- Three.js core from CDN (jsDelivr is tried automatically if cdnjs fails) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
 <script>
 /* =========================================================================
    KART PARTY DELUXE  —  single-file 3D arcade kart racer
@@ -299,12 +299,12 @@ function loadScript(src, timeout) {
 }
 async function ensureThree() {
   if (window.THREE) return true;
-  await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js', 12000);
+  await loadScript('https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js', 12000);
   return !!window.THREE;
 }
 // Optional bloom post-processing. If any file fails to load, the game simply renders without bloom.
 async function loadPost() {
-  const base = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';
+  const base = 'https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/';
   const files = ['shaders/CopyShader.js', 'shaders/LuminosityHighPassShader.js', 'postprocessing/EffectComposer.js',
     'postprocessing/RenderPass.js', 'postprocessing/ShaderPass.js', 'postprocessing/UnrealBloomPass.js'];
   const ok = await Promise.all(files.map((f) => loadScript(base + f, 7000)));
@@ -673,8 +673,9 @@ function makeEnvMap(r) {
     const panel = (x, y, z, s, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(2.2), side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); sc.add(m); };
     panel(0, 40, 10, 30, 0xffffff); panel(30, 15, -20, 14, 0xfff2dd); panel(-30, 12, 20, 12, 0xddeeff);
     const rt = pm.fromScene(sc, 0.03); pm.dispose();
+    r.setRenderTarget(null);
     return rt.texture;
-  } catch (e) { console.warn('EnvMap generation failed', e); return null; }
+  } catch (e) { console.warn('EnvMap generation failed', e); r.setRenderTarget(null); return null; }
 }
 
 /* ------------------------------------------------------------ 5. PARTICLES */
