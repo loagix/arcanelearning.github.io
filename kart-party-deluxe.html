@@ -817,21 +817,21 @@ class Track {
 
 /* ------------------------------------------------------------ 7. KART + RACER MODELS */
 const SHARED_MATS = {
-  dark:   new THREE.MeshStandardMaterial({ color: 0x2b2e3a, roughness: 0.55, metalness: 0.25 }),
-  rubber: new THREE.MeshStandardMaterial({ color: 0x1c1c22, roughness: 0.92 }),
-  chrome: new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.12 }),
-  white:  new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 }),
-  black:  new THREE.MeshStandardMaterial({ color: 0x0e0e16, roughness: 0.15 }),
-  blush:  new THREE.MeshStandardMaterial({ color: 0xff8fb0, roughness: 0.7, transparent: true, opacity: 0.75 }),
-  pink:   new THREE.MeshStandardMaterial({ color: 0xff9ec0, roughness: 0.55 }),
-  orange: new THREE.MeshStandardMaterial({ color: 0xffa21e, roughness: 0.35 }),
-  lens:   new THREE.MeshStandardMaterial({ color: 0x6fd8ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
-  wing:   new THREE.MeshStandardMaterial({ color: 0xdff6ff, roughness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide }),
-  red:    new THREE.MeshStandardMaterial({ color: 0xe8304a, roughness: 0.4 }),
+  dark:   new THREE.MeshLambertMaterial({ color: 0x2b2e3a, roughness: 0.55, metalness: 0.25 }),
+  rubber: new THREE.MeshLambertMaterial({ color: 0x1c1c22, roughness: 0.92 }),
+  chrome: new THREE.MeshLambertMaterial({ color: 0xdddddd, emissive: 0x555555 }),
+  white:  new THREE.MeshLambertMaterial({ color: 0xffffff, roughness: 0.3 }),
+  black:  new THREE.MeshLambertMaterial({ color: 0x0e0e16, roughness: 0.15 }),
+  blush:  new THREE.MeshLambertMaterial({ color: 0xff8fb0, roughness: 0.7, transparent: true, opacity: 0.75 }),
+  pink:   new THREE.MeshLambertMaterial({ color: 0xff9ec0, roughness: 0.55 }),
+  orange: new THREE.MeshLambertMaterial({ color: 0xffa21e, roughness: 0.35 }),
+  lens:   new THREE.MeshLambertMaterial({ color: 0x6fd8ff, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.85 }),
+  wing:   new THREE.MeshLambertMaterial({ color: 0xdff6ff, roughness: 0.1, transparent: true, opacity: 0.55, side: THREE.DoubleSide }),
+  red:    new THREE.MeshLambertMaterial({ color: 0xe8304a, roughness: 0.4 }),
 };
 for (const k in SHARED_MATS) SHARED_MATS[k].userData.shared = true;
 const ENV = { map: null };
-const toy = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.3, metalness: 0.0 }, o));
+const toy = (color, o = {}) => new THREE.MeshLambertMaterial(Object.assign({ color, roughness: 0.3, metalness: 0.0 }, o));
 const MAT_CACHE = new Map();
 function kartMaterials(ch) {
   if (MAT_CACHE.has(ch.id)) return MAT_CACHE.get(ch.id);
@@ -839,7 +839,7 @@ function kartMaterials(ch) {
     body: toy(ch.color), accent: toy(ch.accent), suit: toy(ch.suit, { roughness: 0.55 }),
     skin: toy(ch.skin, { roughness: 0.45 }), rim: toy(ch.rim),
     skin2: toy(new THREE.Color(ch.skin).multiplyScalar(0.72), { roughness: 0.5 }),
-    emblem: new THREE.MeshStandardMaterial({ map: TEX.emblem(ch), transparent: true, roughness: 0.35, polygonOffset: true, polygonOffsetFactor: -2 }),
+    emblem: new THREE.MeshLambertMaterial({ map: TEX.emblem(ch), transparent: true, roughness: 0.35, polygonOffset: true, polygonOffsetFactor: -2 }),
   });
   for (const k of ['body', 'accent', 'suit', 'skin', 'rim', 'skin2', 'emblem']) m[k].userData.shared = true;
   MAT_CACHE.set(ch.id, m);
@@ -1077,7 +1077,7 @@ function setupSun(sun, size = 50) {
   const c = sun.shadow.camera; c.left = -size; c.right = size; c.top = size; c.bottom = -size; c.near = 1; c.far = 360;
   sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.03;
 }
-const CLOUD_MAT = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, emissive: 0xc8d0ff, emissiveIntensity: 0.38 });
+const CLOUD_MAT = new THREE.MeshLambertMaterial({ color: 0xffffff, roughness: 1, emissive: 0xc8d0ff, emissiveIntensity: 0.38 });
 CLOUD_MAT.userData.shared = true;
 /** Adds one puffy cloud (a cluster of spheres) to a Builder. */
 function puffCloud(B, x, y, z, s, mat = CLOUD_MAT) {
@@ -1140,17 +1140,17 @@ function sceneryShores(w) {
   const ground = new THREE.Mesh(gGeo, new THREE.MeshLambertMaterial({ vertexColors: true })); ground.position.set(c.x, -0.02, c.z); ground.receiveShadow = true; S.add(ground);
 
   const oGeo = new THREE.PlaneGeometry(3600, 3600, 70, 70); oGeo.rotateX(-Math.PI / 2);
-  const ocean = new THREE.Mesh(oGeo, new THREE.MeshStandardMaterial({ color: 0x38bdf2, roughness: 0.18, metalness: 0.15, flatShading: true, transparent: true, opacity: 0.92 }));
+  const ocean = new THREE.Mesh(oGeo, new THREE.MeshLambertMaterial({ color: 0x38bdf2, roughness: 0.18, metalness: 0.15, flatShading: true, transparent: true, opacity: 0.92 }));
   ocean.position.set(c.x, -1.4, c.z); S.add(ocean);
   const oBase = Float32Array.from(oGeo.attributes.position.array);
   w.anim.push((dt, t) => { const a = oGeo.attributes.position; for (let i = 0; i < a.count; i++) a.array[i * 3 + 1] = Math.sin(oBase[i * 3] * 0.02 + t * 1.1) * 0.8 + Math.cos(oBase[i * 3 + 2] * 0.025 + t * 0.8) * 0.8; a.needsUpdate = true; });
 
   // Road, curbs and rounded striped barriers
   const across = []; for (let j = 0; j <= 8; j++) across.push(-hw + (j / 8) * hw * 2);
-  S.add(T.ribbon(across, across.map(() => 0.05), new THREE.MeshStandardMaterial({ map: TEX.road(), roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), { vLen: 14 }));
-  const curbMat = new THREE.MeshStandardMaterial({ map: TEX.stripes('#ef3346', '#ffffff'), roughness: 0.5, side: THREE.DoubleSide });
-  const barMatA = new THREE.MeshStandardMaterial({ map: TEX.stripes('#2f6bff', '#ffffff'), roughness: 0.35, metalness: 0.05, side: THREE.DoubleSide });
-  const barMatB = new THREE.MeshStandardMaterial({ map: TEX.stripes('#ef3346', '#ffffff'), roughness: 0.35, metalness: 0.05, side: THREE.DoubleSide });
+  S.add(T.ribbon(across, across.map(() => 0.05), new THREE.MeshLambertMaterial({ map: TEX.road(), roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), { vLen: 14 }));
+  const curbMat = new THREE.MeshLambertMaterial({ map: TEX.stripes('#ef3346', '#ffffff'), roughness: 0.5, side: THREE.DoubleSide });
+  const barMatA = new THREE.MeshLambertMaterial({ map: TEX.stripes('#2f6bff', '#ffffff'), roughness: 0.35, metalness: 0.05, side: THREE.DoubleSide });
+  const barMatB = new THREE.MeshLambertMaterial({ map: TEX.stripes('#ef3346', '#ffffff'), roughness: 0.35, metalness: 0.05, side: THREE.DoubleSide });
   const L = hw + T.def.barrier, offs = [-0.55, -0.62, -0.46, 0, 0.46, 0.62, 0.55], ys = [0, 0.55, 1.0, 1.22, 1.0, 0.55, 0];
   for (const s of [-1, 1]) {
     S.add(T.ribbon([s * (hw - 0.15), s * (hw + 0.55), s * (hw + 1.6)], [0.08, 0.2, 0.07], curbMat, { vLen: 3.2 }));
@@ -1158,7 +1158,7 @@ function sceneryShores(w) {
   }
 
   // Palms, bushes, rocks (all merged → few draw calls)
-  const pm = { trunk: toy(0xb8814a, { roughness: 0.8 }), leaf: new THREE.MeshStandardMaterial({ color: 0x3fc24a, roughness: 0.6, side: THREE.DoubleSide }), coco: toy(0x7a4a22, { roughness: 0.7 }) };
+  const pm = { trunk: toy(0xb8814a, { roughness: 0.8 }), leaf: new THREE.MeshLambertMaterial({ color: 0x3fc24a, roughness: 0.6, side: THREE.DoubleSide }), coco: toy(0x7a4a22, { roughness: 0.7 }) };
   const PB = new Builder();
   let placed = 0;
   for (let tries = 0; placed < 75 && tries < 3000; tries++) {
@@ -1224,7 +1224,7 @@ function sceneryShores(w) {
     SB.add(roundedBox(14, 0.5, 38, 0.2), toy(0xff5fa8), 4.5, 9.5, 0);
     for (const zz of [-18, 18]) SB.add(U.cyl, SHARED_MATS.white, 10, 4.75, zz, 0, 0, 0, 0.25, 9.5, 0.25);
     stand.add(SB.build());
-    const crowd = new THREE.InstancedMesh(roundedBox(0.8, 1.2, 0.8, 0.3, 2), new THREE.MeshStandardMaterial({ roughness: 0.6 }), 4 * 18);
+    const crowd = new THREE.InstancedMesh(roundedBox(0.8, 1.2, 0.8, 0.3, 2), new THREE.MeshLambertMaterial({ roughness: 0.6 }), 4 * 18);
     const base = []; let n = 0;
     for (let k = 0; k < 4; k++) for (let m = 0; m < 18; m++) { base.push([k * 3 - 0.3 + rand(-0.4, 0.4), 1.3 * (k + 1) + 0.6, -17 + m * 2 + rand(-0.3, 0.3), rand(0, 6)]); crowd.setColorAt(n++, new THREE.Color().setHSL(Math.random(), 0.75, 0.6)); }
     stand.add(crowd); S.add(stand);
@@ -1303,7 +1303,7 @@ function scenerySkyway(w) {
 
   // Ringed planet, moons, floating stars
   const planet = (r, map, color, pos, ring) => {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), new THREE.MeshStandardMaterial({ map, color, roughness: 0.9, emissive: 0x302040, fog: false }));
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), new THREE.MeshLambertMaterial({ map, color, roughness: 0.9, emissive: 0x302040, fog: false }));
     m.position.copy(pos); m.rotation.z = 0.3; S.add(m); w.anim.push((dt) => { m.rotation.y += dt * 0.03; });
     if (ring) { const rg = new THREE.Mesh(new THREE.RingGeometry(r * 1.3, r * 2.3, 96, 1), new THREE.MeshBasicMaterial({ map: TEX.ring(), transparent: true, side: THREE.DoubleSide, fog: false, depthWrite: false })); rg.position.copy(pos); rg.rotation.set(-Math.PI / 2 + 0.25, 0.15, 0); S.add(rg); }
   };
@@ -1329,7 +1329,7 @@ function buildTrackProps(w) {
   lm.rotation.x = -Math.PI / 2; lm.position.y = 0.1; line.add(lm); S.add(place(line, 0));
   // Gantry: striped poles, balloon bunches, banner and bunting
   const G = new Builder(), poleTex = TEX.stripes('#ef3346', '#ffffff'); poleTex.repeat.set(1, 6);
-  const poleMat = new THREE.MeshStandardMaterial({ map: poleTex, roughness: 0.4 });
+  const poleMat = new THREE.MeshLambertMaterial({ map: poleTex, roughness: 0.4 });
   const px = hw + (sky ? 1.6 : 2.4), top = 10.5;
   const bal = [0xff5fa8, 0xffd21f, 0x38c2ff, 0x5ad65a, 0xb48cff].map((cc) => toy(cc, { roughness: 0.15 }));
   for (const sx of [-1, 1]) {
@@ -1346,7 +1346,7 @@ function buildTrackProps(w) {
 
   // Item boxes: rows of 4 across the road
   const qt = TEX.question();
-  w.boxMat = new THREE.MeshStandardMaterial({ map: qt, transparent: true, opacity: 0.88, emissive: 0x6633aa, emissiveIntensity: 0.45, roughness: 0.15 });
+  w.boxMat = new THREE.MeshLambertMaterial({ map: qt, transparent: true, opacity: 0.88, emissive: 0x6633aa, emissiveIntensity: 0.45, roughness: 0.15 });
   const boxGeo = roundedBox(1.9, 1.9, 1.9, 0.35, 3);
   for (const f of T.def.boxes) {
     const i = Math.floor(f * N);
@@ -1365,7 +1365,7 @@ function buildTrackProps(w) {
   // Coins (instanced)
   const coinPos = [];
   for (const [f, l] of T.def.coins) for (let k = 0; k < 5; k++) { const i = T.wrap(Math.floor(f * N) + k * 4), p = T.pts[i], n = T.nor[i]; coinPos.push(new V3(p.x + n.x * l * hw, p.y + 1.1, p.z + n.z * l * hw)); }
-  const CG = new Builder(), gold = new THREE.MeshStandardMaterial({ color: 0xffc81a, metalness: 0.75, roughness: 0.22, emissive: 0x6a4000 });
+  const CG = new Builder(), gold = new THREE.MeshLambertMaterial({ color: 0xffc81a, emissive: 0x8a5200 });
   CG.add(U.cyl, gold, 0, 0, 0, Math.PI / 2, 0, 0, 0.62, 0.16, 0.62);
   CG.add(new THREE.TorusGeometry(0.55, 0.07, 8, 26), gold, 0, 0, 0);
   CG.add(roundedBox(0.16, 0.6, 0.24, 0.06), gold, 0, 0, 0);
@@ -1402,7 +1402,7 @@ function createShowcase() {
   for (let k = 0; k < 22; k++) { const a = (k / 22) * Math.PI * 2, r = rand(9, 15); B.add(U.sph, CLOUD_MAT, Math.cos(a) * r, rand(-7.5, -6), Math.sin(a) * r, 0, 0, 0, rand(5, 8), rand(3, 4), rand(5, 8)); }
   for (let k = 0; k < 10; k++) B.add(U.sph, CLOUD_MAT, rand(-7, 7), rand(-14, -11), rand(-7, 7), 0, 0, 0, rand(5, 8), rand(4, 6), rand(5, 8));
   S.add(B.build());
-  const ring = new THREE.Mesh(new THREE.RingGeometry(11.3, 14.2, 128, 1), new THREE.MeshStandardMaterial({ map: ringTex(), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -2 }));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(11.3, 14.2, 128, 1), new THREE.MeshLambertMaterial({ map: ringTex(), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -2 }));
   ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; ring.receiveShadow = true; S.add(ring);
   const CB = new Builder();
   for (let k = 0; k < 26; k++) { const a = rand(0, 6.28), r = rand(40, 170); puffCloud(CB, Math.cos(a) * r, rand(-30, 45), Math.sin(a) * r, rand(5, 12)); }
@@ -2051,20 +2051,6 @@ function initRenderer() {
   renderer.shadowMap.enabled = false;
   renderer.outputEncoding = THREE.LinearEncoding;
   ENV_MAP = makeEnvMap(renderer);
-  // Diagnostic: render a basic red cube to a corner canvas for 5s — if it shows, Three.js works
-  try {
-    const dc = document.createElement('canvas'); dc.width = dc.height = 80;
-    dc.style.cssText = 'position:fixed;top:40px;right:4px;z-index:999998;border:2px solid lime;';
-    document.body.appendChild(dc);
-    const dr = new THREE.WebGLRenderer({ canvas: dc, antialias: false });
-    dr.outputEncoding = THREE.LinearEncoding;
-    const ds = new THREE.Scene(); ds.add(new THREE.AmbientLight(0xffffff, 1));
-    ds.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 })));
-    const dCam = new THREE.PerspectiveCamera(45, 1, 0.1, 100); dCam.position.z = 3;
-    dr.render(ds, dCam);
-    console.warn('DIAG: cube rendered, check corner for red box');
-    setTimeout(() => { try { document.body.removeChild(dc); dr.dispose(); } catch(e){} }, 8000);
-  } catch(e) { console.error('DIAG cube failed', e); }
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
     try {
