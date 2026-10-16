@@ -155,7 +155,6 @@ body.racing #muteBtn{display:none}
 </head>
 <body>
 <canvas id="fx"></canvas>
-<canvas id="game"></canvas>
 <div id="dbg" style="display:none;position:fixed;bottom:0;left:0;right:0;max-height:45vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font:11px/1.5 monospace;padding:8px;z-index:999999;white-space:pre-wrap;word-break:break-all"></div>
 <button id="dbgBtn" onclick="document.getElementById('dbg').style.display=document.getElementById('dbg').style.display==='none'?'block':'none'" style="position:fixed;top:4px;right:4px;z-index:999999;background:#000;color:#0f0;border:1px solid #0f0;padding:2px 6px;font:10px monospace;cursor:pointer">DBG</button>
 
@@ -2041,7 +2040,10 @@ const App = { state: 'boot', charIdx: 0, trackIdx: 0, cls: 1, laps: 3, fx: 0, ca
 const camPos = new V3(), camLook = new V3(), tmpA = new V3(), tmpB = new V3();
 
 function initRenderer() {
-  const gameCanvas = $('game');
+  const gameCanvas = document.createElement('canvas');
+  gameCanvas.id = 'game';
+  gameCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0';
+  document.body.appendChild(gameCanvas);
   renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, alpha: true, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
   renderer.shadowMap.enabled = false;
