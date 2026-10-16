@@ -2045,6 +2045,7 @@ function initRenderer() {
   renderer.shadowMap.enabled = false;
   renderer.outputEncoding = THREE.LinearEncoding;
   ENV_MAP = makeEnvMap(renderer);
+  renderer.setClearColor(0xff4400, 1);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
     try {
