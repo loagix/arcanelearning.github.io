@@ -157,6 +157,7 @@ body.racing #muteBtn{display:none}
 <canvas id="game"></canvas>
 <canvas id="fx"></canvas>
 <div id="dbg" style="display:none;position:fixed;bottom:0;left:0;right:0;max-height:45vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font:11px/1.5 monospace;padding:8px;z-index:999999;white-space:pre-wrap;word-break:break-all"></div>
+<button id="dbgBtn" onclick="document.getElementById('dbg').style.display=document.getElementById('dbg').style.display==='none'?'block':'none'" style="position:fixed;top:4px;right:4px;z-index:999999;background:#000;color:#0f0;border:1px solid #0f0;padding:2px 6px;font:10px monospace;cursor:pointer">DBG</button>
 
 <div id="ui">
   <!-- TITLE -->
@@ -2044,6 +2045,8 @@ function initRenderer() {
   applyQuality();
   window.addEventListener('resize', onResize);
   renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); showError('The graphics context was lost (GPU reset). Please reload.'); });
+  const gl = renderer.getContext();
+  console.warn('Renderer init: WebGL' + (renderer.capabilities.isWebGL2 ? '2' : '1') + ' | precision=' + renderer.capabilities.precision + ' | maxTex=' + renderer.capabilities.maxTextures + ' | vendor=' + gl.getParameter(gl.VENDOR) + ' | renderer=' + gl.getParameter(gl.RENDERER));
 }
 function applyQuality() {
   const pr = App.fx ? Math.min(window.devicePixelRatio || 1, 1.75) : Math.min(window.devicePixelRatio || 1, 1);
