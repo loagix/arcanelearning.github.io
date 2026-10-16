@@ -1034,7 +1034,7 @@ function makePortraits() {
     const cv = document.createElement('canvas'); cv.width = cv.height = 192;
     r2 = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true, preserveDrawingBuffer: true });
     r2.setSize(192, 192, false);
-    r2.outputColorSpace = THREE.LinearSRGBColorSpace;
+    r2.outputEncoding = THREE.LinearEncoding;
     sc = new THREE.Scene();
     sc.environment = makeEnvMap(r2);
     sc.add(new THREE.HemisphereLight(0xffffff, 0x8899cc, 0.45));
@@ -2049,8 +2049,22 @@ function initRenderer() {
   renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
   renderer.shadowMap.enabled = false;
-  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  renderer.outputEncoding = THREE.LinearEncoding;
   ENV_MAP = makeEnvMap(renderer);
+  // Diagnostic: render a basic red cube to a corner canvas for 5s — if it shows, Three.js works
+  try {
+    const dc = document.createElement('canvas'); dc.width = dc.height = 80;
+    dc.style.cssText = 'position:fixed;top:40px;right:4px;z-index:999998;border:2px solid lime;';
+    document.body.appendChild(dc);
+    const dr = new THREE.WebGLRenderer({ canvas: dc, antialias: false });
+    dr.outputEncoding = THREE.LinearEncoding;
+    const ds = new THREE.Scene(); ds.add(new THREE.AmbientLight(0xffffff, 1));
+    ds.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000 })));
+    const dCam = new THREE.PerspectiveCamera(45, 1, 0.1, 100); dCam.position.z = 3;
+    dr.render(ds, dCam);
+    console.warn('DIAG: cube rendered, check corner for red box');
+    setTimeout(() => { try { document.body.removeChild(dc); dr.dispose(); } catch(e){} }, 8000);
+  } catch(e) { console.error('DIAG cube failed', e); }
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
     try {
