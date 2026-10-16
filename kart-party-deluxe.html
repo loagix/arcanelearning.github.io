@@ -361,6 +361,7 @@ const CHARACTERS = [
   { id: 'pippa',  name: 'Pippa',  animal: 'bunny',   color: 0xb48cff, accent: 0xffe6f2, suit: 0xff8cc6, skin: 0xfbf7ff, rim: 0xff8cc6, css: '#9a6cf0', desc: 'Bouncy and nimble — hops into drifts in a flash.', stats: { speed: 3, accel: 5, handling: 4, weight: 1, drift: 4 } },
   { id: 'bandit', name: 'Bandit', animal: 'raccoon', color: 0x4a5162, accent: 0xff7a1f, suit: 0xff7a1f, skin: 0xa3a3b0, rim: 0xff7a1f, css: '#4a5162', desc: 'Sly speedster who never brakes for anything.', stats: { speed: 5, accel: 3, handling: 2, weight: 3, drift: 3 } },
   { id: 'cleo',   name: 'Cleo',   animal: 'cat',     color: 0xff8c42, accent: 0xfff4dc, suit: 0x3d2b7a, skin: 0xffb870, rim: 0xfff4dc, css: '#ff8c42', desc: 'Sleek drifter. Fast on the straights, purrfect on the bends.', stats: { speed: 4, accel: 2, handling: 3, weight: 3, drift: 4 } },
+  { id: 'rex',    name: 'Rex',    animal: 'dog',     color: 0xe05c1a, accent: 0xfff0cc, suit: 0x1a3a6e, skin: 0xd4956a, rim: 0xfff0cc, css: '#e05c1a', desc: 'Loyal and scrappy — never gives up, no matter the position.', stats: { speed: 3, accel: 4, handling: 4, weight: 3, drift: 3 } },
 ];
 
 // Course control points are [x, z, y]; the closed spline is sampled every ~1.5 units.
@@ -687,23 +688,7 @@ function skyDome(radius, top, mid, bottom) {
   return m;
 }
 
-/** Image-based lighting for glossy toy materials, generated from a tiny procedural sky gradient. */
-function makeEnvMap(r) {
-  try {
-    const gen = new THREE.PMREMGenerator(r);
-    gen.compileEquirectangularShader();
-    const cv = document.createElement('canvas'); cv.width = 4; cv.height = 2;
-    const ctx = cv.getContext('2d');
-    const grd = ctx.createLinearGradient(0, 0, 0, 2);
-    grd.addColorStop(0, '#6fa8dc'); grd.addColorStop(1, '#d5e8f5');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, 4, 2);
-    const tex = new THREE.CanvasTexture(cv);
-    tex.mapping = THREE.EquirectangularReflectionMapping;
-    const envMap = gen.fromEquirectangular(tex).texture;
-    tex.dispose(); gen.dispose(); r.setRenderTarget(null);
-    return envMap;
-  } catch(e) { console.warn('makeEnvMap failed', e); return null; }
-}
+function makeEnvMap() { return null; }
 
 /* ------------------------------------------------------------ 5. PARTICLES */
 const PVERT = `attribute vec3 pcolor; attribute float psize; attribute float palpha; uniform float uScale; varying vec3 vC; varying float vA;
@@ -935,6 +920,19 @@ function buildHead(H, ch, M) {
       }
       H.add(S, M.pink, 0, -0.08, 0.51, 0, 0, 0, 0.065, 0.052, 0.048);
       eyes(0.06, 0.18, 0.43); cheeks(-0.13, 0.31, 0.37); break;
+    case 'dog':
+      H.add(S, sk, 0, 0, 0, 0, 0, 0, R, R * 0.92, R);
+      // snout
+      H.add(S, M.skin2, 0, -0.14, 0.38, 0, 0, 0, 0.22, 0.16, 0.22);
+      H.add(S, M.black, 0, -0.06, 0.54, 0, 0, 0, 0.09, 0.07, 0.06);
+      // floppy ears
+      for (const sx of [-1, 1]) {
+        H.add(S, M.skin2, sx * 0.46, -0.06, -0.06, 0, 0, sx * 0.5, 0.18, 0.28, 0.1);
+        H.add(S, sk, sx * 0.42, 0.32, -0.04, 0, 0, 0, 0.16, 0.15, 0.1);
+      }
+      eyes(0.08, 0.19, 0.42); cheeks(-0.12, 0.32, 0.37);
+      // collar tag
+      H.add(U.cyl, new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0x664400 }), 0, -0.38, 0.24, Math.PI / 2, 0, 0, 0.09, 0.02, 0.09); break;
   }
 }
 
@@ -1036,8 +1034,7 @@ function makePortraits() {
     r2.setSize(192, 192, false);
     r2.outputEncoding = THREE.LinearEncoding;
     sc = new THREE.Scene();
-    sc.environment = makeEnvMap(r2);
-    sc.add(new THREE.HemisphereLight(0xffffff, 0x8899cc, 0.45));
+    sc.add(new THREE.AmbientLight(0xffffff, 0.8));
     const key = new THREE.DirectionalLight(0xffffff, 0.8); key.position.set(2, 4, 5); sc.add(key);
     const cam = new THREE.PerspectiveCamera(26, 1, 0.1, 50); cam.position.set(0.55, 2.35, 2.25); cam.lookAt(0, 2.02, -0.4);
     for (const ch of CHARACTERS) {
@@ -1047,7 +1044,7 @@ function makePortraits() {
       sc.remove(k.group); disposeObject(k.group);
     }
   } catch (e) { console.warn('Portrait render failed', e); }
-  if (r2) { if (sc && sc.environment) sc.environment.dispose(); r2.dispose(); }
+  if (r2) { r2.dispose(); }
   return out;
 }
 
@@ -1121,8 +1118,7 @@ function sceneryShores(w) {
   const S = w.scene, T = w.track, hw = T.halfW, N = T.N, c = T.center, R = T.radius + 30;
   const dome = skyDome(1700, 0x4aa8ff, 0xeaf7ff, 0xbfe3ff); dome.position.set(c.x, 0, c.z); S.add(dome);
   S.fog = new THREE.Fog(0xdcefff, 260, 1100);
-  S.add(new THREE.HemisphereLight(0xffffff, 0x8cc070, 0.42));
-  S.environment = ENV_MAP;
+  S.add(new THREE.AmbientLight(0xffffff, 0.7));
   const sun = new THREE.DirectionalLight(0xfff3dc, 1.05); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(60, 120, 50);
 
   // Island: grass core → sandy beach → shore sloping into the sea
@@ -1261,8 +1257,7 @@ function scenerySkyway(w) {
   neb.position.set(c.x, 0, c.z); neb.renderOrder = -10; S.add(neb);
   w.anim.push((dt) => { neb.rotation.y += dt * 0.004; });
   S.fog = new THREE.Fog(0x2a0f50, 500, 1500);
-  S.add(new THREE.HemisphereLight(0xc0c8ff, 0x50287a, 0.6));
-  S.environment = ENV_MAP;
+  S.add(new THREE.AmbientLight(0xd0d8ff, 0.7));
   const sun = new THREE.DirectionalLight(0xffffff, 0.75); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(-50, 120, 60);
 
   // Rainbow road + underside + glowing edges
@@ -1391,8 +1386,7 @@ function createShowcase() {
   const S = s.scene;
   S.add(skyDome(600, 0x5ab0ff, 0xbfe0ff, 0xffd8ee));
   S.fog = new THREE.Fog(0xd4e8ff, 140, 560);
-  S.add(new THREE.HemisphereLight(0xffffff, 0xc8a8ff, 0.32));
-  S.environment = ENV_MAP;
+  S.add(new THREE.AmbientLight(0xffffff, 0.6));
   const sun = new THREE.DirectionalLight(0xffffff, 0.72); sun.position.set(14, 30, 18); setupSun(sun, 22); S.add(sun);
   const B = new Builder(), white = toy(0xf4f2ff, { roughness: 0.35 }), pink = toy(0xff7ab8, { roughness: 0.45 });
   B.add(new THREE.CylinderGeometry(15.4, 14, 1.8, 96), white, 0, -0.9, 0);
