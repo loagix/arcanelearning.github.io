@@ -172,7 +172,7 @@ body.racing #muteBtn{display:none}
 
   <!-- SELECT (course + racer) -->
   <div id="select" class="screen hidden">
-    <div class="selH">GET READY TO RACE!</div>
+    <div class="selH">PICK YOUR RACER!</div>
     <div id="courseCard" class="card">
       <h3>COURSE</h3>
       <div id="thumbs"></div>
@@ -2317,9 +2317,9 @@ function frame(now) {
 }
 
 // ---- Boot sequence
-PORTRAITS = makePortraits();   // rendered in a separate context before the main renderer exists
 MAT_CACHE.clear(); TOY_CACHE.clear();
 initRenderer();
+PORTRAITS = makePortraits();
 go('title');
 $('loading').classList.add('hidden');
 requestAnimationFrame(frame);
