@@ -155,8 +155,7 @@ body.racing #muteBtn{display:none}
 </head>
 <body>
 <canvas id="fx"></canvas>
-<div id="dbg" style="display:none;position:fixed;bottom:0;left:0;right:0;max-height:45vh;overflow-y:auto;background:rgba(0,0,0,0.92);color:#0f0;font:11px/1.5 monospace;padding:8px;z-index:999999;white-space:pre-wrap;word-break:break-all"></div>
-<button id="dbgBtn" onclick="document.getElementById('dbg').style.display=document.getElementById('dbg').style.display==='none'?'block':'none'" style="position:fixed;top:4px;right:4px;z-index:999999;background:#000;color:#0f0;border:1px solid #0f0;padding:2px 6px;font:10px monospace;cursor:pointer">DBG</button>
+<div id="ver" style="position:fixed;bottom:4px;right:6px;font:9px/1 monospace;color:rgba(255,255,255,0.35);z-index:3;pointer-events:none">v10.16</div>
 
 <div id="ui">
   <!-- TITLE -->
@@ -274,23 +273,6 @@ body.racing #muteBtn{display:none}
 'use strict';
 
 /* ------------------------------------------------------------ 1. BOOT */
-// Debug overlay — press backtick (`) to toggle; shows on crash; deduplicates repeated messages
-(function() {
-  const dbg = document.getElementById('dbg');
-  const seen = new Map();
-  const append = (type, args) => {
-    const msg = '[' + type + '] ' + Array.from(args).map(a => { try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch(e) { return '…'; } }).join(' ');
-    if (seen.has(msg)) { const el = seen.get(msg); const n = (parseInt(el.dataset.n || '1') + 1); el.dataset.n = n; el.firstChild.textContent = msg + ' (×' + n + ')'; return; }
-    if (dbg.childElementCount > 60) { const old = dbg.firstChild; seen.delete(old && old.firstChild && old.firstChild.textContent); dbg.removeChild(old); }
-    const d = document.createElement('div'); const t = document.createTextNode(msg); d.appendChild(t);
-    d.style.color = type === 'error' ? '#f66' : '#fa0'; seen.set(msg, d);
-    dbg.appendChild(d); dbg.scrollTop = dbg.scrollHeight;
-  };
-  const _e = console.error.bind(console); console.error = function() { _e.apply(console, arguments); append('error', arguments); };
-  const _w = console.warn.bind(console); console.warn = function() { _w.apply(console, arguments); append('warn', arguments); };
-  window.dbgShow = () => { dbg.style.display = 'block'; };
-  window.addEventListener('keydown', (e) => { if (e.key === '`') dbg.style.display = dbg.style.display === 'none' ? 'block' : 'none'; });
-})();
 
 const $ = (id) => document.getElementById(id);
 let fatal = false;
@@ -302,7 +284,6 @@ function showError(msg) {
   $('error').classList.remove('hidden');
   const detail = (msg && msg.stack) ? msg.stack : String(msg && msg.message ? msg.message : msg);
   $('errorMsg').textContent = detail;
-  if (window.dbgShow) window.dbgShow();
 }
 window.addEventListener('error', (ev) => { if (ev.error) showError(ev.error); });
 window.addEventListener('unhandledrejection', (ev) => showError(ev.reason || 'Unhandled promise rejection'));
@@ -2340,7 +2321,6 @@ initRenderer();
 PORTRAITS = makePortraits();
 go('title');
 $('loading').classList.add('hidden');
-if (window.dbgShow) window.dbgShow();
 requestAnimationFrame(frame);
 window.KPD = { App, get stage() { return stage; }, go, keys, skipIntro };
 } // end main
