@@ -273,14 +273,6 @@ body.racing #muteBtn{display:none}
 'use strict';
 
 /* ------------------------------------------------------------ 1. BOOT */
-// Force WebGL1 — better ARM GPU compatibility (same as Babylon.js/PolyIsland)
-(function() {
-  const _get = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = function(type, attrs) {
-    if (type === 'webgl2') return null;
-    return _get.call(this, type, attrs);
-  };
-})();
 
 const $ = (id) => document.getElementById(id);
 let fatal = false;
@@ -1105,7 +1097,6 @@ function addPalm(B, x, z, s, mats) {
 function sceneryShores(w) {
   const S = w.scene, T = w.track, hw = T.halfW, N = T.N, c = T.center, R = T.radius + 30;
   const dome = skyDome(1700, 0x4aa8ff, 0xeaf7ff, 0xbfe3ff); dome.position.set(c.x, 0, c.z); S.add(dome);
-  S.fog = new THREE.Fog(0xdcefff, 260, 1100);
   S.add(new THREE.AmbientLight(0xffffff, 0.7));
   const sun = new THREE.DirectionalLight(0xfff3dc, 1.05); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(60, 120, 50);
 
@@ -1244,7 +1235,6 @@ function scenerySkyway(w) {
   const neb = new THREE.Mesh(new THREE.SphereGeometry(1700, 48, 24), new THREE.MeshBasicMaterial({ map: TEX.nebula(), side: THREE.BackSide, fog: false, depthWrite: false }));
   neb.position.set(c.x, 0, c.z); neb.renderOrder = -10; S.add(neb);
   w.anim.push((dt) => { neb.rotation.y += dt * 0.004; });
-  S.fog = new THREE.Fog(0x2a0f50, 500, 1500);
   S.add(new THREE.AmbientLight(0xd0d8ff, 0.7));
   const sun = new THREE.DirectionalLight(0xffffff, 0.75); setupSun(sun); S.add(sun, sun.target); w.sun = sun; w.sunOffset = new V3(-50, 120, 60);
 
@@ -1373,7 +1363,6 @@ function createShowcase() {
   const s = { scene: new THREE.Scene(), isShowcase: true, time: 0, mode: 'title', ringKarts: [], center: null, bloom: { s: 0.22, r: 0.4, t: 0.97 }, camPos: new V3(0, 18, 30), camLook: new V3(0, 1, 0) };
   const S = s.scene;
   S.add(skyDome(600, 0x5ab0ff, 0xbfe0ff, 0xffd8ee));
-  S.fog = new THREE.Fog(0xd4e8ff, 140, 560);
   S.add(new THREE.AmbientLight(0xffffff, 0.6));
   const sun = new THREE.DirectionalLight(0xffffff, 0.72); sun.position.set(14, 30, 18); setupSun(sun, 22); S.add(sun);
   const B = new Builder(), white = toy(0xf4f2ff, { roughness: 0.35 }), pink = toy(0xff7ab8, { roughness: 0.45 });
