@@ -285,7 +285,11 @@ function showError(msg) {
   const detail = (msg && msg.stack) ? msg.stack : String(msg && msg.message ? msg.message : msg);
   $('errorMsg').textContent = detail;
 }
-window.addEventListener('error', (ev) => { if (ev.error) showError(ev.error); });
+window.addEventListener('error', (ev) => {
+  const v = document.getElementById('ver');
+  if (v) v.textContent = (ev.message || String(ev.error)).slice(0, 60);
+  if (ev.error) showError(ev.error);
+});
 window.addEventListener('unhandledrejection', (ev) => showError(ev.reason || 'Unhandled promise rejection'));
 
 function loadScript(src, timeout) {
