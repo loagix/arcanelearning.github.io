@@ -2023,14 +2023,16 @@ function probeWebGL2() {
     const c = document.createElement('canvas'); c.width = c.height = 2;
     const r = new THREE.WebGLRenderer({ canvas: c, antialias: false, preserveDrawingBuffer: true });
     if (!r.capabilities.isWebGL2) { r.dispose(); return false; }
-    const sc = new THREE.Scene(); sc.background = new THREE.Color(1, 0, 0);
-    sc.add(new THREE.AmbientLight(0xffffff, 1));
+    const sc = new THREE.Scene();
+    sc.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(0, 1, 2); sc.add(dir);
     sc.add(new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshLambertMaterial({ color: 0xff0000 })));
-    r.render(sc, new THREE.PerspectiveCamera(60, 1, 0.1, 10));
+    const cam = new THREE.PerspectiveCamera(60, 1, 0.1, 10); cam.position.set(0, 0, 3);
+    r.render(sc, cam);
     const px = new Uint8Array(16);
     r.getContext().readPixels(0, 0, 2, 2, 0x1908, 0x1401, px);
     r.dispose();
-    return px[0] > 100;
+    return px[0] > 50;
   } catch(e) { return false; }
 }
 function initRenderer() {
