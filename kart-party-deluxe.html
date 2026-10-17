@@ -2018,35 +2018,14 @@ let renderer, camera, stage = null, showcase = null, composer = null, renderPass
 const App = { state: 'boot', charIdx: 0, trackIdx: 0, cls: 1, laps: 3, fx: 0, camH: 0, camSnap: false, autopilot: false, slowT: 0, slowT2: 0 };
 const camPos = new V3(), camLook = new V3(), tmpA = new V3(), tmpB = new V3();
 
-function probeWebGL2() {
-  try {
-    const c = document.createElement('canvas'); c.width = c.height = 2;
-    const r = new THREE.WebGLRenderer({ canvas: c, antialias: false, preserveDrawingBuffer: true });
-    if (!r.capabilities.isWebGL2) { r.dispose(); return false; }
-    const sc = new THREE.Scene();
-    sc.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8); dir.position.set(0, 1, 2); sc.add(dir);
-    sc.add(new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshLambertMaterial({ color: 0xff0000 })));
-    const cam = new THREE.PerspectiveCamera(60, 1, 0.1, 10); cam.position.set(0, 0, 3);
-    r.render(sc, cam);
-    const px = new Uint8Array(16);
-    r.getContext().readPixels(0, 0, 2, 2, 0x1908, 0x1401, px);
-    r.dispose();
-    return px[0] > 50;
-  } catch(e) { return false; }
-}
 function initRenderer() {
   const gameCanvas = document.createElement('canvas');
   gameCanvas.id = 'game';
   gameCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0';
   document.body.appendChild(gameCanvas);
-  const webgl2ok = probeWebGL2();
-  const ctx = webgl2ok ? undefined : (gameCanvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: true }) || gameCanvas.getContext('experimental-webgl', { antialias: false, preserveDrawingBuffer: true }));
-  document.getElementById('ver').textContent = 'v10.16 ' + (webgl2ok ? 'GL2' : 'GL1');
-  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, ...(ctx ? { context: ctx } : {}), antialias: false, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
-  renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
+  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, preserveDrawingBuffer: true, failIfMajorPerformanceCaveat: false });
   renderer.shadowMap.enabled = false;
-  renderer.outputEncoding = THREE.LinearEncoding;
+  document.getElementById('ver').textContent = 'v10.16 ' + (renderer.capabilities.isWebGL2 ? 'GL2' : 'GL1');
   ENV_MAP = makeEnvMap(renderer);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
