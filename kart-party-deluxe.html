@@ -2025,7 +2025,16 @@ function initRenderer() {
   renderer.debug.onShaderError = () => {};
   renderer.shadowMap.enabled = false;
   renderer.outputEncoding = THREE.LinearEncoding;
-  document.getElementById('ver').textContent = 'v10.16 ' + (renderer.capabilities.isWebGL2 ? 'GL2' : 'GL1');
+  const _glver = renderer.capabilities.isWebGL2 ? 'GL2' : 'GL1';
+  // Pixel test: render red background, read back to confirm renderer works
+  (function() {
+    const ts = new THREE.Scene(); ts.background = new THREE.Color(1, 0, 0);
+    renderer.setSize(2, 2);
+    renderer.render(ts, new THREE.PerspectiveCamera(60, 1, 0.1, 10));
+    const px = new Uint8Array(16);
+    renderer.getContext().readPixels(0, 0, 2, 2, 0x1908, 0x1401, px);
+    document.getElementById('ver').textContent = _glver + ' px:' + px[0] + ',' + px[1] + ',' + px[2];
+  })();
   ENV_MAP = makeEnvMap(renderer);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
   if (POST_OK) {
