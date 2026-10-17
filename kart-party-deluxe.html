@@ -2023,8 +2023,10 @@ function initRenderer() {
   gameCanvas.id = 'game';
   gameCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0';
   document.body.appendChild(gameCanvas);
-  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, preserveDrawingBuffer: true, failIfMajorPerformanceCaveat: false });
+  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
+  renderer.debug.onShaderError = () => {};
   renderer.shadowMap.enabled = false;
+  renderer.outputEncoding = THREE.LinearEncoding;
   document.getElementById('ver').textContent = 'v10.16 ' + (renderer.capabilities.isWebGL2 ? 'GL2' : 'GL1');
   ENV_MAP = makeEnvMap(renderer);
   camera = new THREE.PerspectiveCamera(66, innerWidth / innerHeight, 0.1, 4000);
