@@ -155,7 +155,7 @@ body.racing #muteBtn{display:none}
 </head>
 <body>
 <canvas id="fx"></canvas>
-<div id="ver" style="position:fixed;bottom:6px;right:8px;font:14px/1 monospace;color:rgba(255,255,255,0.6);z-index:3;pointer-events:none">v10.16</div>
+<div id="ver" style="position:fixed;bottom:6px;left:8px;font:18px/1 monospace;color:red;z-index:3;pointer-events:none">v10.16</div>
 
 <div id="ui">
   <!-- TITLE -->
@@ -2040,7 +2040,7 @@ function initRenderer() {
   document.body.appendChild(gameCanvas);
   const webgl2ok = probeWebGL2();
   const ctx = webgl2ok ? undefined : (gameCanvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: true }) || gameCanvas.getContext('experimental-webgl', { antialias: false, preserveDrawingBuffer: true }));
-  console.warn('WebGL2 probe: ' + webgl2ok + (ctx ? ' → using WebGL1 fallback' : ''));
+  document.getElementById('ver').textContent = 'v10.16 ' + (webgl2ok ? 'GL2' : 'GL1');
   renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, ...(ctx ? { context: ctx } : {}), antialias: false, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = (gl, program, vs, fs) => { console.error('Shader compile error', renderer.info.programs); };
   renderer.shadowMap.enabled = false;
