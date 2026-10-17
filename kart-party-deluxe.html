@@ -1383,8 +1383,6 @@ function ringTex() {
 function createShowcase() {
   const s = { scene: new THREE.Scene(), isShowcase: true, time: 0, mode: 'title', ringKarts: [], center: null, bloom: { s: 0.22, r: 0.4, t: 0.97 }, camPos: new V3(0, 18, 30), camLook: new V3(0, 1, 0) };
   const S = s.scene;
-  S.background = new THREE.Color(0xff4400);
-  S.add(new THREE.Mesh(new THREE.SphereGeometry(500, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff4400, side: THREE.BackSide })));
   S.add(skyDome(600, 0x5ab0ff, 0xbfe0ff, 0xffd8ee));
   S.fog = new THREE.Fog(0xd4e8ff, 140, 560);
   S.add(new THREE.AmbientLight(0xffffff, 0.6));
@@ -2272,7 +2270,7 @@ function updateCamera(dt) {
 
 let lastT = performance.now(), fpsAcc = 0, fpsN = 0;
 function frame(now) {
-  if (fatal) { console.warn('FRAME STOPPED: fatal=true'); return; }
+  if (fatal) return;
   requestAnimationFrame(frame);
   let dt = (now - lastT) / 1000; lastT = now;
   if (!(dt > 0)) dt = 1 / 60;
@@ -2298,7 +2296,7 @@ function frame(now) {
         renderPass.scene = stage.scene; renderPass.camera = camera;
         bloomPass.strength = stage.bloom.s; bloomPass.radius = stage.bloom.r; bloomPass.threshold = stage.bloom.t;
         composer.render(dt);
-      } else { if (!(window._rc = (window._rc||0)+1) || window._rc <= 3 || window._rc % 60 === 0) console.warn('RENDER#' + window._rc + ' scene=' + !!stage.scene + ' cam=' + !!camera); renderer.render(stage.scene, camera); }
+      } else renderer.render(stage.scene, camera);
     }
     // FPS meter + automatic performance mode
     fpsAcc += rawDt; fpsN++;
@@ -2325,7 +2323,6 @@ PORTRAITS = makePortraits();
 go('title');
 $('loading').classList.add('hidden');
 if (window.dbgShow) window.dbgShow();
-console.warn('BOOT: stage=' + !!stage + ' renderer=' + !!renderer);
 requestAnimationFrame(frame);
 window.KPD = { App, get stage() { return stage; }, go, keys, skipIntro };
 } // end main
