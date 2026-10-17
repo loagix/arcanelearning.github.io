@@ -2272,7 +2272,7 @@ function updateCamera(dt) {
 
 let lastT = performance.now(), fpsAcc = 0, fpsN = 0;
 function frame(now) {
-  if (fatal) return;
+  if (fatal) { console.warn('FRAME STOPPED: fatal=true'); return; }
   requestAnimationFrame(frame);
   let dt = (now - lastT) / 1000; lastT = now;
   if (!(dt > 0)) dt = 1 / 60;
@@ -2298,7 +2298,7 @@ function frame(now) {
         renderPass.scene = stage.scene; renderPass.camera = camera;
         bloomPass.strength = stage.bloom.s; bloomPass.radius = stage.bloom.r; bloomPass.threshold = stage.bloom.t;
         composer.render(dt);
-      } else renderer.render(stage.scene, camera);
+      } else { if (!(window._rc = (window._rc||0)+1) || window._rc <= 3 || window._rc % 60 === 0) console.warn('RENDER#' + window._rc + ' scene=' + !!stage.scene + ' cam=' + !!camera); renderer.render(stage.scene, camera); }
     }
     // FPS meter + automatic performance mode
     fpsAcc += rawDt; fpsN++;
@@ -2324,6 +2324,8 @@ initRenderer();
 PORTRAITS = makePortraits();
 go('title');
 $('loading').classList.add('hidden');
+if (window.dbgShow) window.dbgShow();
+console.warn('BOOT: stage=' + !!stage + ' renderer=' + !!renderer);
 requestAnimationFrame(frame);
 window.KPD = { App, get stage() { return stage; }, go, keys, skipIntro };
 } // end main
