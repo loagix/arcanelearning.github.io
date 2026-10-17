@@ -273,6 +273,14 @@ body.racing #muteBtn{display:none}
 'use strict';
 
 /* ------------------------------------------------------------ 1. BOOT */
+// Force WebGL1 — better ARM GPU compatibility (same as Babylon.js/PolyIsland)
+(function() {
+  const _get = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function(type, attrs) {
+    if (type === 'webgl2') return null;
+    return _get.call(this, type, attrs);
+  };
+})();
 
 const $ = (id) => document.getElementById(id);
 let fatal = false;
@@ -2023,9 +2031,7 @@ function initRenderer() {
   gameCanvas.id = 'game';
   gameCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0';
   document.body.appendChild(gameCanvas);
-  const gl1ctx = gameCanvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: true, failIfMajorPerformanceCaveat: false })
-             || gameCanvas.getContext('experimental-webgl', { antialias: false, preserveDrawingBuffer: true });
-  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, context: gl1ctx, antialias: false, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
+  renderer = new THREE.WebGLRenderer({ canvas: gameCanvas, antialias: false, preserveDrawingBuffer: true, precision: 'mediump', failIfMajorPerformanceCaveat: false });
   renderer.debug.onShaderError = () => {};
   renderer.shadowMap.enabled = false;
   renderer.outputEncoding = THREE.LinearEncoding;
